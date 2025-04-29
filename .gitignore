@@ -1,0 +1,13 @@
+# Node
+node_modules/
+dist/
+.env
+
+# Maven
+packages/backend/target/
+
+# Others
+.idea/
+.vscode/
+.DS_Store
+
