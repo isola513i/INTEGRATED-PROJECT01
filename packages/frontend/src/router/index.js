@@ -1,19 +1,23 @@
+import { createRouter, createWebHistory } from 'vue-router';
+import ProductGalleryView from '@/views/ProductGalleryView.vue';
+import LandingPageView from '@/views/LandingPageView.vue';
 
-import { createRouter, createWebHistory} from "vue-router"
+const routes = [
+  {
+    path: '/',
+    name: 'Landing',
+    component: LandingPageView,
+  },
+  {
+    path: '/sale-items',
+    name: 'SaleItems',
+    component: ProductGalleryView,
+  },
+];
 
 const router = createRouter({
-    history: createWebHistory(import.meta.env.BASE_URL),
-    routes:[
-        {
-            path:'/',
-            name :'home',
-            component: () => import('@/view/Home.vue')
-        },
-        {
-            path:'/sale-items',
-            name :'sale-items',
-            component: () => import('@/view/Shop.vue')
-        }
-    ]
-}) 
-export default router
+  history: createWebHistory(),
+  routes,
+});
+
+export default router;
