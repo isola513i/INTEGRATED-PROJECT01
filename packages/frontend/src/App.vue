@@ -1,7 +1,9 @@
 <script setup></script>
 
 <template>
-  <div class="bg-red-500 text-white p-10 text-2xl">Test tailwindCSS</div>
+  <div class="min-h-screen bg-gray-100">
+    <router-view />
+  </div>
 </template>
 
 <style scoped></style>

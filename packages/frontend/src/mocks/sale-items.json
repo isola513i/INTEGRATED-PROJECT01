@@ -1,0 +1,29 @@
+[
+    {
+      "id": 1,
+      "model": "iPhone 14 Pro Max",
+      "brandName": "Apple",
+      "description": "ไอโฟนเรือธงรุ่นล่าสุด มาพร้อม Dynamic Island",
+      "price": 42900,
+      "storageGB": 512,
+      "color": "Space Black",
+      "ramGB": 6,
+      "screenSizeInch": 6.7,
+      "quantity": 5,
+      "createdOn": "2024-04-20T12:00:00+07:00"
+    },
+    {
+      "id": 2,
+      "model": "Galaxy S23 Ultra",
+      "brandName": "Samsung",
+      "description": "กล้องเทพ ปากกา S-Pen รองรับ 5G เต็มรูปแบบ",
+      "price": 39900,
+      "storageGB": 256,
+      "color": "Phantom Black",
+      "ramGB": null,
+      "screenSizeInch": 6.8,
+      "quantity": 3,
+      "createdOn": "2024-04-21T09:30:00+07:00"
+    }
+  ]
+  
