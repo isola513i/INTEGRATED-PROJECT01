@@ -8,13 +8,6 @@ import PromoBanner from '@/components/PromoBanner.vue';
     <PromoBanner />
     <HeroBanner />
   </div>
-  <Footer/>
 </template>
 
-<script setup>
-import Footer from '@/components/Footer.vue';
-
-</script>
-
 <style scoped></style>
-
