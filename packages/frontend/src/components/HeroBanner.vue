@@ -20,7 +20,7 @@
 
       <router-link
         to="/sale-items"
-        class="bg-[#0071E3] text-white px-8 py-3 rounded-full font-semibold transition-colors duration-300 hover:bg-[#339DFF] animate__animated animate__fadeInUp"
+        class="bg-[#0071E3] text-white px-8 py-3 rounded-full font-semibold transition-colors duration-300 hover:bg-[#339DFF] animate__animated animate__fadeInUp Itbms-shopnow"
         style="animation-delay: 0.6s"
       >
         Shop Now
