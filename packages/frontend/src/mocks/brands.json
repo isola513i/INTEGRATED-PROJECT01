@@ -1,0 +1,52 @@
+[
+  {
+    "brandId": 1,
+    "name": "Samsung",
+    "websiteUrl": "https://www.samsung.com",
+    "isActive": 1,
+    "countryOfOrigin": "South Korea",
+    "createdOn": "2024-01-01T10:00:00",
+    "updatedOn": "2024-01-05T12:00:00",
+    "logoUrl": "https://images.samsung.com/th/smartphones/galaxy-z-flip6/buy/product_color_yellow_PC_v2.png?imbypass=true"
+  },
+  {
+    "brandId": 2,
+    "name": "Apple",
+    "websiteUrl": "https://www.apple.com",
+    "isActive": 1,
+    "countryOfOrigin": "USA",
+    "createdOn": "2024-01-02T11:00:00",
+    "updatedOn": "2024-01-06T13:00:00",
+    "logoUrl": "https://media.studio7thailand.com/154743/iPhone_16_Pro_Max_Natural_Titanium_PDP_Image_Position_1a_Natural_Titanium_Color__TH-TH.png"
+  },
+  {
+    "brandId": 3,
+    "name": "Xiaomi",
+    "websiteUrl": "https://www.mi.com",
+    "isActive": 1,
+    "countryOfOrigin": "China",
+    "createdOn": "2024-01-03T09:30:00",
+    "updatedOn": "2024-01-07T14:30:00",
+    "logoUrl": "https://i02.appmifile.com/844_item_th/07/01/2025/affbfc2d14e707e9e9f439f5e400930c!600x600!85.png"
+  },
+  {
+    "brandId": 4,
+    "name": "OnePlus",
+    "websiteUrl": "https://www.oneplus.com",
+    "isActive": 1,
+    "countryOfOrigin": "China",
+    "createdOn": "2024-01-04T08:45:00",
+    "updatedOn": "2024-01-08T16:15:00",
+    "logoUrl": "https://oasis.opstatics.com/content/dam/oasis/page/2023/global/product/vitamin/vitamin-spec-green.png"
+  },
+  {
+    "brandId": 5,
+    "name": "Sony",
+    "websiteUrl": "https://www.sony.com",
+    "isActive": 1,
+    "countryOfOrigin": "Japan",
+    "createdOn": "2024-01-05T07:20:00",
+    "updatedOn": "2024-01-09T18:00:00",
+    "logoUrl": "https://store.sony.co.th/cdn/shop/files/pdx245_mmWave_group_khakiGreen-Large_0e8fd8f2-7e32-48dd-b515-b1a5b8340af4_400x.jpg?v=1718251538"
+  }
+]

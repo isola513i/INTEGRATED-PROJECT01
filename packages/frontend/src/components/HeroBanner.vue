@@ -1,5 +1,5 @@
 <template>
-  <div class="relative h-[850px] w-full">
+  <div class="relative h-[900px] w-full">
     <img
       src="@/assets/heroBanner.png"
       alt="Hero Background"

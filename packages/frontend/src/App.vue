@@ -4,9 +4,13 @@ import Navbar from './components/Navbar.vue';
 import Footer from './components/Footer.vue';
 </script>
 <template>
-  <Navbar />
-  <RouterView />
-  <Footer />
+  <div class="bg-[#d0d0d0]">
+    <Navbar />
+    <main class="pt-13">
+      <RouterView />
+    </main>
+    <Footer />
+  </div>
 </template>
 
 <style scoped></style>
