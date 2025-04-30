@@ -5,6 +5,7 @@ import Footer from './components/Footer.vue';
 import PromoBanner from './components/PromoBanner.vue';
 </script>
 <template>
+
   <Navbar />
   <RouterView />
   <Footer />

@@ -23,6 +23,7 @@ const sortedItems = computed(() => {
     </div>
     <div v-else class="grid grid-cols-5 gap-4">
       <SaleItemCard v-for="item in sortedItems" :key="item.id" :item="item" />
+     
     </div>
   </div>
 </template>
