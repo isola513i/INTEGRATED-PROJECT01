@@ -1,11 +1,11 @@
+<script setup>
+import HeroBanner from '@/components/HeroBanner.vue';
+import PromoBanner from '@/components/PromoBanner.vue';
+</script>
+
 <template>
-  <div class="flex items-center justify-center min-h-screen bg-white">
-    <h1 class="text-4xl font-bold text-gray-800">
-      Welcome to the Sale Item Gallery!
-    </h1>
+  <div class="pt-[55px]">
+    <PromoBanner />
+    <HeroBanner />
   </div>
 </template>
-
-<script setup></script>
-
-<style scoped></style>
