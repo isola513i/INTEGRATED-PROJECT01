@@ -1,13 +1,13 @@
 <script setup>
-import { RouterView } from 'vue-router'
-
-
+import { RouterView } from 'vue-router';
+import Navbar from './components/Navbar.vue';
+import Footer from './components/Footer.vue';
+import PromoBanner from './components/PromoBanner.vue';
 </script>
-
 <template>
-  <div class="min-h-screen bg-gray-100">
-    <router-view />
-  </div>
+  <Navbar />
+  <RouterView />
+  <Footer />
 </template>
 
 <style scoped></style>
