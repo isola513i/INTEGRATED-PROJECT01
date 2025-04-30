@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 
+
 const isOpen = ref(false)
 </script>
 
@@ -9,8 +10,8 @@ const isOpen = ref(false)
     <div class="max-w-7xl mx-auto flex items-center justify-between">
       <!-- เมนูซ้าย -->
       <div class="flex items-center space-x-6">
-        <span class="font-bold text-lg">Logo</span>
-
+          <img class="w-16 h-10" src="/image/ITBM_SHOP.png" alt="logo">
+       
         <!-- เมนูหลัก (ซ่อนบนมือถือ) -->
         <div class="hidden md:flex space-x-6">
           <a href="#" class="hover:underline">Store</a>

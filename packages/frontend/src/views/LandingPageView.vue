@@ -4,8 +4,12 @@
       Welcome to the Sale Item Gallery!
     </h1>
   </div>
+  <Footer/>
 </template>
 
-<script setup></script>
+<script setup>
+import Footer from '@/components/Footer.vue';
+
+</script>
 
 <style scoped></style>
