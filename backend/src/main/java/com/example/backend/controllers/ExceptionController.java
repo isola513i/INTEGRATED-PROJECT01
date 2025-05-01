@@ -1,7 +1,8 @@
 package com.example.backend.controllers;
 
-import com.example.integratedproject1.exceptions.ItemNotFoundException;
-import com.example.integratedproject1.exceptions.MyErrorResponse;
+
+import com.example.backend.exceptions.ItemNotFoundException;
+import com.example.backend.exceptions.MyErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
