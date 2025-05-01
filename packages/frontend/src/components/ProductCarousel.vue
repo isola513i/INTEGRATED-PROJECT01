@@ -1,3 +1,23 @@
+<script setup>
+import { ref } from 'vue';
+
+const imageModules = import.meta.glob('@/assets/carousel/*.jpg', {
+  eager: true,
+});
+
+const images = Object.values(imageModules).map((mod) => mod.default);
+
+const currentIndex = ref(0);
+
+function next() {
+  currentIndex.value = (currentIndex.value + 1) % images.length;
+}
+
+function prev() {
+  currentIndex.value = (currentIndex.value - 1 + images.length) % images.length;
+}
+</script>
+
 <template>
   <div class="relative w-full overflow-hidden h-[400px] md:h-[500px]">
     <div
@@ -48,25 +68,5 @@
     </button>
   </div>
 </template>
-
-<script setup>
-import { ref } from 'vue';
-
-const imageModules = import.meta.glob('@/assets/carousel/*.jpg', {
-  eager: true,
-});
-
-const images = Object.values(imageModules).map((mod) => mod.default);
-
-const currentIndex = ref(0);
-
-function next() {
-  currentIndex.value = (currentIndex.value + 1) % images.length;
-}
-
-function prev() {
-  currentIndex.value = (currentIndex.value - 1 + images.length) % images.length;
-}
-</script>
 
 <style scoped></style>

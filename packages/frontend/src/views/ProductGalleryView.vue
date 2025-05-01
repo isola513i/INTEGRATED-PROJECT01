@@ -16,23 +16,26 @@ function getBrand(brandId) {
   return brands.find((b) => b.brandId === brandId) || {};
 }
 </script>
+
 <template>
-  <ProductCarousel />
-  <ProductFilter />
-  <div class="p-2 mb-5">
-    <div
-      v-if="sortedItems.length"
-      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
-    >
-      <SaleItemCard
-        v-for="item in sortedItems"
-        :key="item.saleItemId"
-        :item="item"
-        :brand="getBrand(item.brandId)"
-      />
-    </div>
-    <div v-else class="p-10 text-center text-gray-400 text-xl">
-      No sale items available.
+  <div class="min-h-screen bg-white">
+    <ProductCarousel />
+    <ProductFilter />
+    <div class="px-4 py-2">
+      <div
+        v-if="sortedItems.length"
+        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
+      >
+        <SaleItemCard
+          v-for="item in sortedItems"
+          :key="item.saleItemId"
+          :item="item"
+          :brand="getBrand(item.brandId)"
+        />
+      </div>
+      <div v-else class="p-10 text-center text-gray-400 text-xl">
+        No products available.
+      </div>
     </div>
   </div>
 </template>
