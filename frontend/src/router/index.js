@@ -16,7 +16,7 @@ const routes = [
   },
   {
     path: '/sale-items/:slug',
-    name: 'SaleItems',
+    name: 'SaleItems-Detail',
     component: ProductDetailView,
   },
 ];
