@@ -1,11 +1,11 @@
 <script setup>
 import { computed } from 'vue';
-import SaleItemCard from '@/components/SaleItemCard.vue';
+import SaleItemCard from '@/components/ProductGallery/SaleItemCard.vue';
 import saleItems from '@/mocks/sale-items.json';
 import brands from '@/mocks/brands.json';
-import ProductFilter from '@/components/ProductFilter.vue';
-import ProductCarousel from '@/components/ProductCarousel.vue';
-import PromoBar from '@/components/PromoBar.vue';
+import ProductFilter from '@/components/ProductGallery/ProductFilter.vue';
+import ProductCarousel from '@/components/ProductGallery/ProductCarousel.vue';
+import PromoBar from '@/components/ProductGallery/PromoBar.vue';
 
 const sortedItems = computed(() => {
   return saleItems
