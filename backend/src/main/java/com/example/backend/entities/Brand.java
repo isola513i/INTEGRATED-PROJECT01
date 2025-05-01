@@ -1,0 +1,47 @@
+package com.example.backend.entities;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.time.Instant;
+
+@Getter
+@Setter
+@Entity
+@Table(name = "brands", schema = "itbms")
+public class Brand {
+    @Id
+    @Column(name = "brandId", nullable = false)
+    private Integer id;
+
+    @Size(max = 30)
+    @NotNull
+    @Column(name = "name", nullable = false, length = 30)
+    private String name;
+
+    @Size(max = 40)
+    @Column(name = "websiteUrl", length = 40)
+    private String websiteUrl;
+
+    @Column(name = "isActive")
+    private Boolean isActive;
+
+    @Size(max = 80)
+    @Column(name = "countryOfOrigin", length = 80)
+    private String countryOfOrigin;
+
+    @NotNull
+    @Column(name = "createdOn", nullable = false)
+    private Instant createdOn;
+
+    @NotNull
+    @Column(name = "updatedOn", nullable = false)
+    private Instant updatedOn;
+
+}
