@@ -1,7 +1,7 @@
 <script setup></script>
 
 <template>
-  <footer class="bg-[#000000] text-white px-6 md:px-16 py-10">
+  <footer class="bg-[#050610] text-white px-6 md:px-16 py-10">
     <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
       <!-- Newsletter Section -->
       <div>
@@ -22,7 +22,7 @@
             class="w-full px-4 py-2 text-gray-500 rounded-l-md bg-white focus:outline-none"
           />
           <button
-            class="bg-[#3b5998] hover:bg-[#2d4373] px-4 py-2 rounded-r-md text-white"
+            class="bg-[#101a2f] hover:bg-[#050610] px-4 py-2 rounded-r-md text-white"
           >
             Subscribe
           </button>
@@ -47,9 +47,9 @@
       <div>
         <h3 class="text-sm font-semibold mb-4">Contact us</h3>
         <ul class="text-sm text-gray-300 space-y-2">
-          <li>E-mail : xxxx</li>
-          <li>Phone : 000000</li>
-          <li>Line Id : 0000000</li>
+          <li>E-mail :</li>
+          <li>Phone :</li>
+          <li>Line Id :</li>
         </ul>
       </div>
 
