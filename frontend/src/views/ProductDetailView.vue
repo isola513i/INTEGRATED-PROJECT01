@@ -1,23 +1,22 @@
 <script setup>
-import { onMounted, ref } from "vue";
-import img1 from "@/assets/phone.jpg";
-import img2 from "@/assets/phone.jpg";
-import img3 from "@/assets/phone.jpg";
-import products from "@/mocks/sale-items.json"
-import { useRoute } from "vue-router";
+import { onMounted, ref } from 'vue';
+import img1 from '@/assets/phone.jpg';
+import img2 from '@/assets/phone.jpg';
+import img3 from '@/assets/phone.jpg';
+import products from '@/mocks/sale-items.json';
+import { useRoute } from 'vue-router';
 
-const route = useRoute()
+const route = useRoute();
 
-const product = ref({})
+const product = ref({});
 
 onMounted(() => {
-  product.value = products.find(p => p.saleItemId == route.params.slug)
-})
+  product.value = products.find((p) => p.saleItemId == route.params.slug);
+});
 
 const images = [img1, img2, img3];
 const selectedImage = ref(images[0]);
 const quantity = ref(1);
-
 
 const increaseQty = () => {
   quantity.value++;
@@ -58,9 +57,11 @@ const decreaseQty = () => {
 
       <!-- Product Details -->
       <div>
-        <div class="text-sm text-gray-500 mb-2">{{product.brandName}}</div>
+        <div class="text-sm text-gray-500 mb-2">{{ product.brandName }}</div>
         <h1 class="text-3xl font-bold mb-2 text-black">{{ product.model }}</h1>
-        <div class="text-2xl font-semibold text-gray-800 mb-1">{{ product.price }}</div>
+        <div class="text-2xl font-semibold text-gray-800 mb-1">
+          {{ product.price }}
+        </div>
         <div class="text-sm text-gray-600 mb-4">
           Available quantity : {{ product.quantity }} unit
         </div>
@@ -85,13 +86,17 @@ const decreaseQty = () => {
               class="border rounded-xl p-4 text-center border-gray-400 hover:bg-gray-100"
             >
               <div class="text-sm text-gray-500">Screen Size</div>
-              <div class="font-medium text-gray-800">{{ product.screenSizeInch }}</div>
+              <div class="font-medium text-gray-800">
+                {{ product.screenSizeInch }}
+              </div>
             </div>
             <div
               class="border rounded-xl p-4 text-center border-gray-400 hover:bg-gray-100"
             >
               <div class="text-sm text-gray-500">Storage</div>
-              <div class="font-medium text-gray-800">{{ product.storageGB }}</div>
+              <div class="font-medium text-gray-800">
+                {{ product.storageGB }}
+              </div>
             </div>
             <div
               class="border rounded-xl p-4 text-center border-gray-400 hover:bg-gray-100"
