@@ -5,6 +5,7 @@ import saleItems from '@/mocks/sale-items.json';
 import brands from '@/mocks/brands.json';
 import ProductFilter from '@/components/ProductFilter.vue';
 import ProductCarousel from '@/components/ProductCarousel.vue';
+import PromoBar from '@/components/PromoBar.vue';
 
 const sortedItems = computed(() => {
   return saleItems
@@ -19,6 +20,7 @@ function getBrand(brandId) {
 
 <template>
   <div class="min-h-screen bg-white">
+    <PromoBar />
     <ProductCarousel />
     <ProductFilter />
     <div class="px-4 py-2">

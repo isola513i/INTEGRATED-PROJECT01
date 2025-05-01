@@ -1,12 +1,11 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 
 const imageModules = import.meta.glob('@/assets/carousel/*.jpg', {
   eager: true,
 });
 
 const images = Object.values(imageModules).map((mod) => mod.default);
-
 const currentIndex = ref(0);
 
 function next() {
@@ -16,6 +15,18 @@ function next() {
 function prev() {
   currentIndex.value = (currentIndex.value - 1 + images.length) % images.length;
 }
+
+let intervalId;
+
+onMounted(() => {
+  intervalId = setInterval(() => {
+    next();
+  }, 5000);
+});
+
+onUnmounted(() => {
+  clearInterval(intervalId);
+});
 </script>
 
 <template>
