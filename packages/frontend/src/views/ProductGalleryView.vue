@@ -22,7 +22,7 @@ function getBrand(brandId) {
   <div class="p-2 mb-5">
     <div
       v-if="sortedItems.length"
-      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2"
+      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
     >
       <SaleItemCard
         v-for="item in sortedItems"
