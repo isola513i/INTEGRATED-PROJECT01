@@ -1,7 +1,7 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted } from "vue";
 
-const imageModules = import.meta.glob('@/assets/carousel/*.jpg', {
+const imageModules = import.meta.glob("@/assets/carousel/*.jpg", {
   eager: true,
 });
 

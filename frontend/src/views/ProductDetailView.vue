@@ -1,10 +1,10 @@
 <script setup>
-import { onMounted, ref } from 'vue';
-import img1 from '@/assets/phone.jpg';
-import img2 from '@/assets/phone.jpg';
-import img3 from '@/assets/phone.jpg';
-import products from '@/mocks/sale-items.json';
-import { useRoute } from 'vue-router';
+import { onMounted, ref } from "vue";
+import img1 from "@/assets/phone.jpg";
+import img2 from "@/assets/phone.jpg";
+import img3 from "@/assets/phone.jpg";
+import products from "@/mocks/sale-items.json";
+import { useRoute } from "vue-router";
 
 const route = useRoute();
 
