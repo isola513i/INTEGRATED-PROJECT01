@@ -1,7 +1,6 @@
 <script setup>
 import { ref } from "vue";
 const isOpen = ref(false);
-
 </script>
 
 <template>
@@ -13,16 +12,17 @@ const isOpen = ref(false);
           <img class="w-16 h-10" src="/image/ITBM_SHOP.png" alt="logo" />
         </router-link>
         <div class="hidden md:flex space-x-10 ml-24">
-          <router-link to="/sale-items"  class="relative font-semibold tracking-wide text-white
-           hover:text-gray-300 transition duration-300 after:content-[''] after:block after:w-0 hover:after:w-full after:h-[1px] after:bg-white
-           after:transition-all after:duration-300 after:mt-1"
+          <router-link
+            to="/sale-items"
+            class="relative font-semibold tracking-wide text-white hover:text-gray-300 transition duration-300 after:content-[''] after:block after:w-0 hover:after:w-full after:h-[1px] after:bg-white after:transition-all after:duration-300 after:mt-1"
             >store</router-link
           >
-          <router-link to="/" class="relative font-semibold tracking-wide text-white
-           hover:text-gray-300 transition duration-300 after:content-[''] after:block after:w-0 hover:after:w-full after:h-[1px] after:bg-white
-           after:transition-all after:duration-300 after:mt-1">support</router-link>
+          <router-link
+            to="/"
+            class="relative font-semibold tracking-wide text-white hover:text-gray-300 transition duration-300 after:content-[''] after:block after:w-0 hover:after:w-full after:h-[1px] after:bg-white after:transition-all after:duration-300 after:mt-1"
+            >support</router-link
+          >
         </div>
-        
       </div>
 
       <!-- ด้านขวา -->
@@ -104,7 +104,6 @@ const isOpen = ref(false);
               />
             </svg>
           </button>
-          
         </div>
 
         <!-- Hamburger -->
