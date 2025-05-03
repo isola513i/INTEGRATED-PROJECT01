@@ -14,7 +14,7 @@ const router = useRouter();
 onMounted(async () => {
   try {
     const data = await fetchSaleItems();
-    saleItems.value = data || [];
+    saleItems.value = Array.isArray(data) ? data : [];
   } catch (err) {
     router.push('/server-error');
   } finally {
@@ -50,8 +50,11 @@ const productCount = computed(() => saleItems.value.length);
           :item="item"
         />
       </div>
+      <div v-else-if="loading" class="p-10 text-center text-gray-400 text-xl">
+        Loading...
+      </div>
       <div v-else class="p-10 text-center text-gray-400 text-xl">
-        No sale item.
+        No sale item
       </div>
     </div>
   </div>
