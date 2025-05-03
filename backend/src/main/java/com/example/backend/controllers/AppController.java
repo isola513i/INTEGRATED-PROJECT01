@@ -24,7 +24,7 @@ public class AppController {
     @Autowired
     private ListMapper listMapper;
 
-    @GetMapping("v1/sale-items")
+    @GetMapping("/v1/sale-items")
     public ResponseEntity<List<SaleItemDto.GetAllSaleItemsDto>> getAllItems(){
         return ResponseEntity.ok(listMapper.mapList(saleItemService.allSaleItems(),SaleItemDto.GetAllSaleItemsDto.class,modelMapper));
     }
