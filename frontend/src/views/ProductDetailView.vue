@@ -111,13 +111,14 @@ const shouldShowToggle = computed(() => {
 
       <!-- Product Details -->
       <div>
-        <div class="text-sm text-gray-500 mb-2">{{ product.brandName }}</div>
-        <h1 class="text-3xl font-bold mb-2 text-black truncate">
+        <div class="itbms-brand text-sm text-gray-500 mb-2">{{ product.brandName  }}</div>
+        <h1 class=" itbms-model text-3xl font-bold mb-2 text-black truncate">
           {{ product.model }}
         </h1>
 
-        <div class="text-2xl font-semibold text-gray-800 mb-1">
-          ฿ {{ formattedPrice }}
+        <div class="itbms-price text-2xl font-semibold text-gray-800 mb-1">
+          <span class="itbms-price-unit">฿</span>
+          <span class="itbms-price">{{ formattedPrice }}</span> 
         </div>
 
         <div class="mt-5">
@@ -127,8 +128,9 @@ const shouldShowToggle = computed(() => {
               class="border rounded-xl p-3 text-center border-gray-400 hover:bg-gray-100"
             >
               <div class="text-sm text-gray-500">Ram</div>
-              <div class="font-medium text-gray-800">
-                {{ product.ramGB ? product.ramGB + " GB" : "-" }}
+              <div class="font-medium text-gray-800 ">
+              <span class="itbms-ramGb"> {{ product.ramGb ? product.ramGb : "-" }}</span> 
+              <span class="itbms-ramGb-unit">   Gb</span>
               </div>
             </div>
 
@@ -137,11 +139,8 @@ const shouldShowToggle = computed(() => {
             >
               <div class="text-sm text-gray-500">Screen Size</div>
               <div class="font-medium text-gray-800">
-                {{
-                  product.screenSizeInch
-                    ? product.screenSizeInch + " Inch"
-                    : "-"
-                }}
+                <span class="itbms-screenSizeInch">{{product.screenSizeInch ? product.screenSizeInch : "-"}}</span>
+                <span class="itbms-screenSizeInch-unit">  Inch</span>
               </div>
             </div>
 
@@ -150,7 +149,7 @@ const shouldShowToggle = computed(() => {
             >
               <div class="text-sm text-gray-500">Storage</div>
               <div class="font-medium text-gray-800">
-                {{ product.storageGB ? product.storageGB + " GB" : "-" }}
+                {{ product.storageGb ? product.storageGb  : "-" }}
               </div>
             </div>
 
@@ -159,7 +158,9 @@ const shouldShowToggle = computed(() => {
             >
               <div class="text-sm text-gray-500">Color</div>
               <div class="font-medium text-gray-800">
-                {{ product.color ? product.color : "-" }}
+
+                <span class="itbms-storageGb">{{ product.color ? product.color : "-" }}</span>
+                <span class="itbms-storageGb-unit" > Gb</span>
               </div>
             </div>
           </div>
@@ -167,7 +168,8 @@ const shouldShowToggle = computed(() => {
 
         <div class="mt-5">
           <div class="text-sm text-gray-500 mb-2">
-            Avialable Quatity : {{ product.quantity }} units
+            <span class="itbms-quantity">Avialable Quatity : {{ product.quantity }}</span> 
+            <span class="itbms-quantity-unit"> units</span>
           </div>
         </div>
         <!-- Quantity Selector -->
