@@ -5,14 +5,15 @@ import img2 from "@/assets/phone.jpg";
 import img3 from "@/assets/phone.jpg";
 import img4 from "@/assets/phone.jpg";
 import img5 from "@/assets/phone.jpg";
-import products from "@/mocks/sale-items.json";
 import { useRoute } from "vue-router";
+import { fetchItembyId } from "@/services/saleItemService";
 
 const route = useRoute();
 
 const product = ref({});
-onMounted(() => {
-  product.value = products.find((p) => p.saleItemId == route.params.slug);
+onMounted(async() => {
+  const data = await fetchItembyId(route.params.slug)
+  product.value = data
 });
 
 const images = [img1, img2, img3, img4, img5];
