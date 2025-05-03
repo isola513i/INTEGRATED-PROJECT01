@@ -1,19 +1,19 @@
 <script setup>
-import { onMounted, ref, computed } from "vue";
-import img1 from "@/assets/phone.jpg";
-import img2 from "@/assets/phone.jpg";
-import img3 from "@/assets/phone.jpg";
-import img4 from "@/assets/phone.jpg";
-import img5 from "@/assets/phone.jpg";
-import { useRoute } from "vue-router";
-import { fetchItembyId } from "@/services/saleItemService";
+import { onMounted, ref, computed } from 'vue';
+import img1 from '@/assets/phone.jpg';
+import img2 from '@/assets/phone.jpg';
+import img3 from '@/assets/phone.jpg';
+import img4 from '@/assets/phone.jpg';
+import img5 from '@/assets/phone.jpg';
+import { useRoute } from 'vue-router';
+import { fetchItembyId } from '@/services/saleItemService';
 
 const route = useRoute();
 
 const product = ref({});
-onMounted(async() => {
-  const data = await fetchItembyId(route.params.slug)
-  product.value = data
+onMounted(async () => {
+  const data = await fetchItembyId(route.params.slug);
+  product.value = data;
 });
 
 const images = [img1, img2, img3, img4, img5];
@@ -49,7 +49,7 @@ const handleInput = () => {
 };
 
 const formattedPrice = computed(
-  () => product.value?.price?.toLocaleString() ?? "-",
+  () => product.value?.price?.toLocaleString() ?? '-'
 );
 const showFullDescription = ref(false);
 
@@ -128,7 +128,7 @@ const shouldShowToggle = computed(() => {
             >
               <div class="text-sm text-gray-500">Ram</div>
               <div class="font-medium text-gray-800">
-                {{ product.ramGB ? product.ramGB + " GB" : "-" }}
+                {{ product.ramGb ? product.ramGb + ' GB' : '-' }}
               </div>
             </div>
 
@@ -139,8 +139,8 @@ const shouldShowToggle = computed(() => {
               <div class="font-medium text-gray-800">
                 {{
                   product.screenSizeInch
-                    ? product.screenSizeInch + " Inch"
-                    : "-"
+                    ? product.screenSizeInch + ' Inch'
+                    : '-'
                 }}
               </div>
             </div>
@@ -150,7 +150,7 @@ const shouldShowToggle = computed(() => {
             >
               <div class="text-sm text-gray-500">Storage</div>
               <div class="font-medium text-gray-800">
-                {{ product.storageGB ? product.storageGB + " GB" : "-" }}
+                {{ product.storageGb ? product.storageGb + ' GB' : '-' }}
               </div>
             </div>
 
@@ -159,7 +159,7 @@ const shouldShowToggle = computed(() => {
             >
               <div class="text-sm text-gray-500">Color</div>
               <div class="font-medium text-gray-800">
-                {{ product.color ? product.color : "-" }}
+                {{ product.color ? product.color : '-' }}
               </div>
             </div>
           </div>
@@ -230,7 +230,7 @@ const shouldShowToggle = computed(() => {
             @click="toggleDescription"
             class="mt-1 text-blue-400 hover:underline text-sm"
           >
-            {{ showFullDescription ? "show less" : "read more" }}
+            {{ showFullDescription ? 'show less' : 'read more' }}
           </button>
         </div>
       </div>
