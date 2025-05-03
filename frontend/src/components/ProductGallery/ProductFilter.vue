@@ -1,7 +1,15 @@
 <script setup>
-import { ref, computed } from "vue";
-import brands from "@/mocks/brands.json";
-import saleItems from "@/mocks/sale-items.json";
+import { ref, computed } from 'vue';
+import brands from '@/mocks/brands.json';
+import saleItems from '@/mocks/sale-items.json';
+
+const props = defineProps({
+  productCount: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
+});
 
 const showFilters = ref(false);
 const showSortOptions = ref(false);
@@ -23,11 +31,11 @@ const selectedColors = ref([]);
 const selectedScreenSizes = ref([]);
 
 const priceRanges = [
-  { label: "Under $300", value: "under-300" },
-  { label: "$300 - $600", value: "300-600" },
-  { label: "$600 - $1000", value: "600-1000" },
-  { label: "$1000 - $1500", value: "1000-1500" },
-  { label: "Over $1500", value: "over-1500" },
+  { label: 'Under $300', value: 'under-300' },
+  { label: '$300 - $600', value: '300-600' },
+  { label: '$600 - $1000', value: '600-1000' },
+  { label: '$1000 - $1500', value: '1000-1500' },
+  { label: 'Over $1500', value: 'over-1500' },
 ];
 
 const storageOptions = computed(() => {
@@ -55,13 +63,11 @@ const colorOptions = computed(() => {
 });
 
 const screenSizeOptions = [
-  { label: 'Under 5"', value: "under-5" },
-  { label: '5" - 6"', value: "5-6" },
-  { label: '6" - 6.5"', value: "6-6.5" },
-  { label: 'Over 6.5"', value: "over-6.5" },
+  { label: 'Under 5"', value: 'under-5' },
+  { label: '5" - 6"', value: '5-6' },
+  { label: '6" - 6.5"', value: '6-6.5' },
+  { label: 'Over 6.5"', value: 'over-6.5' },
 ];
-
-const productCount = ref(saleItems.length);
 
 function toggleFilters() {
   showFilters.value = !showFilters.value;
