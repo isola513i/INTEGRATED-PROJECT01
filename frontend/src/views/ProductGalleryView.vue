@@ -22,15 +22,6 @@ onMounted(async () => {
   }
 });
 
-const sortedItems = computed(() => {
-  if (!Array.isArray(saleItems.value)) return [];
-  return saleItems.value.slice().sort((a, b) => {
-    const brandA = a.brandName || '';
-    const brandB = b.brandName || '';
-    return brandA.localeCompare(brandB);
-  });
-});
-
 const productCount = computed(() => saleItems.value.length);
 </script>
 
@@ -41,12 +32,12 @@ const productCount = computed(() => saleItems.value.length);
     <ProductFilter :productCount="productCount" />
     <div class="px-4 py-2">
       <div
-        v-if="sortedItems.length > 0"
+        v-if="saleItems.length > 0"
         class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
       >
         <SaleItemCard
           class="itbms-row"
-          v-for="item in sortedItems"
+          v-for="item in saleItems"
           :key="item.saleItemId"
           :item="item"
         />
