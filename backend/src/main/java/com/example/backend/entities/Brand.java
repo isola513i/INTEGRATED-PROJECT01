@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -15,7 +17,6 @@ import java.time.Instant;
 public class Brand {
     @Id
     @Column(name = "brandId", nullable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Size(max = 30)
@@ -41,5 +42,8 @@ public class Brand {
     @NotNull
     @Column(name = "updatedOn", nullable = false)
     private Instant updatedOn;
+
+    @OneToMany(mappedBy = "brand")
+    private Set<SaleItem> saleItems = new LinkedHashSet<>();
 
 }

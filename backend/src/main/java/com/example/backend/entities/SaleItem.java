@@ -16,7 +16,6 @@ import java.time.Instant;
 public class SaleItem {
     @Id
     @Column(name = "saleItemId", nullable = false)
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Size(max = 60)
@@ -38,10 +37,10 @@ public class SaleItem {
     @Column(name = "price", nullable = false)
     private Integer price;
 
-    @Column(name = "ramGB")
-    private Integer ramGB;
+    @Column(name = "ramGb")
+    private Integer ramGb;
 
-    @Column(name = "screenSizeInch", precision = 3, scale = 1)
+    @Column(name = "screenSizeInch", precision = 4, scale = 2)
     private BigDecimal screenSizeInch;
 
     @Column(name = "storageGb")

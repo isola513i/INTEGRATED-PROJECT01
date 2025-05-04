@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import java.util.List;
 
-@CrossOrigin(origins = "${app.cors.allowedOrigins}")
+//@CrossOrigin(origins = "${app.cors.allowedOrigins}")
 @RestController
-@RequestMapping("/itb-mshop/vi")
+@RequestMapping("/itb-mshop/v1")
 public class AppController {
     @Autowired
     private SaleItemService saleItemService;
