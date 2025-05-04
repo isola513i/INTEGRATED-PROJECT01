@@ -5,15 +5,26 @@ import img2 from "@/assets/phone.jpg";
 import img3 from "@/assets/phone.jpg";
 import img4 from "@/assets/phone.jpg";
 import img5 from "@/assets/phone.jpg";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { fetchItembyId } from "@/services/saleItemService";
 
 const route = useRoute();
-
+const router = useRouter();
 const product = ref({});
 onMounted(async() => {
-  const data = await fetchItembyId(route.params.slug)
-  product.value = data
+  try{
+    const data = await fetchItembyId(route.params.slug)
+    product.value = data
+    if(!product.value){
+      window.alert("The requested sale item does not exist.")
+      router.push("/sale-items")
+    }
+  }catch(err){
+    window.alert("The requested sale item does not exist.")
+    router.push("/sale-items")
+
+  }
+  
 });
 
 const images = [img1, img2, img3, img4, img5];
@@ -48,9 +59,6 @@ const handleInput = () => {
   }
 };
 
-const formattedPrice = computed(
-  () => product.value?.price?.toLocaleString() ?? "-",
-);
 const showFullDescription = ref(false);
 
 const toggleDescription = () => {
@@ -64,7 +72,7 @@ const shouldShowToggle = computed(() => {
 
 <template>
   <div class="pt-[55px] bg-white">
-    <div class="max-w-7xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-10">
+    <div v-if="product" class="max-w-7xl itbms-row mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-10">
       <!-- Main Image & Gallery -->
       <div>
         <!-- รูปภาพหลัก + ปุ่มเลื่อน -->
@@ -117,8 +125,8 @@ const shouldShowToggle = computed(() => {
         </h1>
 
         <div class="itbms-price text-2xl font-semibold text-gray-800 mb-1">
-          <span class="itbms-price-unit">฿</span>
-          <span class="itbms-price">{{ formattedPrice }}</span> 
+          <span class="itbms-price-unit">Baht </span> 
+          <span class="itbms-price">{{ product.price?.toLocaleString() }}</span> 
         </div>
 
         <div class="mt-5">
@@ -130,7 +138,7 @@ const shouldShowToggle = computed(() => {
               <div class="text-sm text-gray-500">Ram</div>
               <div class="font-medium text-gray-800 ">
               <span class="itbms-ramGb"> {{ product.ramGb ? product.ramGb : "-" }}</span> 
-              <span class="itbms-ramGb-unit">   Gb</span>
+              <span class="itbms-ramGb-unit">GB</span>
               </div>
             </div>
 
@@ -140,7 +148,7 @@ const shouldShowToggle = computed(() => {
               <div class="text-sm text-gray-500">Screen Size</div>
               <div class="font-medium text-gray-800">
                 <span class="itbms-screenSizeInch">{{product.screenSizeInch ? product.screenSizeInch : "-"}}</span>
-                <span class="itbms-screenSizeInch-unit">  Inch</span>
+                <span class="itbms-screenSizeInch-unit">Inches</span>
               </div>
             </div>
 
@@ -149,7 +157,7 @@ const shouldShowToggle = computed(() => {
             >
               <div class="text-sm text-gray-500">Storage</div>
               <div class="font-medium text-gray-800">
-                {{ product.storageGb ? product.storageGb  : "-" }}
+                <span class="itbms-storageGb">{{ product.storageGb ? product.storageGb  : "-" }}</span> <span class="itbms-storageGb-unit">GB</span>
               </div>
             </div>
 
@@ -159,8 +167,7 @@ const shouldShowToggle = computed(() => {
               <div class="text-sm text-gray-500">Color</div>
               <div class="font-medium text-gray-800">
 
-                <span class="itbms-storageGb">{{ product.color ? product.color : "-" }}</span>
-                <span class="itbms-storageGb-unit" > Gb</span>
+                <span class="itbms-color">{{ product.color ? product.color : "-" }}</span>
               </div>
             </div>
           </div>
@@ -222,7 +229,7 @@ const shouldShowToggle = computed(() => {
                 : 'max-h-[60px] overflow-hidden'
             "
           >
-            <p class="text-gray-700 whitespace-pre-line break-words">
+            <p class="text-gray-700 whitespace-pre-line break-words itbms-description">
               {{ product.description }}
             </p>
           </div>
