@@ -45,6 +45,7 @@ const productCount = computed(() => saleItems.value.length);
         class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
       >
         <SaleItemCard
+          class="itbms-row"
           v-for="item in sortedItems"
           :key="item.saleItemId"
           :item="item"
