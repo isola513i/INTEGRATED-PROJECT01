@@ -1,11 +1,11 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue';
-import { useRouter } from 'vue-router';
-import { fetchSaleItems } from '@/services/saleItemService';
-import SaleItemCard from '@/components/ProductGallery/SaleItemCard.vue';
-import ProductFilter from '@/components/ProductGallery/ProductFilter.vue';
-import ProductCarousel from '@/components/ProductGallery/ProductCarousel.vue';
-import PromoBar from '@/components/ProductGallery/PromoBar.vue';
+import { ref, onMounted, computed } from "vue";
+import { useRouter } from "vue-router";
+import { fetchSaleItems } from "@/services/saleItemService";
+import SaleItemCard from "@/components/ProductGallery/SaleItemCard.vue";
+import ProductFilter from "@/components/ProductGallery/ProductFilter.vue";
+import ProductCarousel from "@/components/ProductGallery/ProductCarousel.vue";
+import PromoBar from "@/components/ProductGallery/PromoBar.vue";
 
 const saleItems = ref([]);
 const loading = ref(true);
@@ -16,7 +16,7 @@ onMounted(async () => {
     const data = await fetchSaleItems();
     saleItems.value = Array.isArray(data) ? data : [];
   } catch (err) {
-    router.push('/server-error');
+    router.push("/server-error");
   } finally {
     loading.value = false;
   }
@@ -36,7 +36,6 @@ const productCount = computed(() => saleItems.value.length);
         class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
       >
         <SaleItemCard
-          class="itbms-row"
           v-for="item in saleItems"
           :key="item.saleItemId"
           :item="item"
