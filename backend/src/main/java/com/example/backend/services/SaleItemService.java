@@ -14,7 +14,7 @@ public class SaleItemService {
     private SaleItemRepository saleItemRepository;
 
     public List<SaleItem> allSaleItems(){
-        return saleItemRepository.findAllByOrderByCreatedOnAsc();
+        return saleItemRepository.findAllByOrderByCreatedOnAscIdAsc();
     }
     public SaleItem findSaleItemById(Integer id){
         return saleItemRepository.findById(id).orElseThrow(() -> new ItemNotFoundException("SaleItem not found for this id :: "+id));

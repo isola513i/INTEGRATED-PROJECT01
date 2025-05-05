@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 
 @Data
 @NoArgsConstructor
@@ -23,6 +24,7 @@ public class SaleItemDto {
         }
 
         private Integer price;
+        private Integer ramGb;
         private Integer storageGb;
         private String color;
     }
