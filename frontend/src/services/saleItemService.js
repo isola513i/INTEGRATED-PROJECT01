@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -8,7 +8,6 @@ export const fetchSaleItems = async () => {
 };
 
 export const fetchItembyId = async (saleItemId) => {
-    const response = await axios.get(`${API_BASE_URL}/sale-items/${saleItemId}`);
-    return await response.data;
-
+  const response = await axios.get(`${API_BASE_URL}/sale-items/${saleItemId}`);
+  return await response.data;
 };
