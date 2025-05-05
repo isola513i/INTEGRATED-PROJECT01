@@ -138,7 +138,7 @@ const shouldShowToggle = computed(() => {
               <div class="text-sm text-gray-500">Ram</div>
               <div class="font-medium text-gray-800 ">
               <span class="itbms-ramGb"> {{ product.ramGb ? product.ramGb : "-" }}</span> 
-              <span class="itbms-ramGb-unit">GB</span>
+              <span class="itbms-ramGb-unit"> GB</span>
               </div>
             </div>
 
@@ -148,7 +148,7 @@ const shouldShowToggle = computed(() => {
               <div class="text-sm text-gray-500">Screen Size</div>
               <div class="font-medium text-gray-800">
                 <span class="itbms-screenSizeInch">{{product.screenSizeInch ? product.screenSizeInch : "-"}}</span>
-                <span class="itbms-screenSizeInch-unit">Inches</span>
+                <span class="itbms-screenSizeInch-unit"> Inches</span>
               </div>
             </div>
 
@@ -157,7 +157,7 @@ const shouldShowToggle = computed(() => {
             >
               <div class="text-sm text-gray-500">Storage</div>
               <div class="font-medium text-gray-800">
-                <span class="itbms-storageGb">{{ product.storageGb ? product.storageGb  : "-" }}</span> <span class="itbms-storageGb-unit">GB</span>
+                <span class="itbms-storageGb">{{ product.storageGb ? product.storageGb  : "-" }}</span> <span class="itbms-storageGb-unit"> GB</span>
               </div>
             </div>
 
