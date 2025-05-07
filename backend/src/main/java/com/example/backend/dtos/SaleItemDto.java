@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 public class SaleItemDto {
@@ -47,6 +49,7 @@ public class SaleItemDto {
         private Integer quantity;
         private Integer storageGb;
         private String color;
+        private LocalDateTime createdOn;
+        private LocalDateTime updatedOn;
     }
-
 }
