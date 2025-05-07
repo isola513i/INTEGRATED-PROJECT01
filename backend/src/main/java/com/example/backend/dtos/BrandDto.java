@@ -11,13 +11,13 @@ import java.time.LocalDateTime;
 public class BrandDto {
     @Data
     @NoArgsConstructor
-    public static class GetAllBrand{
+    public static class GetAllBrandDto{
         private Integer brandId;
         private String name;
     }
     @Data
     @NoArgsConstructor
-    public static class GetBrand{
+    public static class GetBrandDto {
         private Integer brandId;
         private String name;
         private String websiteUrl;

@@ -3,6 +3,7 @@ package com.example.backend.dtos;
 import com.example.backend.entities.Brand;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
@@ -51,5 +52,19 @@ public class SaleItemDto {
         private String color;
         private LocalDateTime createdOn;
         private LocalDateTime updatedOn;
+    }
+    @Data
+    @AllArgsConstructor
+    public static class GetCreateSaleItemDto{
+        private Integer id;
+        private String model;
+        private BrandDto.GetAllBrandDto brand;
+        private String description;
+        private Integer price;
+        private Integer ramGb;
+        private Double screenSizeInch;
+        private Integer quantity;
+        private Integer storageGb;
+        private String color;
     }
 }
