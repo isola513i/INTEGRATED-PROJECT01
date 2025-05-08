@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Data
@@ -50,15 +51,20 @@ public class SaleItemDto {
         private Integer quantity;
         private Integer storageGb;
         private String color;
-        private LocalDateTime createdOn;
-        private LocalDateTime updatedOn;
+        private Instant createdOn;
+        private Instant updatedOn;
     }
     @Data
     @AllArgsConstructor
     public static class GetCreateSaleItemDto{
-        private Integer id;
         private String model;
-        private BrandDto.GetAllBrandDto brand;
+        @JsonIgnore
+        private Brand brand;
+
+        @JsonProperty("brandName")
+        public Integer getBrandId() {
+            return brand != null ? brand.getId() : null;
+        }        //private Integer brandId;
         private String description;
         private Integer price;
         private Integer ramGb;
