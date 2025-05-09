@@ -2,6 +2,7 @@
 import { RouterView } from "vue-router";
 import Navbar from "./components/UI/Navbar.vue";
 import Footer from "./components/UI/Footer.vue";
+import Breadcrumb from "./components/Home/Breadcrumb.vue";
 </script>
 <template>
   <div class="bg-[#ffffff]">
@@ -9,6 +10,7 @@ import Footer from "./components/UI/Footer.vue";
     <main class="pt-15">
       <RouterView />
     </main>
+
     <Footer />
   </div>
 </template>
