@@ -206,16 +206,21 @@ const shouldShowToggle = computed(() => {
 
         <!-- Buttons -->
         <div class="flex space-x-4 mt-6">
-          <button
+          <!-- <button
             class="px-6 py-2 bg-[#4180d1] text-white rounded-md hover:bg-[#0E3971]"
           >
             Add to cart
-          </button>
-          <button
+          </button> -->
+          <!-- <button
             class="px-6 py-2 bg-[#1D5298] text-white rounded-md hover:bg-[#0E3971]"
           >
             Buy now
+          </button> -->
+          <button class="itbms-edit-button px-6 py-2 bg-[#4180d1] text-white rounded-md hover:bg-[#0E3971]"
+          >Edit
           </button>
+          <button class="itbms-delete-button px-6 py-2 bg-[#e15144] text-white rounded-md hover:bg-[#71340e]"
+          >Delete</button>
         </div>
 
         <div class="mt-5">

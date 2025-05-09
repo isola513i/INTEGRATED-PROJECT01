@@ -55,12 +55,10 @@ public class SaleItem {
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
-    @NotNull
-    @Column(name = "createdOn", nullable = false)
+    @Column(name = "createdOn", updatable = false, insertable = false)
     private Instant createdOn;
 
-    @NotNull
-    @Column(name = "updatedOn", nullable = false)
+    @Column(name = "updatedOn",updatable = false, insertable = false)
     private Instant updatedOn;
 
 }
