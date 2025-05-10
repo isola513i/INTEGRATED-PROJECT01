@@ -27,5 +27,4 @@ public class BrandController {
         return ResponseEntity.ok(listMapper.mapList(brandService.getAllBrands(),BrandDto.GetAllBrandDto.class,modelMapper));
     }
 
-
 }
