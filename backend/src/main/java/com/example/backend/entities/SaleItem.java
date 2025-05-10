@@ -59,10 +59,17 @@ public class SaleItem {
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
+<<<<<<< HEAD
     @Column(name = "createdOn", nullable = false, insertable = false, updatable = false)
     private Instant createdOn;
 
     @Column(name = "updatedOn", nullable = false, insertable = false)
+=======
+    @Column(name = "createdOn", updatable = false, insertable = false)
+    private Instant createdOn;
+
+    @Column(name = "updatedOn",updatable = false, insertable = false)
+>>>>>>> 7b93360d58bef94b6db2f002a69387d68749b79f
     private Instant updatedOn;
 
 }

@@ -6,7 +6,9 @@ import com.example.backend.entities.SaleItem;
 import com.example.backend.exceptions.ItemNotFoundException;
 import com.example.backend.repositories.BrandRepository;
 import com.example.backend.repositories.SaleItemRepository;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +22,8 @@ public class SaleItemService {
     private SaleItemRepository saleItemRepository;
     @Autowired
     private BrandRepository brandRepository;
-
+    @Autowired
+    private EntityManager entityManager;
     public List<SaleItem> allSaleItems() {
         return saleItemRepository.findAllByOrderByCreatedOnAscIdAsc();
     }
@@ -52,6 +55,7 @@ public class SaleItemService {
         return saleItemRepository.findById(updateItem.getId()).orElseThrow();
     }
 
+    @Transactional
     public SaleItem addSaleItem(SaleItem saleItem) {
         if (saleItem.getBrand() == null || saleItem.getBrand().getId() == null) {
             throw new IllegalArgumentException("Brand id must not be null");
