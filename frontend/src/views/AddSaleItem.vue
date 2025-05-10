@@ -1,189 +1,3 @@
-<template>
-	<div class="p-4 max-w-2xl mx-auto text-gray-800">
-		<router-link
-			to="/"
-			class="mb-4 inline-block text-blue-600 hover:text-blue-800"
-		>
-			← Home
-		</router-link>
-
-		<button
-			v-if="!showForm"
-			@click="showForm = true"
-			class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-		>
-			Add Sale Item
-		</button>
-
-		<form
-			v-if="showForm"
-			@submit.prevent="handleSubmit"
-			class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
-		>
-			<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-				<!-- Brand Dropdown -->
-				<div class="mb-4">
-					<label class="block text-gray-700 text-sm font-bold mb-2">
-						Brand *
-					</label>
-					<select
-						v-model="form.brandId"
-						class="w-full px-3 py-2 border rounded"
-						required
-					>
-						<option value="" disabled>Select a brand</option>
-						<option
-							v-for="brand in sortedBrands"
-							:key="brand.brandId"
-							:value="brand.brandId"
-						>
-							{{ brand.name }}
-						</option>
-					</select>
-				</div>
-
-				<!-- Model -->
-				<div class="mb-4">
-					<label class="block text-gray-700 text-sm font-bold mb-2">
-						Model *
-					</label>
-					<input
-						type="text"
-						v-model.trim="form.model"
-						@blur="form.model = form.model.trim()"
-						class="w-full px-3 py-2 border rounded"
-						required
-					/>
-				</div>
-
-				<!-- Price -->
-				<div class="mb-4">
-					<label class="block text-gray-700 text-sm font-bold mb-2">
-						Price *
-					</label>
-					<input
-						type="number"
-						v-model.number="form.price"
-						class="w-full px-3 py-2 border rounded"
-						min="0"
-						step="0.01"
-						required
-					/>
-				</div>
-
-				<!-- Quantity -->
-				<div class="mb-4">
-					<label class="block text-gray-700 text-sm font-bold mb-2">
-						Quantity *
-					</label>
-					<input
-						type="number"
-						v-model.number="form.quantity"
-						class="w-full px-3 py-2 border rounded"
-						min="0"
-						required
-					/>
-				</div>
-
-				<!-- Description -->
-				<div class="mb-4 col-span-full">
-					<label class="block text-gray-700 text-sm font-bold mb-2">
-						Description *
-					</label>
-					<textarea
-						v-model.trim="form.description"
-						@blur="form.description = form.description.trim()"
-						class="w-full px-3 py-2 border rounded"
-						rows="3"
-						required
-					></textarea>
-				</div>
-
-				<!-- Optional Fields -->
-				<div class="mb-4">
-					<label class="block text-gray-700 text-sm font-bold mb-2">
-						RAM (GB) (Optional)
-					</label>
-					<input
-						type="number"
-						placeholder="GB"
-						v-model.trim="form.ramGb"
-						@blur="form.ramGb = form.ramGb"
-						class="w-full px-3 py-2 border rounded"
-						min="0"
-					/>
-				</div>
-
-				<div class="mb-4">
-					<label class="block text-gray-700 text-sm font-bold mb-2">
-						Screen Size (Optional)
-					</label>
-					<input
-						type="number"
-						placeholder="Inches"
-						v-model.trim="form.screenSizeInch"
-						@blur="form.screenSize = form.screenSizeInch"
-						class="w-full px-3 py-2 border rounded"
-						step="0.1"
-					/>
-				</div>
-
-				<div class="mb-4">
-					<label class="block text-gray-700 text-sm font-bold mb-2">
-						Storage (Optional)
-					</label>
-					<input
-						type="number"
-						placeholder="GB"
-						v-model.trim="form.storageGb"
-						@blur="form.storage = form.storageGb"
-						class="w-full px-3 py-2 border rounded"
-						min="0"
-					/>
-				</div>
-
-				<div class="mb-4">
-					<label class="block text-gray-700 text-sm font-bold mb-2">
-						Color (Optional)
-					</label>
-					<input
-						type="text"
-						v-model.trim="form.color"
-						@blur="form.color = form.color.trim()"
-						class="w-full px-3 py-2 border rounded"
-					/>
-				</div>
-			</div>
-
-			<div class="flex items-center justify-between">
-				<button
-					type="submit"
-					:disabled="!isFormValid || isSubmitting"
-					class="bg-blue-500 text-white font-bold py-2 px-4 rounded"
-					:class="{
-						'opacity-50 cursor-not-allowed': !isFormValid || isSubmitting,
-						'hover:bg-blue-600': isFormValid && !isSubmitting,
-					}"
-				>
-					{{ isSubmitting ? "Saving..." : "Save" }}
-				</button>
-
-				<button
-					type="button"
-					@click="handleCancel"
-					class="bg-gray-500 text-white font-bold py-2 px-4 rounded hover:bg-gray-600"
-				>
-					Cancel
-				</button>
-			</div>
-
-			<div v-if="errorMessage" class="mt-4 text-red-500">
-				{{ errorMessage }}
-			</div>
-		</form>
-	</div>
-</template>
-
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
@@ -231,28 +45,28 @@ onMounted(async () => {
 	}
 });
 
-const selectedBrand = brands.value.find(
-	(brand) => brand.brandId === form.value.brandId
-);
-
 const handleSubmit = async () => {
 	isSubmitting.value = true;
 	errorMessage.value = "";
 
 	try {
+		const selectedBrand = brands.value.find(
+			(brand) => brand.brandId === form.value.brandId
+		);
+
 		const payload = {
 			brand: {
 				id: form.value.brandId,
 				name: selectedBrand?.name || "",
 			},
 			model: form.value.model.trim(),
-			price: Number(form.value.price),
 			description: form.value.description.trim(),
+			price: Number(form.value.price),
 			ramGb: form.value.ramGb || null,
 			screenSizeInch: form.value.screenSizeInch || null,
+			quantity: Number(form.value.quantity),
 			storageGb: form.value.storageGb || null,
 			color: form.value.color?.trim() || null,
-			quantity: Number(form.value.quantity),
 		};
 
 		console.log("Payload:", payload);
@@ -264,11 +78,12 @@ const handleSubmit = async () => {
 
 		if (response.status === 201) {
 			router.push({
-				path: "/",
+				path: "/sale-items",
 				query: { successMessage: "The sale item has been successfully added" },
 			});
 		}
 	} catch (error) {
+		console.error("❌ ERROR:", error);
 		errorMessage.value =
 			error.response?.data?.message ||
 			"Failed to save sale item. Please try again.";
@@ -296,3 +111,204 @@ const resetForm = () => {
 	};
 };
 </script>
+<template>
+	<div class="p-10 max-w-7xl mx-auto text-gray-800">
+		<!-- Minimalist Luxury Header -->
+		<div class="mb-8 flex items-center gap-2">
+			<router-link
+				id="itbms-home-button"
+				to="/sale-items"
+				class="text-gray-600 hover:text-black text-xl font-light transition duration-300"
+			>
+				Home
+			</router-link>
+			<span class="text-gray-400">/</span>
+			<span class="text-xl text-gray-800 font-light">New Sale Item</span>
+		</div>
+
+		<!-- Main Form -->
+		<form
+			@submit.prevent="handleSubmit"
+			class="bg-white p-10 rounded-xl shadow-lg grid grid-cols-12 gap-8"
+		>
+			<!-- Image Section -->
+			<div class="col-span-4 flex flex-col items-center">
+				<!-- Large Picture Box -->
+				<div
+					class="w-full aspect-[4/3] bg-gray-100 flex items-center justify-center text-lg text-gray-400 rounded-lg mb-6 border border-dashed"
+				>
+					No Picture
+				</div>
+
+				<!-- Thumbnails -->
+				<div class="grid grid-cols-4 gap-x-4">
+					<div
+						v-for="n in 4"
+						:key="n"
+						class="w-16 h-16 rounded-lg bg-gray-50 flex items-center justify-center text-xs text-gray-400 border hover:border-blue-400 transition"
+					>
+						+
+					</div>
+				</div>
+			</div>
+
+			<!-- Form Fields -->
+			<div class="col-span-8 grid grid-cols-2 gap-6">
+				<!-- Brand -->
+				<div>
+					<label
+						class="block mb-1 font-medium text-gray-700 after:content-['*'] after:ml-1 after:text-red-500"
+						>Brand</label
+					>
+					<select
+						id="itbms-brand"
+						v-model="form.brandId"
+						class="w-full border px-4 py-2 rounded"
+						required
+					>
+						<option value="" disabled>Select brand</option>
+						<option
+							v-for="brand in sortedBrands"
+							:key="brand.brandId"
+							:value="brand.brandId"
+						>
+							{{ brand.name }}
+						</option>
+					</select>
+				</div>
+
+				<!-- Model -->
+				<div>
+					<label
+						class="block mb-1 font-medium text-gray-700 after:content-['*'] after:ml-1 after:text-red-500"
+						>Model</label
+					>
+					<input
+						id="itbms-model"
+						type="text"
+						v-model="form.model"
+						class="w-full border px-4 py-2 rounded"
+						required
+					/>
+				</div>
+
+				<!-- Price -->
+				<div>
+					<label
+						class="block mb-1 font-medium text-gray-700 after:content-['*'] after:ml-1 after:text-red-500"
+						>Price (Baht)</label
+					>
+					<input
+						id="itbms-price"
+						type="number"
+						v-model.number="form.price"
+						min="0"
+						class="w-full border px-4 py-2 rounded"
+						required
+					/>
+				</div>
+
+				<!-- Quantity -->
+				<div>
+					<label
+						class="block mb-1 font-medium text-gray-700 after:content-['*'] after:ml-1 after:text-red-500"
+						>Quantity</label
+					>
+					<input
+						id="itbms-quantity"
+						type="number"
+						v-model.number="form.quantity"
+						class="w-full border px-4 py-2 rounded"
+						min="0"
+						required
+					/>
+				</div>
+
+				<!-- Description -->
+				<div class="col-span-2">
+					<label
+						class="block mb-1 font-medium text-gray-700 after:content-['*'] after:ml-1 after:text-red-500"
+						>Description</label
+					>
+					<textarea
+						id="itbms-description"
+						v-model="form.description"
+						class="w-full border px-4 py-2 rounded"
+						rows="3"
+						required
+					></textarea>
+				</div>
+
+				<!-- RAM -->
+				<div>
+					<label class="block mb-1 font-medium text-gray-700">RAM (GB)</label>
+					<input
+						id="itbms-ramGb"
+						type="number"
+						v-model.number="form.ramGb"
+						class="w-full border px-4 py-2 rounded"
+					/>
+				</div>
+
+				<!-- Screen Size -->
+				<div>
+					<label class="block mb-1 font-medium text-gray-700"
+						>Screen Size (Inch)</label
+					>
+					<input
+						id="itbms-screenSizeInch"
+						type="number"
+						step="0.1"
+						v-model.number="form.screenSizeInch"
+						class="w-full border px-4 py-2 rounded"
+					/>
+				</div>
+
+				<!-- Storage -->
+				<div>
+					<label class="block mb-1 font-medium text-gray-700"
+						>Storage (GB)</label
+					>
+					<input
+						id="itbms-storageGb"
+						type="number"
+						v-model.number="form.storageGb"
+						class="w-full border px-4 py-2 rounded"
+					/>
+				</div>
+
+				<!-- Color -->
+				<div>
+					<label class="block mb-1 font-medium text-gray-700">Color</label>
+					<input
+						id="itbms-color"
+						type="text"
+						v-model="form.color"
+						class="w-full border px-4 py-2 rounded"
+					/>
+				</div>
+			</div>
+
+			<!-- Save/Cancel Buttons -->
+			<div class="col-span-12 flex justify-center gap-6 mt-10">
+				<button
+					id="itbms-save-button"
+					type="submit"
+					:disabled="!isFormValid || isSubmitting"
+					class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+				>
+					{{ isSubmitting ? "Saving..." : "Save" }}
+				</button>
+
+				<button
+					id="itbms-cancel-button"
+					type="button"
+					@click="handleCancel"
+					class="border border-gray-400 text-gray-700 px-6 py-2 rounded hover:bg-gray-100 transition"
+				>
+					Cancel
+				</button>
+			</div>
+		</form>
+	</div>
+</template>
