@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { fetchSaleItems } from "@/services/saleItemService";
 import SaleItemCard from "@/components/ProductGallery/SaleItemCard.vue";
 import ProductFilter from "@/components/ProductGallery/ProductFilter.vue";
@@ -10,8 +10,18 @@ import PromoBar from "@/components/ProductGallery/PromoBar.vue";
 const saleItems = ref([]);
 const loading = ref(true);
 const router = useRouter();
+const route = useRoute();
+const successMessage = ref("");
 
 onMounted(async () => {
+	if (route.query.successMessage) {
+		successMessage.value = String(route.query.successMessage);
+		setTimeout(() => {
+			successMessage.value = "";
+		}, 4000);
+		router.replace({ query: {} });
+	}
+
 	try {
 		const data = await fetchSaleItems();
 		saleItems.value = Array.isArray(data) ? data : [];
@@ -30,6 +40,13 @@ const productCount = computed(() => saleItems.value.length);
 		<PromoBar />
 		<ProductCarousel />
 		<ProductFilter :productCount="productCount" />
+		<div
+			v-if="successMessage"
+			class="m-4 p-4 bg-green-100 text-green-800 shadow itbms-message"
+		>
+			✅ {{ successMessage }}
+		</div>
+
 		<div class="px-4 py-2">
 			<div
 				v-if="saleItems.length > 0"
