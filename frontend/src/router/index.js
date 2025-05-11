@@ -4,7 +4,8 @@ import LandingPageView from "@/views/LandingPageView.vue";
 import ProductDetailView from "@/views/ProductDetailView.vue";
 import NotFoundView from "@/views/NotFoundView.vue";
 import Error500View from "@/views/Error500View.vue";
-import AddSaleItem from "@/views/AddSaleItem.vue";
+import AddSaleItem from "@/views/AddSaleItemView.vue";
+import EditSaleItemView from "@/views/EditSaleItemView.vue";
 
 const routes = [
 	{
@@ -26,6 +27,11 @@ const routes = [
 		path: "/sale-items/add",
 		name: "Add-SaleItem",
 		component: AddSaleItem,
+	},
+	{
+		path: "/sale-items/edit/:slug",
+		name: "Edit-SaleItem",
+		component: EditSaleItemView,
 	},
 	{
 		path: "/not-found",

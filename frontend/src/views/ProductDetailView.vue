@@ -76,13 +76,11 @@ const shouldShowToggle = computed(() => {
 		>
 			<!-- Main Image & Gallery -->
 			<div>
-				<!-- รูปภาพหลัก + ปุ่มเลื่อน -->
 				<div
 					class="relative bg-gray-100 rounded-xl flex justify-center items-center overflow-hidden h-[500px]"
 				>
 					<img :src="selectedImage" class="w-full h-full object-cover" />
 
-					<!-- ปุ่มก่อนหน้า -->
 					<button
 						@click="prev"
 						class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-700 hover:text-black text-3xl focus:outline-none z-10"
@@ -91,7 +89,6 @@ const shouldShowToggle = computed(() => {
 						‹
 					</button>
 
-					<!-- ปุ่มถัดไป -->
 					<button
 						@click="next"
 						class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-700 hover:text-black text-3xl focus:outline-none z-10"
@@ -219,15 +216,16 @@ const shouldShowToggle = computed(() => {
 
 				<!-- Buttons -->
 				<div class="flex space-x-4 mt-6">
-					<button
+					<router-link
+						to="/sale-items/edit/:slug"
 						class="px-6 py-2 bg-[#4180d1] text-white rounded-md hover:bg-[#0E3971]"
 					>
-						Add to cart
-					</button>
+						Edit
+					</router-link>
 					<button
 						class="px-6 py-2 bg-[#1D5298] text-white rounded-md hover:bg-[#0E3971]"
 					>
-						Buy now
+						Delete
 					</button>
 				</div>
 
