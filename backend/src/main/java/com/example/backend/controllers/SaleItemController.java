@@ -7,6 +7,7 @@ import com.example.backend.entities.SaleItem;
 import com.example.backend.services.BrandService;
 import com.example.backend.services.SaleItemService;
 import com.example.backend.utils.ListMapper;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.Getter;
 import lombok.Setter;
 import org.modelmapper.ModelMapper;
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-//@CrossOrigin(origins = "${app.cors.allowedOrigins}")
+@CrossOrigin(origins = "${app.cors.allowedOrigins}")
 @RestController
 @Getter
 @Setter
@@ -41,11 +42,9 @@ public class SaleItemController {
         return ResponseEntity.ok(modelMapper.map(saleItemService.findSaleItemById(saleItemId), SaleItemDto.GetSaleItemDto.class));
     }
 
-    @PutMapping("/sale-items/{id}")
-    public ResponseEntity<SaleItemDto.GetSaleItemDto> updateSaleItem(@PathVariable Integer id ,@RequestBody SaleItemDto.GetCreateSaleItemDto saleItemDto){
-        SaleItem updateSaleItem = saleItemService.updateSaleItem(id,modelMapper.map(saleItemDto,SaleItem.class));
-        return ResponseEntity.ok(modelMapper.map(updateSaleItem
-                ,SaleItemDto.GetSaleItemDto.class));
+    @PutMapping("/sale-items/{saleItemId}")
+    public ResponseEntity<SaleItemDto.GetSaleItemDto> updateSaleItem(@PathVariable Integer saleItemId ,@RequestBody SaleItemDto.GetCreateSaleItemDto saleItemDto){
+        return ResponseEntity.ok(modelMapper.map(saleItemService.updateSaleItem(saleItemId,saleItemDto),SaleItemDto.GetSaleItemDto.class));
     }
 
     @PostMapping("/sale-items")
@@ -55,7 +54,11 @@ public class SaleItemController {
         SaleItemDto.GetSaleItemDto dto = modelMapper.map(savedItem, SaleItemDto.GetSaleItemDto.class);
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
-
+    @DeleteMapping("/sale-items/{saleItemId}")
+    public ResponseEntity<Void> deleteSaleItem(@PathVariable Integer saleItemId){
+        saleItemService.deleteSaleItem(saleItemId);
+        return ResponseEntity.noContent().build();
+    }
 
 }
 

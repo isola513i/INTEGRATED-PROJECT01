@@ -1,5 +1,6 @@
 package com.example.backend.services;
 
+import com.example.backend.dtos.SaleItemDto;
 import com.example.backend.entities.Brand;
 import com.example.backend.entities.SaleItem;
 import com.example.backend.exceptions.ItemNotFoundException;
@@ -11,6 +12,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
@@ -36,19 +38,27 @@ public class SaleItemService {
         } else throw new ItemNotFoundException("SaleItem not found for this id :: " + id);
     }
 
-    public SaleItem updateSaleItem(Integer id, SaleItem saleItem) {
-        if (!saleItemRepository.existsById(id)) {
-            throw new ItemNotFoundException("SaleItem not found for this id :: " + id);
-        } else if (!brandRepository.existsById(saleItem.getBrand().getId())) {
-            throw new ItemNotFoundException("Brand not found for this id :: " + id);
-        }
-        return saleItemRepository.save(saleItem);
+    public SaleItem updateSaleItem(Integer id, SaleItemDto.GetCreateSaleItemDto saleItemDto) {
+        SaleItem saleItem = saleItemRepository.findById(id).orElseThrow(() -> new ItemNotFoundException("SaleItem not found for this id :: " + id));
+        Brand brand = brandRepository.findById(saleItemDto.getBrand().getId()).orElseThrow(
+                () -> new ItemNotFoundException("Brand not found for this id :: " + id));
+        saleItem.setModel(saleItemDto.getModel());
+        saleItem.setBrand(brand);
+        saleItem.setDescription(saleItemDto.getDescription());
+        saleItem.setPrice(saleItemDto.getPrice());
+        saleItem.setRamGb(saleItemDto.getRamGb());
+        saleItem.setScreenSizeInch(BigDecimal.valueOf(saleItemDto.getScreenSizeInch()));
+        saleItem.setQuantity(saleItemDto.getQuantity());
+        saleItem.setStorageGb(saleItemDto.getStorageGb());
+        saleItem.setColor(saleItemDto.getColor());
+        SaleItem updateItem = saleItemRepository.save(saleItem);
+        return saleItemRepository.findById(updateItem.getId()).orElseThrow();
     }
 
     @Transactional
     public SaleItem addSaleItem(SaleItem saleItem) {
         if (saleItem.getBrand() == null || saleItem.getBrand().getId() == null) {
-            throw new IllegalArgumentException("Brand ID must not be null");
+            throw new IllegalArgumentException("Brand id must not be null");
         }
         Brand brand = brandRepository.
                 findById(saleItem.getBrand().getId()).orElseThrow(
@@ -56,8 +66,7 @@ public class SaleItemService {
                                 + saleItem.getBrand().getId()));
         saleItem.setBrand(brand);
         SaleItem savedItem = saleItemRepository.save(saleItem);
-        entityManager.refresh(savedItem);
-        return savedItem;
+        return saleItemRepository.findById(savedItem.getId()).orElseThrow();
         }
 
 }
