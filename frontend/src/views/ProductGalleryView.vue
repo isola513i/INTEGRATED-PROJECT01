@@ -30,14 +30,6 @@ const productCount = computed(() => saleItems.value.length);
 		<PromoBar />
 		<ProductCarousel />
 		<ProductFilter :productCount="productCount" />
-		<div>
-			<router-link
-				to="/sale-items/add"
-				class="bg-red-500 text-white px-4 py-2 rounded"
-			>
-				Add Sale Item
-			</router-link>
-		</div>
 		<div class="px-4 py-2">
 			<div
 				v-if="saleItems.length > 0"
