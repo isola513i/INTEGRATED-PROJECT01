@@ -56,7 +56,7 @@ public class SaleItemDto {
     }
     @Data
     @AllArgsConstructor
-    public static class GetCreateSaleItemDto{
+    public static class GetCreateSaleItemDto {
         private String model;
         private BrandDto.GetAllBrandDto brand;
         private String description;
@@ -67,11 +67,4 @@ public class SaleItemDto {
         private Integer storageGb;
         private String color;
     }
-    //        @JsonIgnore
-//        private Brand brand;
-//
-//        @JsonProperty("brandName")
-//        public Integer getBrandId() {
-//            return brand != null ? brand.getId() : null;
-//        }        //private Integer brandId;
 }
