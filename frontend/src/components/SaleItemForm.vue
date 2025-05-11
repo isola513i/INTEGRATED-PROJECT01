@@ -50,7 +50,7 @@ const trimField = (field, value) => {
 					>Brand</label
 				>
 				<select
-					v-model="props.form.brandId"
+					:value="props.form.brandId"
 					@change="updateField('brandId', $event.target.value)"
 					class="w-full border px-4 py-2 rounded"
 				>
