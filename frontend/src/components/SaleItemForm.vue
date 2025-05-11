@@ -9,6 +9,9 @@ const props = defineProps({
 const emit = defineEmits(["update:form", "submit", "cancel", "blur"]);
 
 const updateField = (field, value) => {
+	if (field === "brandId") {
+		console.log(`Selected brandId: ${value}, type: ${typeof value}`);
+	}
 	emit("update:form", { ...props.form, [field]: value });
 };
 
@@ -23,7 +26,6 @@ const trimField = (field, value) => {
 		@submit.prevent="$emit('submit')"
 		class="grid grid-cols-12 gap-8 bg-white p-10 rounded-xl shadow-lg"
 	>
-		<!-- Left -->
 		<div class="col-span-4">
 			<div
 				class="w-full aspect-[4/3] bg-gray-100 flex items-center justify-center text-lg text-gray-400 rounded-lg mb-6 border border-dashed"
@@ -41,9 +43,7 @@ const trimField = (field, value) => {
 			</div>
 		</div>
 
-		<!-- Right -->
 		<div class="col-span-8 grid grid-cols-2 gap-6">
-			<!-- Brand -->
 			<div>
 				<label
 					class="block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
@@ -51,7 +51,7 @@ const trimField = (field, value) => {
 				>
 				<select
 					:value="props.form.brandId"
-					@change="updateField('brandId', $event.target.value)"
+					@change="updateField('brandId', Number($event.target.value) || '')"
 					class="w-full border px-4 py-2 rounded"
 				>
 					<option value="" disabled>Select brand</option>
@@ -65,7 +65,6 @@ const trimField = (field, value) => {
 				</select>
 			</div>
 
-			<!-- Model -->
 			<div>
 				<label
 					class="block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
@@ -80,7 +79,6 @@ const trimField = (field, value) => {
 				/>
 			</div>
 
-			<!-- Price -->
 			<div>
 				<label
 					class="block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
@@ -98,7 +96,6 @@ const trimField = (field, value) => {
 				/>
 			</div>
 
-			<!-- Quantity -->
 			<div>
 				<label
 					class="block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
@@ -116,7 +113,6 @@ const trimField = (field, value) => {
 				/>
 			</div>
 
-			<!-- Description -->
 			<div class="col-span-2">
 				<label
 					class="block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
@@ -130,7 +126,6 @@ const trimField = (field, value) => {
 				></textarea>
 			</div>
 
-			<!-- RAM -->
 			<div>
 				<label class="block mb-1 font-medium text-gray-700">RAM (GB)</label>
 				<input
@@ -141,7 +136,6 @@ const trimField = (field, value) => {
 				/>
 			</div>
 
-			<!-- Screen -->
 			<div>
 				<label class="block mb-1 font-medium text-gray-700"
 					>Screen Size (Inch)</label
@@ -155,7 +149,6 @@ const trimField = (field, value) => {
 				/>
 			</div>
 
-			<!-- Storage -->
 			<div>
 				<label class="block mb-1 font-medium text-gray-700">Storage (GB)</label>
 				<input
@@ -166,7 +159,6 @@ const trimField = (field, value) => {
 				/>
 			</div>
 
-			<!-- Color -->
 			<div>
 				<label class="block mb-1 font-medium text-gray-700">Color</label>
 				<input

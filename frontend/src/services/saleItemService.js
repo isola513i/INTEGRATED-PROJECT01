@@ -13,6 +13,11 @@ export const fetchItemById = async (saleItemId) => {
 };
 
 export const fetchBrands = async () => {
-	const response = await axios.get(`${API_BASE_URL}/brands`);
-	return await response.data;
+	const response = await axios.get(
+		`${import.meta.env.VITE_API_BASE_URL}/brands`
+	);
+	return response.data.map((brand) => ({
+		brandId: brand.id || brand.brandId,
+		name: brand.name,
+	}));
 };

@@ -61,39 +61,74 @@ const handleSubmit = async () => {
 	errorMessage.value = "";
 
 	try {
-		const selectedBrand = brands.value.find(
-			(b) => b.brandId === form.value.brandId
-		);
+		if (!form.value.brandId) {
+			throw new Error("Please select a brand");
+		}
+
+		const brandId = parseInt(form.value.brandId, 10);
+
+		if (isNaN(brandId)) {
+			throw new Error("Invalid brand ID format");
+		}
+
+		const selectedBrand = brands.value.find((b) => {
+			return Number(b.brandId) === brandId;
+		});
+
+		if (!selectedBrand) {
+			throw new Error(`Brand with ID ${brandId} not found`);
+		}
 
 		const payload = {
-			brand: {
-				id: form.value.brandId,
-				name: selectedBrand?.name || "",
-			},
 			model: form.value.model.trim(),
+			brand: {
+				id: brandId,
+				name: selectedBrand.name,
+			},
 			description: form.value.description.trim(),
 			price: Number(form.value.price),
-			ramGb: form.value.ramGb || null,
-			screenSizeInch: form.value.screenSizeInch || null,
+			ramGb: form.value.ramGb !== null ? Number(form.value.ramGb) : null,
+			screenSizeInch:
+				form.value.screenSizeInch !== null
+					? Number(form.value.screenSizeInch)
+					: null,
 			quantity: Number(form.value.quantity),
-			storageGb: form.value.storageGb || null,
+			storageGb:
+				form.value.storageGb !== null ? Number(form.value.storageGb) : null,
 			color: form.value.color?.trim() || null,
 		};
 
-		const response = await axios.post(
-			`${import.meta.env.VITE_API_BASE_URL}/sale-items`,
-			payload
-		);
+		const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/sale-items`;
+
+		const response = await axios.post(apiUrl, payload, {
+			headers: {
+				"Content-Type": "application/json",
+			},
+			timeout: 10000,
+			validateStatus: function (status) {
+				return status < 500;
+			},
+		});
 
 		if (response.status === 201) {
 			router.push({
 				path: "/sale-items",
-				query: { successMessage: "The sale item has been successfully added" },
+				query: { successMessage: "The sale item has been successfully added." },
 			});
+		} else {
+			errorMessage.value = `Unexpected response: ${response.status} ${response.statusText}`;
 		}
 	} catch (error) {
-		errorMessage.value =
-			error.response?.data?.message || "Failed to save item.";
+		if (error.response) {
+			errorMessage.value =
+				error.response.data?.message ||
+				`Server error: ${error.response.status}`;
+		} else if (error.request) {
+			errorMessage.value =
+				"No response from server. Please check your connection.";
+		} else {
+			errorMessage.value = error.message || "Failed to send request";
+		}
 	} finally {
 		isSubmitting.value = false;
 	}
