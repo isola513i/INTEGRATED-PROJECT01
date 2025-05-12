@@ -21,3 +21,10 @@ export const fetchBrands = async () => {
     name: brand.name,
   }));
 };
+
+export const deleteItemById = async (saleItemId) => {
+  const response = await axios.delete(
+    `${API_BASE_URL}/sale-items/${saleItemId}`,
+  );
+  return response.data;
+};
