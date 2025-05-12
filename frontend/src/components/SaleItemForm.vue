@@ -1,5 +1,10 @@
 <script setup>
 const props = defineProps({
+  updatePage: {
+    type: Boolean,
+    default: false, 
+  },
+  isupdate: Boolean,
   form: Object,
   brands: Array,
   isSubmitting: Boolean,
@@ -46,13 +51,13 @@ const trimField = (field, value) => {
     <div class="col-span-8 grid grid-cols-2 gap-6">
       <div>
         <label
-          class="itbms-brand block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
+          class=" block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
           >Brand</label
         >
         <select
           :value="props.form.brandId"
           @change="updateField('brandId', Number($event.target.value) || '')"
-          class="w-full border px-4 py-2 rounded"
+          class="itbms-brand w-full border px-4 py-2 rounded"
         >
           <option value="" disabled>Select brand</option>
           <option
@@ -67,7 +72,7 @@ const trimField = (field, value) => {
 
       <div>
         <label
-          class="itbms-model block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
+          class=" block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
           >Model</label
         >
         <input
@@ -75,13 +80,13 @@ const trimField = (field, value) => {
           :value="props.form.model"
           @input="updateField('model', $event.target.value)"
           @blur="trimField('model', $event.target.value)"
-          class="w-full border px-4 py-2 rounded"
+          class="itbms-model w-full border px-4 py-2 rounded"
         />
       </div>
 
-      <div>
+      <div v-if="!updatePage">
         <label
-          class="itbms-price block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
+          class=" block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
           >Price</label
         >
         <input
@@ -92,13 +97,28 @@ const trimField = (field, value) => {
           @input="
             updateField('price', Math.max(1, Number($event.target.value)))
           "
-          class="w-full border px-4 py-2 rounded"
+          class="itbms-price w-full border px-4 py-2 rounded"
+        />
+      </div>
+      <div v-if="updatePage">
+        <label
+          class=" block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
+          >Price</label
+        >
+        <input
+          type="number"
+          min="0"
+          :value="props.form.price"
+          @input="
+            updateField('price', $event.target.value)
+          "
+          class="itbms-price w-full border px-4 py-2 rounded"
         />
       </div>
 
       <div>
         <label
-          class="itbms-quantity block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
+          class=" block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
           >Quantity</label
         >
         <input
@@ -109,35 +129,35 @@ const trimField = (field, value) => {
           @input="
             updateField('quantity', Math.max(1, Number($event.target.value)))
           "
-          class="w-full border px-4 py-2 rounded"
+          class="itbms-quantity w-full border px-4 py-2 rounded"
         />
       </div>
 
       <div class="col-span-2">
         <label
-          class="itbms-description block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
+          class=" block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
           >Description</label
         >
         <textarea
           :value="props.form.description"
           @input="updateField('description', $event.target.value)"
           @blur="trimField('description', $event.target.value)"
-          class="w-full border px-4 py-2 rounded"
+          class="itbms-description w-full border px-4 py-2 rounded"
         ></textarea>
       </div>
 
       <div>
-        <label class="itbms-ramGb block mb-1 font-medium text-gray-700">RAM (GB)</label>
+        <label class=" block mb-1 font-medium text-gray-700">RAM (GB)</label>
         <input
           type="number"
           :value="props.form.ramGb"
           @input="updateField('ramGb', Number($event.target.value))"
-          class="w-full border px-4 py-2 rounded"
+          class="itbms-ramGb w-full border px-4 py-2 rounded"
         />
       </div>
 
       <div>
-        <label class="itbms-screenSizeInch block mb-1 font-medium text-gray-700"
+        <label class=" block mb-1 font-medium text-gray-700"
           >Screen Size (Inch)</label
         >
         <input
@@ -145,35 +165,36 @@ const trimField = (field, value) => {
           step="0.1"
           :value="props.form.screenSizeInch"
           @input="updateField('screenSizeInch', Number($event.target.value))"
-          class="w-full border px-4 py-2 rounded"
+          class="itbms-screenSizeInch w-full border px-4 py-2 rounded"
         />
       </div>
 
       <div>
-        <label class="itbms-storageGb Screen Sizeblock mb-1 font-medium text-gray-700">Storage (GB)</label>
+        <label class=" Screen Sizeblock mb-1 font-medium text-gray-700">Storage (GB)</label>
         <input
           type="number"
           :value="props.form.storageGb"
           @input="updateField('storageGb', Number($event.target.value))"
-          class="w-full border px-4 py-2 rounded"
+          class="itbms-storageGb w-full border px-4 py-2 rounded"
         />
       </div>
 
       <div>
-        <label class="itbms-storageGb Screen Sizeblock mb-1 font-medium text-gray-700">Storage (GB)</label>
-        <label class="itbms-color block mb-1 font-medium text-gray-700">Color</label>
+        <label class=" Screen Sizeblock mb-1 font-medium text-gray-700">Storage (GB)</label>
+        <label class=" block mb-1 font-medium text-gray-700">Color</label>
         <input
           type="text"
           :value="props.form.color"
           @input="updateField('color', $event.target.value)"
           @blur="trimField('color', $event.target.value)"
-          class="w-full border px-4 py-2 rounded"
+          class="w-full itbms-color border px-4 py-2 rounded"
         />
       </div>
     </div>
 
     <div class="col-span-12 flex justify-center gap-6 mt-10">
       <button
+        v-if="!updatePage"
         type="submit"
         :disabled="!isFormValid || !isDirty || isSubmitting"
         class="itbms-save-button bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
@@ -182,9 +203,18 @@ const trimField = (field, value) => {
       </button>
 
       <button
+        v-if="updatePage"
+        type="submit"
+        :disabled="!isupdate"
+        class="itbms-save-button bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
+      >
+        Save
+      </button>
+
+      <button
         type="button"
         @click="$emit('cancel')"
-        class="itbms-cancle-button border border-gray-400 px-6 py-2 rounded hover:bg-gray-100"
+        class="itbms-cancel-button border border-gray-400 px-6 py-2 rounded hover:bg-gray-100"
       >
         Cancel
       </button>

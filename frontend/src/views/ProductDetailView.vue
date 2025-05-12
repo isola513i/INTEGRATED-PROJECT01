@@ -12,9 +12,17 @@ const product = ref({});
 const quantity = ref(1);
 const showModal = ref(false);
 const showFullDescription = ref(false);
+const successMessage = ref("");
 
 /* --- Fetch Product on Mount --- */
 onMounted(async () => {
+  if (route.query.successMessage) {
+    successMessage.value = String(route.query.successMessage);
+    setTimeout(() => {
+      successMessage.value = "";
+    }, 4000);
+    router.replace({ query: {} });
+  }
   try {
     const data = await fetchItemById(route.params.slug);
     if (!data) throw new Error("Not found");
@@ -62,8 +70,12 @@ const shouldShowToggle = computed(() => product.value.description?.length > 50);
 const deleteItem = async () => {
   try {
     await deleteItemById(route.params.slug); // ถ้าได้ 204 ตรงนี้จะสำเร็จ
-    window.alert("The sale item has been deleted.")
-    router.push("/sale-items")
+    router.push({
+        path: `/sale-items`,
+        query: {
+          successMessage: "The sale item has been deleted.",
+        },
+      });
   } catch (error) {
     
     if (error.response?.status === 404) {
@@ -79,6 +91,19 @@ const deleteItem = async () => {
 
 <template>
   <div class="pt-[55px] bg-white">
+    <div
+      v-if="successMessage"
+      class="m-4 p-4 bg-green-100 text-green-800 shadow itbms-message"
+    >
+      ✅ {{ successMessage }}
+    </div>
+    <div class="mb-8 flex items-center gap-2">
+      <router-link
+        to="/sale-items"
+        class="itbms-home-button text-gray-600 hover:text-black text-xl font-light"
+        >Home
+		</router-link
+   
     <div v-if="product" class="max-w-7xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-10">
       
       <!-- Image Gallery -->
@@ -104,12 +129,12 @@ const deleteItem = async () => {
 
       <!-- Product Details -->
       <div>
-        <div class="text-sm text-gray-500 mb-2">{{ product.brandName }}</div>
-        <h1 class="text-3xl font-bold text-black truncate mb-2">{{ product.model }}</h1>
+        <div class="itbms-brand text-sm itbms-brand text-gray-500 mb-2">{{ product.brandName }}</div>
+        <h1 class="itbms-model text-3xl font-bold text-black truncate mb-2">{{ product.model }}</h1>
 
         <div class="text-2xl font-semibold text-gray-800 mb-4">
-          <span>Baht </span>
-          <span>{{ product.price?.toLocaleString() }}</span>
+          <span class="itbms-price-unit">Baht </span>
+          <span class="itbms-price">{{ product.price?.toLocaleString() }}</span>
         </div>
 
         <!-- Specs -->
@@ -117,28 +142,31 @@ const deleteItem = async () => {
         <div class="grid grid-cols-2 gap-4 max-w-md">
           <div class="border rounded-xl p-3 text-center border-gray-400 hover:bg-gray-100">
             <div class="text-sm text-gray-500">RAM</div>
-            <div class="text-gray-800 font-medium">{{ product.ramGb || "-" }} GB</div>
+            <span class="itbms-ramGb text-gray-800 font-medium">{{ product.ramGb || "-" }}</span>
+            <span class="itbms-ramGb-unit text-gray-800"> GB</span>
           </div>
           <div class="border rounded-xl p-3 text-center border-gray-400 hover:bg-gray-100">
             <div class="text-sm text-gray-500">Screen Size</div>
-            <div class="text-gray-800 font-medium">{{ product.screenSizeInch || "-" }} Inches</div>
+            <span class="itbms-screenSizeInch text-gray-800 font-medium">{{ product.screenSizeInch || "-" }}</span>
+            <span class="itbms-screenSizeInch-unit text-gray-800"> Inch</span>
           </div>
           <div class="border rounded-xl p-3 text-center border-gray-400 hover:bg-gray-100">
             <div class="text-sm text-gray-500">Storage</div>
-            <div class="text-gray-800 font-medium">{{ product.storageGb || "-" }} GB</div>
+            <span class="itbms-storageGb text-gray-800 font-medium">{{ product.storageGb || "-" }}</span>
+            <span class="itbms-storageGb-unit text-gray-800"> GB</span>
           </div>
           <div class="border rounded-xl p-3 text-center border-gray-400 hover:bg-gray-100">
             <div class="text-sm text-gray-500">Color</div>
-            <div class="text-gray-800 font-medium">{{ product.color || "-" }}</div>
+            <div class="itbms-color text-gray-800 font-medium">{{ product.color || "-" }}</div>
           </div>
         </div>
 
         <!-- Quantity -->
         <div class="mt-5 text-sm text-gray-500">
-          Available Quantity: {{ product.quantity }} units
+          Available Quantity: <span class="itbms-quantity">{{ product.quantity }}></span><span class="itbms-quantity-unit">units</span> 
         </div>
         <div class="flex items-center space-x-4 mt-2">
-          <span class="text-gray-700">Quantity</span>
+          <span class=" text-gray-700">Quantity</span>
           <button @click="decreaseQty" class="w-5 h-5 border rounded flex items-center justify-center text-gray-500">-</button>
           <input
             type="number"
@@ -155,12 +183,12 @@ const deleteItem = async () => {
         <div class="flex space-x-4 mt-6">
           <router-link
             :to="`/sale-items/edit/${route.params.slug}`"
-            class="px-6 py-2 bg-[#4180d1] text-white rounded-md hover:bg-[#0E3971]"
+            class="itbms-edit-button px-6 py-2 bg-[#4180d1] text-white rounded-md hover:bg-[#0E3971]"
           >
             Edit
           </router-link>
           <button
-            class="px-6 py-2 bg-[#1D5298] text-white rounded-md hover:bg-[#0E3971]"
+            class="itbms-delete-button px-6 py-2 bg-[#1D5298] text-white rounded-md hover:bg-[#0E3971]"
             @click="showModal = true"
           >
             Delete
@@ -174,7 +202,7 @@ const deleteItem = async () => {
             class="relative transition-all duration-300 overflow-hidden max-w-full"
             :class="showFullDescription ? '' : 'max-h-[60px] overflow-hidden'"
           >
-            <p class="text-gray-700 whitespace-pre-line break-words">{{ product.description }}</p>
+            <p class="itbms-description text-gray-700 whitespace-pre-line break-words">{{ product.description }}</p>
           </div>
           <button
             v-if="shouldShowToggle"
