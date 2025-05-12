@@ -21,6 +21,7 @@ import java.util.List;
 @CrossOrigin(origins = "${app.cors.allowedOrigins}")
 //@CrossOrigin(origins= "*")
 
+
 @RestController
 @Getter
 @Setter
