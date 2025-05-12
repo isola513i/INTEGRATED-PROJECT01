@@ -56,13 +56,7 @@ onUnmounted(() => {
       </h2>
       <p class="text-sm md:text-base mb-6 drop-shadow-md">
         Upgrade your everyday with next-gen design.
-      </p>
-      <router-link
-        to="/sale-items/add"
-        class="border border-white text-white px-5 py-2 rounded-full hover:bg-white hover:text-black transition-all text-sm font-medium"
-      >
-        Add New Sale Item
-      </router-link>
+      </p>  
     </div>
 
     <button

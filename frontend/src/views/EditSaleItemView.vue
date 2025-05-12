@@ -9,6 +9,7 @@ const router = useRouter();
 const isSubmitting = ref(false);
 const errorMessage = ref("");
 const brands = ref([]);
+const product = ref({});
 
 const form = ref({
   brandId: "",
@@ -175,11 +176,16 @@ const handleCancel = () => {
     <div class="mb-8 flex items-center gap-2">
       <router-link
         to="/sale-items"
-        class="text-gray-600 hover:text-black text-xl font-light"
-        >Home</router-link
+        class="itbms-home-button text-gray-600 hover:text-black text-xl font-light"
+        >Home
+		</router-link
       >
       <span class="text-gray-400">/</span>
-      <span class="text-xl text-gray-800 font-light">Edit Sale Item</span>
+	  <router-link
+    	to="/sale-items"
+    	class="itbms-home-button text-gray-600 hover:text-black text-xl font-light"
+ 		>{{ product.model || 'Sale Item' }}
+		</router-link>
     </div>
 
     <div v-if="errorMessage" class="text-red-600 mb-4">{{ errorMessage }}</div>

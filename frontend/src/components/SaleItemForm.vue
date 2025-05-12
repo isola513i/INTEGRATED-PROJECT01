@@ -46,7 +46,7 @@ const trimField = (field, value) => {
     <div class="col-span-8 grid grid-cols-2 gap-6">
       <div>
         <label
-          class="block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
+          class="itbms-brand block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
           >Brand</label
         >
         <select
@@ -67,7 +67,7 @@ const trimField = (field, value) => {
 
       <div>
         <label
-          class="block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
+          class="itbms-model block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
           >Model</label
         >
         <input
@@ -81,7 +81,7 @@ const trimField = (field, value) => {
 
       <div>
         <label
-          class="block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
+          class="itbms-price block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
           >Price</label
         >
         <input
@@ -98,7 +98,7 @@ const trimField = (field, value) => {
 
       <div>
         <label
-          class="block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
+          class="itbms-quantity block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
           >Quantity</label
         >
         <input
@@ -115,7 +115,7 @@ const trimField = (field, value) => {
 
       <div class="col-span-2">
         <label
-          class="block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
+          class="itbms-description block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
           >Description</label
         >
         <textarea
@@ -127,7 +127,7 @@ const trimField = (field, value) => {
       </div>
 
       <div>
-        <label class="block mb-1 font-medium text-gray-700">RAM (GB)</label>
+        <label class="itbms-ramGb block mb-1 font-medium text-gray-700">RAM (GB)</label>
         <input
           type="number"
           :value="props.form.ramGb"
@@ -137,7 +137,7 @@ const trimField = (field, value) => {
       </div>
 
       <div>
-        <label class="block mb-1 font-medium text-gray-700"
+        <label class="itbms-screenSizeInch block mb-1 font-medium text-gray-700"
           >Screen Size (Inch)</label
         >
         <input
@@ -150,7 +150,7 @@ const trimField = (field, value) => {
       </div>
 
       <div>
-        <label class="block mb-1 font-medium text-gray-700">Storage (GB)</label>
+        <label class="itbms-storageGb Screen Sizeblock mb-1 font-medium text-gray-700">Storage (GB)</label>
         <input
           type="number"
           :value="props.form.storageGb"
@@ -160,7 +160,8 @@ const trimField = (field, value) => {
       </div>
 
       <div>
-        <label class="block mb-1 font-medium text-gray-700">Color</label>
+        <label class="itbms-storageGb Screen Sizeblock mb-1 font-medium text-gray-700">Storage (GB)</label>
+        <label class="itbms-color block mb-1 font-medium text-gray-700">Color</label>
         <input
           type="text"
           :value="props.form.color"
@@ -175,7 +176,7 @@ const trimField = (field, value) => {
       <button
         type="submit"
         :disabled="!isFormValid || !isDirty || isSubmitting"
-        class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
+        class="itbms-save-button bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
       >
         {{ isSubmitting ? "Saving..." : "Save" }}
       </button>
@@ -183,7 +184,7 @@ const trimField = (field, value) => {
       <button
         type="button"
         @click="$emit('cancel')"
-        class="border border-gray-400 px-6 py-2 rounded hover:bg-gray-100"
+        class="itbms-cancle-button border border-gray-400 px-6 py-2 rounded hover:bg-gray-100"
       >
         Cancel
       </button>
