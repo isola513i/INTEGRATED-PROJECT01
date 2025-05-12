@@ -16,6 +16,7 @@ import java.util.Set;
 @Table(name = "brands", schema = "itbms")
 public class Brand {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "brandId", nullable = false)
     private Integer id;
 
@@ -38,7 +39,7 @@ public class Brand {
     @Column(name = "createdOn", nullable = false, insertable = false, updatable = false)
     private Instant createdOn;
 
-    @Column(name = "updatedOn", nullable = false, insertable = false)
+    @Column(name = "updatedOn", nullable = false, insertable = false,updatable = false)
     private Instant updatedOn;
 
     @OneToMany(mappedBy = "brand")

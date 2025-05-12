@@ -5,8 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -15,8 +13,6 @@ import java.time.Instant;
 @Setter
 @Entity
 @Table(name = "sale_items", schema = "itbms")
-//@CreationTimestamp
-//@UpdateTimestamp
 public class SaleItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,7 +41,7 @@ public class SaleItem {
     @Column(name = "ramGb")
     private Integer ramGb;
 
-    @Column(name = "screenSizeInch", precision = 4, scale = 2)
+    @Column(name = "screenSizeInch", precision = 3, scale = 1)
     private BigDecimal screenSizeInch;
 
     @Column(name = "storageGb")
@@ -59,11 +55,10 @@ public class SaleItem {
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
-
     @Column(name = "createdOn", nullable = false, insertable = false, updatable = false)
     private Instant createdOn;
 
-    @Column(name = "updatedOn", nullable = false, insertable = false)
+    @Column(name = "updatedOn", nullable = false, insertable = false,updatable = false)
     private Instant updatedOn;
 
 }

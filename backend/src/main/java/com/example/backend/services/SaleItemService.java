@@ -7,13 +7,11 @@ import com.example.backend.exceptions.ItemNotFoundException;
 import com.example.backend.repositories.BrandRepository;
 import com.example.backend.repositories.SaleItemRepository;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.time.Instant;
+
 import java.util.List;
 
 @Service
@@ -38,20 +36,23 @@ public class SaleItemService {
         } else throw new ItemNotFoundException("SaleItem not found for this id :: " + id);
     }
 
+    @Transactional
     public SaleItem updateSaleItem(Integer id, SaleItemDto.GetCreateSaleItemDto saleItemDto) {
         SaleItem saleItem = saleItemRepository.findById(id).orElseThrow(() -> new ItemNotFoundException("SaleItem not found for this id :: " + id));
         Brand brand = brandRepository.findById(saleItemDto.getBrand().getId()).orElseThrow(
-                () -> new ItemNotFoundException("Brand not found for this id :: " + id));
+                () -> new ItemNotFoundException("Brand not found for this id :: " + saleItemDto.getBrand().getId() ));
         saleItem.setModel(saleItemDto.getModel());
         saleItem.setBrand(brand);
         saleItem.setDescription(saleItemDto.getDescription());
         saleItem.setPrice(saleItemDto.getPrice());
         saleItem.setRamGb(saleItemDto.getRamGb());
-        saleItem.setScreenSizeInch(BigDecimal.valueOf(saleItemDto.getScreenSizeInch()));
+        saleItem.setScreenSizeInch(saleItemDto.getScreenSizeInch());
         saleItem.setQuantity(saleItemDto.getQuantity());
         saleItem.setStorageGb(saleItemDto.getStorageGb());
         saleItem.setColor(saleItemDto.getColor());
-        SaleItem updateItem = saleItemRepository.save(saleItem);
+
+        SaleItem updateItem = saleItemRepository.saveAndFlush(saleItem);
+        entityManager.refresh(updateItem);
         return saleItemRepository.findById(updateItem.getId()).orElseThrow();
     }
 
@@ -65,7 +66,8 @@ public class SaleItemService {
                         ()-> new ItemNotFoundException("Brand not found for this id :: "
                                 + saleItem.getBrand().getId()));
         saleItem.setBrand(brand);
-        SaleItem savedItem = saleItemRepository.save(saleItem);
+        SaleItem savedItem = saleItemRepository.saveAndFlush(saleItem);
+        entityManager.refresh(savedItem);
         return saleItemRepository.findById(savedItem.getId()).orElseThrow();
         }
 

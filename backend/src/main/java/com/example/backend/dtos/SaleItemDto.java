@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
@@ -47,7 +48,7 @@ public class SaleItemDto {
         private String description;
         private Integer price;
         private Integer ramGb;
-        private Double screenSizeInch;
+        private BigDecimal screenSizeInch;
         private Integer quantity;
         private Integer storageGb;
         private String color;
@@ -62,7 +63,7 @@ public class SaleItemDto {
         private String description;
         private Integer price;
         private Integer ramGb;
-        private Double screenSizeInch;
+        private BigDecimal screenSizeInch;
         private Integer quantity;
         private Integer storageGb;
         private String color;

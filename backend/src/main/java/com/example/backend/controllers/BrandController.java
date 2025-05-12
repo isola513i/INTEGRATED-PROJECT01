@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@CrossOrigin(origins = "${app.cors.allowedOrigins}")
+//@CrossOrigin(origins = "${app.cors.allowedOrigins}")
+@CrossOrigin(origins= "*")
 @RestController
 @RequestMapping("/itb-mshop/v1")
 public class BrandController {
