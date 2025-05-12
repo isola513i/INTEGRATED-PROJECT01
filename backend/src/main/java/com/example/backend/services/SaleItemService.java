@@ -1,5 +1,6 @@
 package com.example.backend.services;
 
+import ch.qos.logback.core.model.Model;
 import com.example.backend.dtos.SaleItemDto;
 import com.example.backend.entities.Brand;
 import com.example.backend.entities.SaleItem;
@@ -8,6 +9,7 @@ import com.example.backend.repositories.BrandRepository;
 import com.example.backend.repositories.SaleItemRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +24,8 @@ public class SaleItemService {
     private BrandRepository brandRepository;
     @Autowired
     private EntityManager entityManager;
+    @Autowired
+    private ModelMapper modelMapper;
     public List<SaleItem> allSaleItems() {
         return saleItemRepository.findAllByOrderByCreatedOnAscIdAsc();
     }
@@ -57,7 +61,8 @@ public class SaleItemService {
     }
 
     @Transactional
-    public SaleItem addSaleItem(SaleItem saleItem) {
+    public SaleItem addSaleItem( SaleItem saleItem) {
+//        SaleItem saleItem = modelMapper.map(saleItemDto , SaleItem.class);
         if (saleItem.getBrand() == null || saleItem.getBrand().getId() == null) {
             throw new IllegalArgumentException("Brand id must not be null");
         }
