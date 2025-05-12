@@ -18,8 +18,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-//@CrossOrigin(origins = "${app.cors.allowedOrigins}")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "${app.cors.allowedOrigins}")
+//@CrossOrigin(origins= "*")
+
 
 @RestController
 @Getter
@@ -51,7 +52,8 @@ public class SaleItemController {
 
     @PostMapping("/sale-items")
     public ResponseEntity<SaleItemDto.GetSaleItemDto> addSaleItem(
-            @RequestBody SaleItem saleItem) {
+            @RequestBody SaleItemDto.GetCreateSaleItemDto saleItemDto) {
+        SaleItem saleItem = modelMapper.map(saleItemDto,SaleItem.class);
         SaleItem savedItem = saleItemService.addSaleItem(saleItem);
         SaleItemDto.GetSaleItemDto dto = modelMapper.map(savedItem, SaleItemDto.GetSaleItemDto.class);
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);

@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.boot.autoconfigure.graphql.GraphQlProperties;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
@@ -47,24 +48,41 @@ public class SaleItemDto {
         private String description;
         private Integer price;
         private Integer ramGb;
-        private Double screenSizeInch;
+        private BigDecimal screenSizeInch;
         private Integer quantity;
         private Integer storageGb;
         private String color;
         private Instant createdOn;
         private Instant updatedOn;
     }
-    @Data
-    @AllArgsConstructor
-    public static class GetCreateSaleItemDto {
-        private String model;
-        private BrandDto.GetAllBrandDto brand;
-        private String description;
-        private Integer price;
-        private Integer ramGb;
-        private Double screenSizeInch;
-        private Integer quantity;
-        private Integer storageGb;
-        private String color;
-    }
+        @Data
+        public static class GetCreateSaleItemDto {
+            private String model;
+            private BrandDto.GetAllBrandDto brand;
+            private String description;
+            private Integer price;
+            private Integer ramGb;
+            private BigDecimal screenSizeInch;
+            private Integer quantity;
+            private Integer storageGb;
+            private String color;
+            public void setModel(String model) {
+                this.model = clean(model);
+            }
+            public void setQuantity(Integer quantity){
+                this.quantity = (quantity == null || quantity < 0) ? 1 : quantity;
+            }
+            public  void setDescription(String description) {
+                this.description = clean(description);
+            }
+
+            public void setColor(String color) {
+                this.color = clean(color);
+            }
+
+            private String clean(String input) {
+                return (input != null && !input.trim().isEmpty()) ? input.trim() : null;
+            }
+        }
+
 }
