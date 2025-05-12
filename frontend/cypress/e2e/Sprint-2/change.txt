@@ -1,0 +1,10 @@
+v.1    2025-05-12 initial release tc pbi-3, pbi-4 (1-4)
+v.1.1  2025-05-12 add pbi-4 (tc-5) and pbi-5
+v.1.2  2025-05-12 Correct pbi4-3 color from 'PinK' to 'Pink'
+                  Repleace .contains('Pink') with .should('have.value','Pink')
+                  Correct the save button should be enable after after adding data 
+                  for Brand, Model, Price and Description
+v.1.3  2025-05-13 Replace the model from 70 to 60 chars in pbi3-4
+                  Change {enter} to .blur() in pbi4-1 in order to lose focus
+
+
