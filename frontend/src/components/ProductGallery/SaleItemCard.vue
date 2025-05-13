@@ -43,9 +43,7 @@ export default {
       <p
         class="text-sm text-gray-500 mb-1 text-center"
       >
-        <span class="itbms-ramGb">
-          {{ item.ramGb != null && item.ramGb !== '' ? item.ramGb + ' GB' : '-' }}
-        </span>
+        <span class="itbms-ramGb"> {{ item.ramGb ? item.ramGb : "-"}}</span>
         <span> /</span>
         <span class="itbms-storageGb">
           {{ item.storageGb ? item.storageGb : "-" }}</span
