@@ -78,12 +78,12 @@ const deleteItem = async () => {
       });
   } catch (error) {
     
-    if (error.response?.status === 404) {
-      window.alert("The requested sale item does not exist.")
-    } else {
-      window.alert("Failed to delete the item.")
-    }
-    router.push("/sale-items")
+    router.push({
+        path: `/sale-items`,
+        query: {
+          successMessage: "The requested sale item does not exist.",
+        },
+      });
   }
 }
 
@@ -97,12 +97,14 @@ const deleteItem = async () => {
     >
       ✅ {{ successMessage }}
     </div>
-    <div class="mb-8 flex items-center gap-2">
+    
+    <div class="px-20 mb-4 flex items-center gap-2">
       <router-link
         to="/sale-items"
         class="itbms-home-button text-gray-600 hover:text-black text-xl font-light"
         >Home
-		</router-link
+      </router-link>
+    </div>
    
     <div v-if="product" class="max-w-7xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-10">
       

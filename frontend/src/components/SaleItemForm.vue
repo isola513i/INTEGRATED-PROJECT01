@@ -180,7 +180,6 @@ const trimField = (field, value) => {
       </div>
 
       <div>
-        <label class=" Screen Sizeblock mb-1 font-medium text-gray-700">Storage (GB)</label>
         <label class=" block mb-1 font-medium text-gray-700">Color</label>
         <input
           type="text"
