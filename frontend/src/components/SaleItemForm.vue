@@ -143,6 +143,7 @@ const trimField = (field, value) => {
 				<label class="block mb-1 font-medium text-gray-700">RAM (GB)</label>
 				<input
 					type="number"
+					min="1"
 					:value="props.form.ramGb"
 					@input="updateField('ramGb', Number($event.target.value))"
 					class="itbms-ramGb w-full border px-4 py-2 rounded"
@@ -156,6 +157,7 @@ const trimField = (field, value) => {
 				>
 				<input
 					type="number"
+					min="1"
 					step="0.1"
 					:value="props.form.screenSizeInch"
 					@input="updateField('screenSizeInch', Number($event.target.value))"
@@ -168,6 +170,7 @@ const trimField = (field, value) => {
 				<label class="block mb-1 font-medium text-gray-700">Storage (GB)</label>
 				<input
 					type="number"
+					min="1"
 					:value="props.form.storageGb"
 					@input="updateField('storageGb', Number($event.target.value))"
 					class="itbms-storageGb w-full border px-4 py-2 rounded"

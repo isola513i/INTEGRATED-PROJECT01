@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = "${app.cors.allowedOrigins}")
-//@CrossOrigin(origins= "*")
+//@CrossOrigin(origins = "${app.cors.allowedOrigins}")
+@CrossOrigin(origins= "*")
 
 
 @RestController
