@@ -43,9 +43,9 @@ const productCount = computed(() => saleItems.value.length);
     <div class="itbms-sale-item-add flex justify-center my-6">
       <router-link
         to="/sale-items/add"
-        class="px-6 py-2 bg-black text-white rounded-full hover:bg-white hover:text-black hover:border hover:border-black transition-all duration-300 text-sm font-semibold"
+        class="px-6 py-2 bg-[#171717] text-white rounded-2xl hover:bg-white hover:text-black hover:border hover:border-black transition-all duration-300 text-sm font-semibold"
       >
-        ➕ Add New Sale Item
+        Add New Sale Item
       </router-link>
     </div>
 

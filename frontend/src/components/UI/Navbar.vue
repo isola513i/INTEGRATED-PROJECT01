@@ -4,7 +4,7 @@ const isOpen = ref(false);
 </script>
 
 <template>
-  <nav class="bg-[#050610] fixed w-full z-50 text-white py-3">
+  <nav class="bg-[#171717] fixed w-full z-50 text-white py-3">
     <div
       class="w-full relative flex items-center justify-between px-4 sm:px-6 lg:px-8"
     >
