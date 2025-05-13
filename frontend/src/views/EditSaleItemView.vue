@@ -55,11 +55,12 @@ onMounted(async () => {
 const isupdate = ref(false)
 watch(
   form,
-  () => {
-    isupdate.value = JSON.stringify(form.value) !== JSON.stringify(initProd.value);
+  (newVal) => {
+    isupdate.value = JSON.stringify(newVal) !== JSON.stringify(initProd.value);
   },
   { deep: true }
 );
+
 const DataToForm = (data) => {
   form.value = {
     brandId: brands.value.find((b) => b.name === data.brandName)?.brandId || "",
