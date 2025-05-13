@@ -1,5 +1,10 @@
 <script setup>
 const props = defineProps({
+	updatePage: {
+		type: Boolean,
+		default: false, 
+	},
+	isupdate: Boolean,
 	form: Object,
 	brands: Array,
 	isSubmitting: Boolean,
@@ -86,7 +91,7 @@ const trimField = (field, value) => {
 			</div>
 
 			<!-- Price -->
-			<div>
+			<div v-if="!updatePage">
 				<label
 					class="block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
 				>
@@ -101,6 +106,21 @@ const trimField = (field, value) => {
 						updateField('price', Math.max(1, Number($event.target.value)))
 					"
 					class="itbms-price w-full border px-4 py-2 rounded"
+				/>
+			</div>
+			<div v-if="updatePage">
+				<label
+				class=" block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
+				>Price</label
+				>
+				<input
+				type="number"
+				min="0"
+				:value="props.form.price"
+				@input="
+					updateField('price', $event.target.value)
+				"
+				class="itbms-price w-full border px-4 py-2 rounded"
 				/>
 			</div>
 
@@ -143,7 +163,6 @@ const trimField = (field, value) => {
 				<label class="block mb-1 font-medium text-gray-700">RAM (GB)</label>
 				<input
 					type="number"
-					min="1"
 					:value="props.form.ramGb"
 					@input="updateField('ramGb', Number($event.target.value))"
 					class="itbms-ramGb w-full border px-4 py-2 rounded"
@@ -157,7 +176,6 @@ const trimField = (field, value) => {
 				>
 				<input
 					type="number"
-					min="1"
 					step="0.1"
 					:value="props.form.screenSizeInch"
 					@input="updateField('screenSizeInch', Number($event.target.value))"
@@ -170,7 +188,6 @@ const trimField = (field, value) => {
 				<label class="block mb-1 font-medium text-gray-700">Storage (GB)</label>
 				<input
 					type="number"
-					min="1"
 					:value="props.form.storageGb"
 					@input="updateField('storageGb', Number($event.target.value))"
 					class="itbms-storageGb w-full border px-4 py-2 rounded"
@@ -193,11 +210,21 @@ const trimField = (field, value) => {
 		<!-- Buttons -->
 		<div class="col-span-12 flex justify-center gap-6 mt-10">
 			<button
+				v-if="!updatePage"
 				type="submit"
 				:disabled="!isFormValid || !isDirty || isSubmitting"
 				class="itbms-save-button bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
 			>
 				{{ isSubmitting ? "Saving..." : "Save" }}
+			</button>
+
+			<button
+				v-if="updatePage"
+				type="submit"
+				:disabled="!isupdate || !isFormValid"
+				class="itbms-save-button bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
+			>
+				Save
 			</button>
 
 			<button
