@@ -3,7 +3,6 @@ package com.example.backend.dtos;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.time.Instant;
 import java.time.LocalDateTime;
 
@@ -22,10 +21,18 @@ public class BrandDto {
         private Integer id;
         private String name;
         private String websiteUrl;
-        private boolean isActive;
+        private Boolean isActive;
         private String countryOfOrigin;
         private Instant createdOn;
         private Instant updatedOn;
+    }
+    @Data
+    @NoArgsConstructor
+    public static class UpdateBrandDto {
+        private String name;
+        private String websiteUrl;
+        private Boolean isActive;
+        private String countryOfOrigin;
     }
 
 }
