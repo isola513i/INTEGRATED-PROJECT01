@@ -1,7 +1,7 @@
 <script setup></script>
 
 <template>
-  <footer class="bg-[#050610] text-white px-6 md:px-16 py-10">
+  <footer class="bg-[#171717] text-white px-6 md:px-16 py-10">
     <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
       <!-- Newsletter Section -->
       <div>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import SaleItemForm from "@/components/SaleItemForm.vue";
@@ -9,6 +9,7 @@ const router = useRouter();
 const isSubmitting = ref(false);
 const errorMessage = ref("");
 const brands = ref([]);
+const product = ref({});
 
 const form = ref({
   brandId: "",
@@ -22,11 +23,7 @@ const form = ref({
   quantity: null,
 });
 
-const sortedBrands = computed(() => {
-  return [...brands.value].sort((a, b) =>
-    a.name.localeCompare(b.name, "en", { sensitivity: "base" }),
-  );
-});
+
 
 const initialForm = ref({ ...form.value });
 const isDirty = computed(() => {
@@ -43,17 +40,26 @@ const isFormValid = computed(() => {
     f.description.trim().length > 0
   );
 });
-
+const initProd = ref();
 const route = useRoute();
 onMounted(async () => {
   try {
     brands.value = await fetchBrands();
     const data = await fetchItemById(route.params.slug);
     DataToForm(data);
+    initProd.value = JSON.parse(JSON.stringify(form.value)); 
   } catch (error) {
     errorMessage.value = "Failed to load brands";
   }
 });
+const isupdate = ref(false)
+watch(
+  form,
+  () => {
+    isupdate.value = JSON.stringify(form.value) !== JSON.stringify(initProd.value);
+  },
+  { deep: true }
+);
 const DataToForm = (data) => {
   form.value = {
     brandId: brands.value.find((b) => b.name === data.brandName)?.brandId || "",
@@ -128,9 +134,9 @@ const handleSubmit = async () => {
 
     if (response.status === 200) {
       router.push({
-        path: "/sale-items",
+        path: `/sale-items/${route.params.slug}`,
         query: {
-          successMessage: "The sale item has been successfully updated.",
+          successMessage: "The sale item has been updated.",
         },
       });
     } else {
@@ -153,20 +159,7 @@ const handleSubmit = async () => {
 };
 
 const handleCancel = () => {
-  const emptyForm = {
-    brandId: "",
-    model: "",
-    price: null,
-    description: "",
-    ramGb: null,
-    screenSizeInch: null,
-    storageGb: null,
-    color: "",
-    quantity: null,
-  };
-
-  form.value = emptyForm;
-  initialForm.value = { ...emptyForm };
+  router.push('/sale-items')
 };
 </script>
 
@@ -175,17 +168,24 @@ const handleCancel = () => {
     <div class="mb-8 flex items-center gap-2">
       <router-link
         to="/sale-items"
-        class="text-gray-600 hover:text-black text-xl font-light"
-        >Home</router-link
+        class="itbms-home-button text-gray-600 hover:text-black text-xl font-light"
+        >Home
+		</router-link
       >
       <span class="text-gray-400">/</span>
-      <span class="text-xl text-gray-800 font-light">Edit Sale Item</span>
+	  <router-link
+    	to="/sale-items"
+    	class="itbms-home-button text-gray-600 hover:text-black text-xl font-light"
+ 		>{{ product.model || 'Sale Item' }}
+		</router-link>
     </div>
 
     <div v-if="errorMessage" class="text-red-600 mb-4">{{ errorMessage }}</div>
 
     <SaleItemForm
       v-if="form"
+      :updatePage="true"
+      :isupdate="isupdate"
       :form="form"
       :brands="brands"
       :isSubmitting="isSubmitting"

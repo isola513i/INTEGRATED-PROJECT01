@@ -41,15 +41,13 @@ export default {
         {{ item.model }}
       </p>
       <p
-        class="itbms-ramGb itbms-storageGb text-sm text-gray-500 mb-1 text-center"
+        class="text-sm text-gray-500 mb-1 text-center"
       >
-        <span class="itbms-ramGb">
-          {{ item.ramGb ? item.ramGb + " GB" : "-" }}
-        </span>
-        /
+        <span class="itbms-ramGb"> {{ item.ramGb ? item.ramGb : "-"}}</span>
+        <span> /</span>
         <span class="itbms-storageGb">
           {{ item.storageGb ? item.storageGb : "-" }}</span
-        >
+        >  
         <span class="itbms-storageGb-unit"> GB</span>
       </p>
       <p class="itbms-price text-sm text-gray-500 mb-4 text-center">
