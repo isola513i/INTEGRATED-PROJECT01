@@ -1,10 +1,12 @@
 package com.example.backend.controllers;
 
 import com.example.backend.dtos.BrandDto;
+import com.example.backend.entities.Brand;
 import com.example.backend.services.BrandService;
 import com.example.backend.utils.ListMapper;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +28,17 @@ public class BrandController {
     public ResponseEntity<List<BrandDto.GetAllBrandDto>> getAllBrands() {
         return ResponseEntity.ok(listMapper.mapList(brandService.getAllBrands(),BrandDto.GetAllBrandDto.class,modelMapper));
     }
+
+    @PostMapping("/brands")
+    public ResponseEntity<BrandDto.GetBrandDto> addBrand(
+            @RequestBody BrandDto.CreateBrandDto requestDto)
+    {
+        Brand createdBrand = brandService.addBrand(requestDto);
+        BrandDto.GetBrandDto responseDto = modelMapper.map(createdBrand,
+                BrandDto.GetBrandDto.class);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+    }
+
 
     @PutMapping("/brands/{id}")
     public ResponseEntity<BrandDto.GetBrandDto> updateBrand(

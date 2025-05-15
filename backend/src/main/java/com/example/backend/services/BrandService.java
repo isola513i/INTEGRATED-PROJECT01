@@ -9,6 +9,7 @@ import com.example.backend.exceptions.DuplicateNameException;
 import com.example.backend.exceptions.ItemNotFoundException;
 import com.example.backend.repositories.BrandRepository;
 import com.example.backend.repositories.SaleItemRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -27,6 +28,23 @@ public class BrandService {
     public Brand getBrandById(int id) {
         return brandRepository.findById(id).orElseThrow(() ->
                 new ItemNotFoundException("Brand not found for this id :: "+ id));
+    }
+
+    @Transactional
+    public  Brand addBrand(BrandDto.CreateBrandDto request) {
+        if (request == null) {
+            throw new IllegalArgumentException("Request must not be null");    }
+        String name = request.getName() != null ? request.getName().trim() : null;
+        if (name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("Brand name must not be empty");    }
+        if (brandRepository.existsByName(name)) {
+            throw new DuplicateNameException("Brand with name '" + name + "' already exists");    }
+        Brand brand = new Brand();    brand.setName(name);
+        brand.setWebsiteUrl(request.getWebsiteUrl() != null ? request.getWebsiteUrl().trim() : null);
+        brand.setCountryOfOrigin(request.getCountryOfOrigin() != null ? request.getCountryOfOrigin().trim() : null);
+        brand.setIsActive(request.getIsActive() != null ? request.getIsActive() : true);
+        brand.setCreatedOn(Instant.now());    brand.setUpdatedOn(Instant.now());
+        return brandRepository.save(brand);
     }
 
     public Brand updateBrand(int id,BrandDto.UpdateBrandDto request){
