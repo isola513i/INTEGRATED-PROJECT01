@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BrandRepository extends JpaRepository<Brand, Integer> {
-    public boolean existsByNameAndIdNot(String name, Integer id);
-    public Optional<Brand> findByIdAndIsDeletedFalse(Integer id);
-    public List<Brand> findAllByIsDeletedFalse();
+    boolean existsByNameAndIdNot(String name, Integer id);
+    Optional<Brand> findByIdAndIsDeletedFalse(Integer id);
+    List<Brand> findAllByIsDeletedFalse();
 }

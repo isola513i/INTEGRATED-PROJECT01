@@ -1,8 +1,6 @@
 package com.example.backend.controllers;
 
 import com.example.backend.dtos.BrandDto;
-import com.example.backend.exceptions.DuplicateNameException;
-import com.example.backend.exceptions.ItemNotFoundException;
 import com.example.backend.services.BrandService;
 import com.example.backend.utils.ListMapper;
 import org.modelmapper.ModelMapper;
