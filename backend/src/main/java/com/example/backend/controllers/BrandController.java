@@ -1,8 +1,6 @@
 package com.example.backend.controllers;
 
 import com.example.backend.dtos.BrandDto;
-import com.example.backend.exceptions.DuplicateNameException;
-import com.example.backend.exceptions.ItemNotFoundException;
 import com.example.backend.services.BrandService;
 import com.example.backend.utils.ListMapper;
 import org.modelmapper.ModelMapper;
@@ -30,25 +28,22 @@ public class BrandController {
     }
 
     @PutMapping("/brands/{id}")
-    public ResponseEntity<?> updateBrand(@PathVariable Integer id,
-                                         @RequestBody BrandDto.UpdateBrandDto request) {
-        try {
-            var updatedBrand = brandService.updateBrand(id, request);
-            var response = modelMapper.map(updatedBrand, BrandDto.GetBrandDto.class);
-            return ResponseEntity.ok(response);
-        } catch (DuplicateNameException e) {
-            return ResponseEntity.badRequest().body(
-                    java.util.Map.of("message", "Duplicate name")
-            );
-        } catch (ItemNotFoundException e) {
-            return ResponseEntity.status(404).body(
-                    java.util.Map.of("message", "Brand not found")
-            );
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(
-                    java.util.Map.of("message", "Create failed")
-            );
-        }
+    public ResponseEntity<BrandDto.GetBrandDto> updateBrand(
+            @PathVariable Integer id,
+            @RequestBody BrandDto.UpdateBrandDto request) {
+
+        return ResponseEntity.ok(
+                modelMapper.map(
+                        brandService.updateBrand(id, request),
+                        BrandDto.GetBrandDto.class
+                )
+        );
+    }
+
+    @DeleteMapping("/brands/{id}")
+    public ResponseEntity<?> deleteBrand(@PathVariable Integer id) {
+        brandService.deleteBrand(id);
+        return ResponseEntity.noContent().build();
     }
 
 }

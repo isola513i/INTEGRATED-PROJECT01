@@ -45,4 +45,7 @@ public class Brand {
     @OneToMany(mappedBy = "brand")
     private Set<SaleItem> saleItems = new LinkedHashSet<>();
 
+    @Column(name="isDeleted", nullable = false)
+    private Boolean isDeleted = false;
+
 }
