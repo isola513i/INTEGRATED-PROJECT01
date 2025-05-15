@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface SaleItemRepository extends JpaRepository<SaleItem,Integer> {
     public List<SaleItem> findAllByOrderByCreatedOnAscIdAsc();
+    public boolean existsByBrand_Id(Integer brandId);
 }
