@@ -39,7 +39,7 @@ public class Brand {
     @Column(name = "createdOn", nullable = false, insertable = false, updatable = false)
     private Instant createdOn;
 
-    @Column(name = "updatedOn", nullable = false, insertable = false,updatable = false)
+    @Column(name = "updatedOn", nullable = false, insertable = false)
     private Instant updatedOn;
 
     @OneToMany(mappedBy = "brand")

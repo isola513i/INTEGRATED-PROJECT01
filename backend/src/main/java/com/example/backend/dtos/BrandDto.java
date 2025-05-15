@@ -23,8 +23,6 @@ public class BrandDto {
         private String websiteUrl;
         private Boolean isActive;
         private String countryOfOrigin;
-        private Instant createdOn;
-        private Instant updatedOn;
     }
     @Data
     @NoArgsConstructor
@@ -34,13 +32,6 @@ public class BrandDto {
         private Boolean isActive;
         private String countryOfOrigin;
     }
-    @Data
-    @NoArgsConstructor
-    public static class CreateBrandDto {
-        private String name;
-        private String websiteUrl;
-        private Boolean isActive;
-        private String countryOfOrigin;
-    }
+
 
 }

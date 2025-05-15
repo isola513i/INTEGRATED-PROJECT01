@@ -9,6 +9,7 @@ import com.example.backend.exceptions.DuplicateNameException;
 import com.example.backend.exceptions.ItemNotFoundException;
 import com.example.backend.repositories.BrandRepository;
 import com.example.backend.repositories.SaleItemRepository;
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,8 @@ public class BrandService {
     private BrandRepository brandRepository;
     @Autowired
     private SaleItemRepository saleItemRepository;
+    @Autowired
+    private EntityManager entityManager;
 
     public List<Brand> getAllBrands() {
         return brandRepository.findAllByIsDeletedFalse();
@@ -31,20 +34,24 @@ public class BrandService {
     }
 
     @Transactional
-    public  Brand addBrand(BrandDto.CreateBrandDto request) {
-        if (request == null) {
+    public  Brand addBrand(BrandDto.GetBrandDto brandDto) {
+        brandDto.setId(null);
+        if (brandDto == null) {
             throw new IllegalArgumentException("Request must not be null");    }
-        String name = request.getName() != null ? request.getName().trim() : null;
+        String name = brandDto.getName() != null ? brandDto.getName().trim() : null;
         if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("Brand name must not be empty");    }
         if (brandRepository.existsByName(name)) {
             throw new DuplicateNameException("Brand with name '" + name + "' already exists");    }
-        Brand brand = new Brand();    brand.setName(name);
-        brand.setWebsiteUrl(request.getWebsiteUrl() != null ? request.getWebsiteUrl().trim() : null);
-        brand.setCountryOfOrigin(request.getCountryOfOrigin() != null ? request.getCountryOfOrigin().trim() : null);
-        brand.setIsActive(request.getIsActive() != null ? request.getIsActive() : true);
-        brand.setCreatedOn(Instant.now());    brand.setUpdatedOn(Instant.now());
-        return brandRepository.save(brand);
+
+        Brand brand = new Brand();
+        brand.setName(name);
+        brand.setWebsiteUrl(brandDto.getWebsiteUrl() != null ? brandDto.getWebsiteUrl().trim() : null);
+        brand.setCountryOfOrigin(brandDto.getCountryOfOrigin() != null ? brandDto.getCountryOfOrigin().trim() : null);
+        brand.setIsActive(brandDto.getIsActive() != null ? brandDto.getIsActive() : true);
+        Brand save = brandRepository.save(brand);
+        entityManager.refresh(save);
+        return save;
     }
 
     public Brand updateBrand(int id,BrandDto.UpdateBrandDto request){
