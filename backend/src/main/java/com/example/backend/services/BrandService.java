@@ -28,10 +28,21 @@ public class BrandService {
         return brandRepository.findAllByIsDeletedFalse();
     }
 
-    public Brand getBrandById(int id) {
-        return brandRepository.findById(id).orElseThrow(() ->
+    public BrandDto.GetBrandDto getBrandById(int id) {
+        Brand brand= brandRepository.findById(id).orElseThrow(() ->
                 new ItemNotFoundException("Brand not found for this id :: "+ id));
+
+        int noOfSaleItems = saleItemRepository.countByBrandId(id);
+        BrandDto.GetBrandDto dto = new BrandDto.GetBrandDto();
+        dto.setId(brand.getId());
+        dto.setName(brand.getName());
+        dto.setWebsiteUrl(brand.getWebsiteUrl());
+        dto.setCountryOfOrigin(brand.getCountryOfOrigin());
+        dto.setIsActive(brand.getIsActive());
+        dto.setNoOfSaleItems(noOfSaleItems);
+        return dto;
     }
+
 
     @Transactional
     public  Brand addBrand(BrandDto.GetBrandDto brandDto) {
@@ -78,5 +89,6 @@ public class BrandService {
         brand.setIsDeleted(true);
         brandRepository.save(brand);
     }
+
 
 }

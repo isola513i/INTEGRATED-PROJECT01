@@ -23,6 +23,7 @@ public class BrandDto {
         private String websiteUrl;
         private Boolean isActive;
         private String countryOfOrigin;
+        private int noOfSaleItems;
     }
     @Data
     @NoArgsConstructor
