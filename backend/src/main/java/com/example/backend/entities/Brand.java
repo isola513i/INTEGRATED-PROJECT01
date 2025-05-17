@@ -48,6 +48,4 @@ public class Brand {
     @Column(name="isDeleted", nullable = false)
     private Boolean isDeleted = false;
 
-    @Column(name = "noOfSaleItems")
-    private Integer noOfSaleItems;
 }
