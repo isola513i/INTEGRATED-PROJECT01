@@ -1,6 +1,7 @@
 package com.example.backend.controllers;
 
 import com.example.backend.dtos.BrandDto;
+import com.example.backend.dtos.SaleItemDto;
 import com.example.backend.entities.Brand;
 import com.example.backend.services.BrandService;
 import com.example.backend.utils.ListMapper;
@@ -28,10 +29,16 @@ public class BrandController {
     public ResponseEntity<List<BrandDto.GetAllBrandDto>> getAllBrands() {
         return ResponseEntity.ok(listMapper.mapList(brandService.getAllBrands(),BrandDto.GetAllBrandDto.class,modelMapper));
     }
+    @GetMapping("/brands/{id}")
+    public ResponseEntity<BrandDto.GetBrandDto> getBrandById(@PathVariable int id) {
+        return ResponseEntity.ok(modelMapper.map(brandService.getBrandById(id), BrandDto.GetBrandDto.class));
+
+    }
+
 
     @PostMapping("/brands")
     public ResponseEntity<BrandDto.GetBrandDto> addBrand(
-            @RequestBody BrandDto.CreateBrandDto requestDto)
+            @RequestBody BrandDto.GetBrandDto requestDto)
     {
         Brand createdBrand = brandService.addBrand(requestDto);
         BrandDto.GetBrandDto responseDto = modelMapper.map(createdBrand,
