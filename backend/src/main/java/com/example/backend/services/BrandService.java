@@ -43,7 +43,6 @@ public class BrandService {
         return dto;
     }
 
-
     @Transactional
     public  Brand addBrand(BrandDto.GetBrandDto brandDto) {
         brandDto.setId(null);
@@ -65,17 +64,23 @@ public class BrandService {
         return save;
     }
 
-    public Brand updateBrand(int id,BrandDto.UpdateBrandDto request){
-        Brand brand = brandRepository.findById(id)
-                .orElseThrow(() -> new ItemNotFoundException("Brand not found for this id :: " + id));
-        boolean isDuplicate = brandRepository.existsByNameAndIdNot(request.getName().trim(), id);
+    public Brand updateBrand(int id, BrandDto.UpdateBrandDto request) {
+        Brand brand = brandRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new ItemNotFoundException("Brand not found"));
+        String trimmedName = request.getName() != null ? request.getName().trim() : null;
+        if (trimmedName == null || trimmedName.isEmpty()) {
+            throw new IllegalArgumentException("Name must not be empty");
+        }
+        boolean isDuplicate = brandRepository
+                .existsByNameAndIdNotAndIsDeletedFalse(trimmedName, id);
         if (isDuplicate) {
             throw new DuplicateNameException("Duplicate name");
         }
-        brand.setName(request.getName().trim());
+        brand.setName(trimmedName);
         brand.setWebsiteUrl(request.getWebsiteUrl() != null ? request.getWebsiteUrl().trim() : null);
         brand.setCountryOfOrigin(request.getCountryOfOrigin() != null ? request.getCountryOfOrigin().trim() : null);
-        brand.setIsActive(request.getIsActive() != null ? request.getIsActive() : true);
+        Boolean isActive = request.getIsActive();
+        brand.setIsActive(isActive != null ? isActive : brand.getIsActive());
         brand.setUpdatedOn(Instant.now());
         return brandRepository.save(brand);
     }

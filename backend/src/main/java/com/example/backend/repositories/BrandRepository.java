@@ -11,4 +11,5 @@ public interface BrandRepository extends JpaRepository<Brand, Integer> {
     boolean existsByName(String name);
     Optional<Brand> findByIdAndIsDeletedFalse(Integer id);
     List<Brand> findAllByIsDeletedFalse();
+    boolean existsByNameAndIdNotAndIsDeletedFalse(String trim, int id);
 }
