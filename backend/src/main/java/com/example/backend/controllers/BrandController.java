@@ -1,7 +1,6 @@
 package com.example.backend.controllers;
 
 import com.example.backend.dtos.BrandDto;
-import com.example.backend.dtos.SaleItemDto;
 import com.example.backend.entities.Brand;
 import com.example.backend.services.BrandService;
 import com.example.backend.utils.ListMapper;
@@ -35,7 +34,6 @@ public class BrandController {
 
     }
 
-
     @PostMapping("/brands")
     public ResponseEntity<BrandDto.GetBrandDto> addBrand(
             @RequestBody BrandDto.GetBrandDto requestDto)
@@ -45,7 +43,6 @@ public class BrandController {
                 BrandDto.GetBrandDto.class);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }
-
 
     @PutMapping("/brands/{id}")
     public ResponseEntity<BrandDto.GetBrandDto> updateBrand(
