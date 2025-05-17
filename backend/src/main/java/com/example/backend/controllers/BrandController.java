@@ -48,13 +48,8 @@ public class BrandController {
     public ResponseEntity<BrandDto.GetBrandDto> updateBrand(
             @PathVariable Integer id,
             @RequestBody BrandDto.UpdateBrandDto request) {
-
-        return ResponseEntity.ok(
-                modelMapper.map(
-                        brandService.updateBrand(id, request),
-                        BrandDto.GetBrandDto.class
-                )
-        );
+        Brand brand = brandService.updateBrand(id, request);
+        return ResponseEntity.ok(modelMapper.map(brandService.getBrandById(brand.getId()), BrandDto.GetBrandDto.class));
     }
 
     @DeleteMapping("/brands/{id}")
