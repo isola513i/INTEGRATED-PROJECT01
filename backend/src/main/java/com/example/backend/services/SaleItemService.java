@@ -62,7 +62,6 @@ public class SaleItemService {
 
     @Transactional
     public SaleItem addSaleItem( SaleItem saleItem) {
-//        SaleItem saleItem = modelMapper.map(saleItemDto , SaleItem.class);
         if (saleItem.getBrand() == null || saleItem.getBrand().getId() == null) {
             throw new IllegalArgumentException("Brand id must not be null");
         }

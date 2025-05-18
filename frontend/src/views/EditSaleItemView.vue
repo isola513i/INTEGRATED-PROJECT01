@@ -4,12 +4,14 @@ import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import SaleItemForm from "@/components/SaleItemForm.vue";
 import { fetchBrands, fetchItemById } from "@/services/saleItemService";
+import { useFlashStore } from "@/store/useFlashStore";
 
 const router = useRouter();
 const isSubmitting = ref(false);
 const errorMessage = ref("");
 const brands = ref([]);
 const product = ref({});
+const flash = useFlashStore();
 
 const form = ref({
   brandId: "",
@@ -22,8 +24,6 @@ const form = ref({
   color: "",
   quantity: null,
 });
-
-
 
 const initialForm = ref({ ...form.value });
 const isDirty = computed(() => {
@@ -45,14 +45,14 @@ const route = useRoute();
 onMounted(async () => {
   try {
     brands.value = await fetchBrands();
-    const data = await fetchItemById(route.params.slug);
+    const data = await fetchItemById(route.params.id);
     DataToForm(data);
-    initProd.value = JSON.parse(JSON.stringify(form.value)); 
+    initProd.value = JSON.parse(JSON.stringify(form.value));
   } catch (error) {
     errorMessage.value = "Failed to load brands";
   }
 });
-const isupdate = ref(false)
+const isupdate = ref(false);
 watch(
   form,
   (newVal) => {
@@ -121,7 +121,7 @@ const handleSubmit = async () => {
       color: form.value.color?.trim() || null,
     };
 
-    const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/sale-items/${route.params.slug}`;
+    const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/sale-items/${route.params.id}`;
 
     const response = await axios.put(apiUrl, payload, {
       headers: {
@@ -134,12 +134,18 @@ const handleSubmit = async () => {
     });
 
     if (response.status === 200) {
-      router.push({
-        path: `/sale-items/${route.params.slug}`,
-        query: {
-          successMessage: "The sale item has been updated.",
-        },
-      });
+      flash.setMessage(
+        "✅ The sale item has been updated.",
+        "m-4 p-4 bg-green-100 text-green-800 shadow itbms-message"
+      );
+      router.back()
+      // router.push(`/sale-items/${route.params.id}`);
+      //   path: ,
+      //   query: {
+      //     successMessage: "✅ The sale item has been updated.",
+      //     successMessageStyle:"m-4 p-4 bg-green-100 text-green-800 shadow itbms-message"
+      //   },
+      // });
     } else {
       errorMessage.value = `Unexpected response: ${response.status} ${response.statusText}`;
     }
@@ -160,7 +166,7 @@ const handleSubmit = async () => {
 };
 
 const handleCancel = () => {
-  router.push('/sale-items')
+  router.back();
 };
 </script>
 
@@ -171,14 +177,13 @@ const handleCancel = () => {
         to="/sale-items"
         class="itbms-home-button text-gray-600 hover:text-black text-xl font-light"
         >Home
-		</router-link
-      >
+      </router-link>
       <span class="text-gray-400">/</span>
-	  <router-link
-    	to="/sale-items"
-    	class="itbms-home-button text-gray-600 hover:text-black text-xl font-light"
- 		>{{ product.model || 'Sale Item' }}
-		</router-link>
+      <button
+        @click="router.back()"
+        class="itbms-home-button text-gray-600 hover:text-black text-xl font-light"
+        >back
+    </button>
     </div>
 
     <div v-if="errorMessage" class="text-red-600 mb-4">{{ errorMessage }}</div>

@@ -1,5 +1,5 @@
 <script setup>
-import router from "@/router";
+// import router from "@/router";
 import { ref, onMounted, onUnmounted } from "vue";
 
 const imageModules = import.meta.glob("@/assets/carousel/*.jpg", {
