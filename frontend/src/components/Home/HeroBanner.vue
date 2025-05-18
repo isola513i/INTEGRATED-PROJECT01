@@ -17,7 +17,7 @@
       >
         Choose the Style That Defines You
       </h1>
-
+      <div class="flex gap-3">
       <router-link
         to="/sale-items"
         class="bg-[#0071E3] text-white px-8 py-3 rounded-full font-semibold transition-colors duration-300 hover:bg-[#339DFF] animate__animated animate__fadeInUp Itbms-shopnow"
@@ -25,6 +25,14 @@
       >
         Shop Now
       </router-link>
+      <router-link
+      to="/sale-items/list"
+      class="bg-[#0071E3] text-white px-13 py-3 rounded-full font-semibold transition-colors duration-300 hover:bg-[#339DFF] animate__animated animate__fadeInUp Itbms-shopnow"
+        style="animation-delay: 0.6s"
+    >
+      Seller
+    </router-link>
+    </div>
     </div>
   </div>
 </template>

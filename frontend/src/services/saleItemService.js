@@ -21,6 +21,12 @@ export const fetchBrands = async () => {
     name: brand.name,
   }));
 };
+export const deleteBrandById = async (brandId) =>{
+  const response = await axios.delete(
+    `${API_BASE_URL}/brands/${brandId}`
+  )
+  return response.data
+}
 
 export const deleteItemById = async (saleItemId) => {
   const response = await axios.delete(
@@ -28,3 +34,12 @@ export const deleteItemById = async (saleItemId) => {
   );
   return response.data;
 };
+
+export const addBrand = async (brand) =>{
+  const res = await axios.post(
+    `${API_BASE_URL}/brands`,brand,{ headers: {
+				"Content-Type": "application/json",
+			}},
+  )
+  return res
+} 

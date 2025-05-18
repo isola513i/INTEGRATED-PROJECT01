@@ -14,15 +14,15 @@
     "@tailwindcss/vite": "^4.1.4",
     "animate.css": "^4.1.1",
     "axios": "^1.9.0",
-    "pinia": "^3.0.1",
+    "pinia": "^3.0.2",
     "tailwindcss": "^4.1.4",
     "vue": "^3.5.13",
-    "vue-router": "^4.5.0"
+    "vue-router": "^4.5.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.3",
     "cypress": "^14.3.3",
-    "daisyui": "^5.0.28",
+    "daisyui": "^5.0.35",
     "prettier": "3.5.3",
     "vite": "^6.2.4",
     "vite-plugin-vue-devtools": "^7.7.2"

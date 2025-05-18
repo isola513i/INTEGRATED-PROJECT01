@@ -4,11 +4,13 @@ import { useRouter } from "vue-router";
 import axios from "axios";
 import SaleItemForm from "@/components/SaleItemForm.vue";
 import { fetchBrands } from "@/services/saleItemService";
+import { useFlashStore } from "@/store/useFlashStore";
 
 const router = useRouter();
 const isSubmitting = ref(false);
 const errorMessage = ref("");
 const brands = ref([]);
+const flash = useFlashStore()
 
 const form = ref({
 	brandId: "",
@@ -110,10 +112,15 @@ const handleSubmit = async () => {
 		});
 
 		if (response.status === 201) {
-			router.push({
-				path: "/sale-items",
-				query: { successMessage: "The sale item has been successfully added." },
-			});
+			flash.setMessage(
+        	"✅ The sale item has been added.",
+        	"m-4 p-4 bg-green-100 text-green-800 shadow itbms-message"
+      );
+	  router.back()
+			// router.push({
+			// 	path: "/sale-items",
+			// 	query: { successMessage: "The sale item has been successfully added." },
+			// });
 		} else {
 			errorMessage.value = `Unexpected response: ${response.status} ${response.statusText}`;
 		}

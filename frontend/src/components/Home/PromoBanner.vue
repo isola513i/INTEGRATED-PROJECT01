@@ -13,5 +13,6 @@
     >
       Shop Now
     </router-link>
+    
   </div>
 </template>

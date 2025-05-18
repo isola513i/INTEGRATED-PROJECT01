@@ -6,6 +6,10 @@ import NotFoundView from "@/views/NotFoundView.vue";
 import Error500View from "@/views/Error500View.vue";
 import AddSaleItem from "@/views/AddSaleItemView.vue";
 import EditSaleItemView from "@/views/EditSaleItemView.vue";
+import ProductListView from "@/views/ProductListView.vue";
+import ManageBrandView from "@/views/ManageBrandView.vue";
+import AddBrandView from "@/views/AddBrandView.vue";
+
 
 const routes = [
   {
@@ -19,7 +23,7 @@ const routes = [
     component: ProductGalleryView,
   },
   {
-    path: "/sale-items/:slug",
+    path: "/sale-items/:id",
     name: "SaleItems-Detail",
     component: ProductDetailView,
   },
@@ -29,9 +33,24 @@ const routes = [
     component: AddSaleItem,
   },
   {
-    path: "/sale-items/edit/:slug",
+    path: "/sale-items/edit/:id",
     name: "Edit-SaleItem",
     component: EditSaleItemView,
+  },
+  {
+    path: "/sale-items/list",
+    name: "ProductListView",
+    component: ProductListView,
+  },
+  {
+    path: "/brands",
+    name: "MangeBrandView",
+    component: ManageBrandView,
+  },
+  {
+    path: "/brands/add",
+    name: "AddBrandView",
+    component:AddBrandView,
   },
   {
     path: "/not-found",
@@ -50,7 +69,7 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory('/ssi4/'),
   routes,
 });
 
