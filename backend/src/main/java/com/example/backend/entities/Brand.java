@@ -36,13 +36,16 @@ public class Brand {
     @Column(name = "countryOfOrigin", length = 80)
     private String countryOfOrigin;
 
-    @Column(name = "createdOn", nullable = false, insertable = false, updatable = false)
-    private Instant createdOn;
-
-    @Column(name = "updatedOn", nullable = false, insertable = false,updatable = false)
+    @Column(name = "updatedOn", nullable = false, insertable = false,  updatable = false, columnDefinition = "DATETIME(6)")
     private Instant updatedOn;
+
+    @Column(name = "createdOn", nullable = false, insertable = false, updatable = false, columnDefinition = "DATETIME(6)")
+    private Instant createdOn;
 
     @OneToMany(mappedBy = "brand")
     private Set<SaleItem> saleItems = new LinkedHashSet<>();
+
+    @Column(name="isDeleted", nullable = false)
+    private Boolean isDeleted = false;
 
 }

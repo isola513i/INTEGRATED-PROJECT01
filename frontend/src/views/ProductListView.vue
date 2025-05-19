@@ -30,7 +30,8 @@ onMounted(async () => {
     saleItems.value = Array.isArray(data) ? data : [];
   } catch (err) {
     router.push("/server-error");
-  } finally {
+  } 
+  finally {
     loading.value = false;
   }
 });
@@ -69,8 +70,12 @@ const productCount = computed(() => saleItems.value.length);
       {{ flash.message }}
     </div>
 
-    <SaleItemList :items="saleItems" />
-
+    <SaleItemList 
+    v-if="saleItems.length > 0"
+    :items="saleItems" />
+    <div v-else class="itbms-no-sale-item p-10 text-center text-gray-400 text-xl">
+        No sale item
+      </div>
     
   </div>
 </template>

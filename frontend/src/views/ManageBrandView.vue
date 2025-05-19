@@ -3,10 +3,12 @@ import { useRoute, useRouter } from "vue-router";
 import { onMounted , ref } from "vue";
 import BrandList from "@/components/brand/BrandList.vue";
 import { fetchBrands } from "@/services/saleItemService";
+import { useFlashStore } from "@/store/useFlashStore";
 
 const router = useRouter();
 const brands= ref([])
 const errorMessage = ref("");
+const flash = useFlashStore()
 
 onMounted(async () => {
 	try {
@@ -16,6 +18,8 @@ onMounted(async () => {
 		errorMessage.value = "Failed to load brands";
 	}
 });
+
+if(flash.message === `Please add correct brand's name`) flash.message=''
 </script>
 
 <template>
@@ -34,6 +38,9 @@ onMounted(async () => {
       >
         Add brand
       </button>
+    </div>
+    <div v-if="flash.message" :class="flash.style">
+      {{ flash.message }}
     </div>
     <BrandList
     v-if="brands.length!==0" 

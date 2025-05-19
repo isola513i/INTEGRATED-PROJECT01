@@ -9,7 +9,7 @@ import EditSaleItemView from "@/views/EditSaleItemView.vue";
 import ProductListView from "@/views/ProductListView.vue";
 import ManageBrandView from "@/views/ManageBrandView.vue";
 import AddBrandView from "@/views/AddBrandView.vue";
-
+import EditBrandView from "@/views/EditBrandView.vue";
 
 const routes = [
   {
@@ -51,6 +51,11 @@ const routes = [
     path: "/brands/add",
     name: "AddBrandView",
     component:AddBrandView,
+  },
+  {
+    path: "/brands/edit/:brandId",
+    name: "EditBrandView",
+    component:EditBrandView,
   },
   {
     path: "/not-found",
