@@ -29,7 +29,8 @@ async function deleteItem(id){
     const index = props.items.findIndex(item => item.id === id)
     props.items.splice(index,1)
     flash.setMessage(
-      "✅ The sale brands has been deleted.",
+      "✅ The brands has been deleted.",
+
       "m-4 p-4 bg-green-100 text-green-800 shadow itbms-message"
     );
     handleModal()
@@ -69,7 +70,7 @@ async function deleteItem(id){
             {{ item.brandId }}
           </div>
           <div
-            class="itbms-brand text-center border-1 border-gray-500 py-2"
+            class="itbms-name text-center border-1 border-gray-500 py-2"
             :key="index"
             :class="key % 2 === 0 ? `bg-gray-200` : 'bg-white'"
           >
@@ -81,7 +82,8 @@ async function deleteItem(id){
             :class="key % 2 === 0 ? 'bg-gray-200' : 'bg-white'"
           >
             <router-link
-              :to="`/sale-items/edit/${item.id}`"
+              :to="`/brands/edit/${item.brandId}`"
+
               class="no-underline"
             >
               <p
@@ -122,7 +124,8 @@ async function deleteItem(id){
                   Cancel
                 </button>
                 <button
-                  @click="deleteItem(saleItemId)"
+                  @click="deleteItem(brandId)"
+
                   class="itbms-confirm-button bg-[#5eb238] text-white px-4 py-2 rounded hover:bg-[#58914c]"
                 >
                   Confirm
