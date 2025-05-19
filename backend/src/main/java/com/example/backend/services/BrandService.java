@@ -94,8 +94,8 @@ public class BrandService {
         if (saleItemRepository.existsByBrand_Id(id)) {
             throw new BrandHasSaleItemsException("Brand has sale item(s)");
         }
-        brand.setIsDeleted(true);
-        brandRepository.save(brand);
+
+        brandRepository.delete(brand);
     }
 
 

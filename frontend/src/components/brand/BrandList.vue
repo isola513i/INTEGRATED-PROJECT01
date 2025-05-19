@@ -46,7 +46,7 @@ async function deleteItem(id){
     handleModal()
   } catch (error) {
     flash.setMessage(
-      "❌ The requested sale item does not exist.",
+      "An error has occurred, the brand does not exist.",
       "m-4 p-4 bg-red-100 text-red-800 shadow itbms-message"
     );
   }
