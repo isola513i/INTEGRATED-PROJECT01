@@ -26,14 +26,13 @@ const handleSubmitForm = async (brand) => {
   formData.append("websiteUrl", brand.websiteUrl);
   formData.append("isActive", brand.isActive);
   formData.append("countryOfOrigin", brand.countryOfOrigin);
-  formData = {}
   // send object from emit
   try {
     const res = await addBrand(formData);
 
     if (res.status === 201) {
       flash.setMessage(
-        	"✅The brand has been added.",
+        	"The brand has been added.",
         	"itbms-message m-4 p-4 bg-green-100 text-green-800 shadow"
       );
 	  router.back()

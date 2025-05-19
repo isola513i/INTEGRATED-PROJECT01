@@ -28,7 +28,7 @@ public class BrandService {
 //        return brandRepository.findAllByIsDeletedFalse();
 //    }
     public List<Brand> getAllBrands() {
-        return brandRepository.findAllByIsDeletedFalseOrderByCreatedOnAsc();
+        return brandRepository.findAll();
     }
 
     public BrandDto.GetBrandDto getBrandById(int id) {

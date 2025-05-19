@@ -151,7 +151,7 @@ const focusNext = (nextIndex) => {
           </button>
           <button
             class="itbms-cancel-button px-5 py-2 border rounded-md"
-            @click="handleCancel"
+            @click="() => router.push('/brands')"
           >
             Cancel
           </button>

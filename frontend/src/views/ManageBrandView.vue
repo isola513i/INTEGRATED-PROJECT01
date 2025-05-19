@@ -13,7 +13,6 @@ const flash = useFlashStore()
 onMounted(async () => {
 	try {
 		brands.value = await fetchBrands();
-        console.log(brands.value)
 	} catch (error) {
 		errorMessage.value = "Failed to load brands";
 	}

@@ -27,7 +27,8 @@ onMounted(async () => {
 
   try {
     const data = await fetchSaleItems();
-    saleItems.value = Array.isArray(data) ? data : [];
+    if(data) saleItems.value = data
+    else saleItems.value = []
   } catch (err) {
     router.push("/server-error");
   } 
@@ -69,13 +70,13 @@ const productCount = computed(() => saleItems.value.length);
     <div v-if="flash.message" :class="flash.style">
       {{ flash.message }}
     </div>
-
+    <div v-if="saleItems.length === 0" class="itbms-no-sale-item p-10 text-center text-gray-400 text-xl">
+        No sale item
+    </div>
     <SaleItemList 
     v-if="saleItems.length > 0"
     :items="saleItems" />
-    <div v-else class="itbms-no-sale-item p-10 text-center text-gray-400 text-xl">
-        No sale item
-      </div>
+    
   </div>
 </template>
 
