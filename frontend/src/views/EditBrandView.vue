@@ -16,13 +16,14 @@ onMounted(async () => {
   try {
     const brandId = parseInt(route.params.brandId);
     if (isNaN(brandId)) throw new Error("Invalid ID");
-
-    const data = await fetchBrandById(brandId);
-    
-    brand.value = data;
+    const res = await fetchBrandById(brandId);
+    if(res.status === 200) brand.value = res.data
   } catch (error) {
     console.error("Fetch failed:", error);
-    window.alert("The requested brand does not exist.");
+    flash.setMessage(
+        	"The brand does not exist.",
+        	"itbms-message m-4 p-4 bg-red-100 text-red-800 shadow "
+      );
     router.push("/brands");
   }
 });

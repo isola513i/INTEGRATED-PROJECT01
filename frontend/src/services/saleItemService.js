@@ -51,7 +51,7 @@ export const addBrand = async (brand) =>{
 
 export const fetchBrandById = async (brandId) => {
    const response = await axios.get(`${API_BASE_URL}/brands/${brandId}`);
-  return response.data;
+  return response;
 }
 export const updateBrand = async (brandId, brand) => {
   const res = await axios.put(

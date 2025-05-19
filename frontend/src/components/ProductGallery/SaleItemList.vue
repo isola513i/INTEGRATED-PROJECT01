@@ -131,7 +131,7 @@ const fields = [
             :class="key % 2 === 0 ? 'bg-gray-200' : 'bg-white'"
           >
             <router-link
-              :to="`/sale-items/edit/${item.id}`"
+              :to="`/sale-items/${item.id}/edit`"
               class="no-underline"
             >
               <p
@@ -156,13 +156,13 @@ const fields = [
             class="fixed inset-0 bg-[#ffffff8f] bg-opacity-50 flex items-center justify-center z-50"
           >
             <div
-              class="itbms-message bg-white rounded-lg p-6 shadow-lg max-w-sm w-full"
+              class=" bg-white rounded-lg p-6 shadow-lg max-w-sm w-full"
             >
               <h2 class="text-xl font-semibold mb-4 text-gray-800">
                 Delete Confirmation
               </h2>
-              <p class="mb-6 text-gray-800">
-                Do you want to delete this sale item id : {{ saleItemId }}? 
+              <p class="itbms-message mb-6 text-gray-800">
+                Do you want to delete this sale item?
               </p>
               <div class="flex justify-end space-x-4">
                 <button

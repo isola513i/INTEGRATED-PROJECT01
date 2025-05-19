@@ -113,7 +113,7 @@ const handleSubmit = async () => {
 
 		if (response.status === 201) {
 			flash.setMessage(
-        	"✅ The sale item has been added.",
+        	"The sale item has been successfully added.",
         	"itbms-message m-4 p-4 bg-green-100 text-green-800 shadow "
 
       );

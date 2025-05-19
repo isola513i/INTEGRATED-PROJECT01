@@ -28,7 +28,7 @@ public class BrandService {
 //        return brandRepository.findAllByIsDeletedFalse();
 //    }
     public List<Brand> getAllBrands() {
-        return brandRepository.findAllByIsDeletedFalseOrderByCreatedOnAsc();
+        return brandRepository.findAll();
     }
 
     public BrandDto.GetBrandDto getBrandById(int id) {
@@ -94,8 +94,8 @@ public class BrandService {
         if (saleItemRepository.existsByBrand_Id(id)) {
             throw new BrandHasSaleItemsException("Brand has sale item(s)");
         }
-        brand.setIsDeleted(true);
-        brandRepository.save(brand);
+
+        brandRepository.delete(brand);
     }
 
 
