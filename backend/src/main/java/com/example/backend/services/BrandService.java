@@ -24,8 +24,11 @@ public class BrandService {
     @Autowired
     private EntityManager entityManager;
 
+//    public List<Brand> getAllBrands() {
+//        return brandRepository.findAllByIsDeletedFalse();
+//    }
     public List<Brand> getAllBrands() {
-        return brandRepository.findAllByIsDeletedFalse();
+        return brandRepository.findAllByIsDeletedFalseOrderByCreatedOnAsc();
     }
 
     public BrandDto.GetBrandDto getBrandById(int id) {
