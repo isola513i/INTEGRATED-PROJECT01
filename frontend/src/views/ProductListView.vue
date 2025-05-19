@@ -76,7 +76,6 @@ const productCount = computed(() => saleItems.value.length);
     <div v-else class="itbms-no-sale-item p-10 text-center text-gray-400 text-xl">
         No sale item
       </div>
-    
   </div>
 </template>
 

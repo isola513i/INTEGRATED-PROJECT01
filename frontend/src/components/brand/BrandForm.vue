@@ -1,4 +1,5 @@
 <script setup>
+
 import { ref, computed } from "vue";
 import { useFlashFormStore } from "@/store/useFlashFormStore";
 import { useRouter } from "vue-router";
@@ -72,6 +73,7 @@ const focusNext = (nextIndex) => {
       <p class="text-xl font-semibold">Add new Brand</p>
       <form
         id="brandForm"
+
         @submit.prevent="submitData"
         class="w-1/2 flex flex-col gap-5"
       >
@@ -87,11 +89,13 @@ const focusNext = (nextIndex) => {
           </div>
           <input
             id="name"
+
             type="text"
             placeholder="name"
             class="itbms-name w-full border px-4 py-2 rounded"
             v-model.trim="brand.name"
             @keydown.enter="focusNext('websiteUrl')"
+
           />
         </div>
         <div>
@@ -104,6 +108,7 @@ const focusNext = (nextIndex) => {
             placeholder="Website URL"
             class="itbms-websiteUrl w-full border px-4 py-2 rounded"
             v-model.trim="brand.websiteUrl"
+
             @keydown.enter="focusNext('countryOfOrigin')"
           />
         </div>
@@ -150,6 +155,7 @@ const focusNext = (nextIndex) => {
           >
             Cancel
           </button>
+
         </div>
       </form>
     </div>

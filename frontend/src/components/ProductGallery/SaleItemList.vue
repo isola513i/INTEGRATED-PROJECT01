@@ -100,6 +100,7 @@ const fields = [
             :class="key % 2 === 0 ? `bg-gray-200` : 'bg-white'"
           >
             {{ item.storageGb  ? item.storageGb : "-" }}
+
           </div>
           <div
             class="itbms-color text-center border-1 border-gray-500 py-2"
@@ -107,12 +108,14 @@ const fields = [
             :class="key % 2 === 0 ? `bg-gray-200` : 'bg-white'"
           >
             {{ item.color ? item.color : "-"}}
+
           </div>
           <div
             class="itbms-price text-center border-1 border-gray-500 py-2"
             :key="index"
             :class="key % 2 === 0 ? `bg-gray-200` : 'bg-white'"
           >
+
           ฿<span class="itbms-price-unit">
           {{
             Number(item.price).toLocaleString("en-US", {

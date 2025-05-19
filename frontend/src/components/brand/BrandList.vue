@@ -30,6 +30,7 @@ async function deleteItem(id){
     props.items.splice(index,1)
     flash.setMessage(
       "✅ The brands has been deleted.",
+
       "m-4 p-4 bg-green-100 text-green-800 shadow itbms-message"
     );
     handleModal()
@@ -82,6 +83,7 @@ async function deleteItem(id){
           >
             <router-link
               :to="`/brands/edit/${item.brandId}`"
+
               class="no-underline"
             >
               <p
@@ -123,6 +125,7 @@ async function deleteItem(id){
                 </button>
                 <button
                   @click="deleteItem(brandId)"
+
                   class="itbms-confirm-button bg-[#5eb238] text-white px-4 py-2 rounded hover:bg-[#58914c]"
                 >
                   Confirm

@@ -115,6 +115,7 @@ const handleSubmit = async () => {
 			flash.setMessage(
         	"✅ The sale item has been added.",
         	"itbms-message m-4 p-4 bg-green-100 text-green-800 shadow "
+
       );
 	  router.back()
 			// router.push({
