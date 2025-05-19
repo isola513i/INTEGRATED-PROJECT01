@@ -33,7 +33,7 @@ const routes = [
     component: AddSaleItem,
   },
   {
-    path: "/sale-items/edit/:id",
+    path: "/sale-items/:id/edit",
     name: "Edit-SaleItem",
     component: EditSaleItemView,
   },
@@ -53,7 +53,7 @@ const routes = [
     component:AddBrandView,
   },
   {
-    path: "/brands/edit/:brandId",
+    path: "/brands/:brandId/edit",
     name: "EditBrandView",
     component:EditBrandView,
   },

@@ -11,13 +11,13 @@ const flashForm = useFlashFormStore()
 
 const validator = (input) => {
   if (typeof input.name !== "string" || input.name === "" || /^[^a-zA-Z0-9]+$/.test(input.name)) return false;
-  if(input.websiteUrl !== "string" || input.websiteUrl === "") input.websiteUrl = null
-  if(input.countryOfOrigin !== "string" || input.countryOfOrigin === "") input.countryOfOrigin = null
+  if(typeof input.websiteUrl !== "string" || input.websiteUrl === "") input.websiteUrl = null
+  if(typeof input.countryOfOrigin !== "string" || input.countryOfOrigin === "") input.countryOfOrigin = null
   return true;
 };
 const handleSubmitForm = async (brand) => {
   const formData = new FormData();
-  
+  console.log(brand)
   if(!validator(brand)){
     flashForm.setMessage(`Please add correct brand's name`, "m-1 p-1 px-2 bg-red-100 text-red-800 shadow itbms-message rounded-md")
     return false

@@ -1,5 +1,5 @@
 <script setup>
-import { deleteBrandById } from '@/services/saleItemService';
+import { deleteBrandById, fetchSaleItems } from '@/services/saleItemService';
 import { useFlashStore } from '@/store/useFlashStore';
 import {ref} from 'vue'
 
@@ -8,7 +8,8 @@ const flash = useFlashStore()
 const showModal = ref(false)
 const brandId = ref(0)
 const brandName = ref('')
-
+const messageDelete = ref('')
+const canDelete= ref(true)
 const props = defineProps({
     items:{
     type:Array,
@@ -16,20 +17,29 @@ const props = defineProps({
     }
 })
 
-const handleModal = (id , name)=>{
+const handleModal =async(id , name)=>{
  showModal.value= !showModal.value
  brandId.value=id
  brandName.value=name
+ const product = await fetchSaleItems();
+ const usedIn = product.filter(item => item.brandName === name)
+ if(usedIn.length > 0){
+  canDelete.value =false
+  messageDelete.value = `Delete ${name} is not allowed. There are sale items with ${name} brand.`
+ }else{
+  canDelete.value =true
+  messageDelete.value = `Do you want to delete ${name} brand?`
+ }
 }
 
 
 async function deleteItem(id){
   try {
     await deleteBrandById(id); // ถ้าได้ 204 ตรงนี้จะสำเร็จ
-    const index = props.items.findIndex(item => item.id === id)
+    const index = props.items.findIndex(item => item.brandId === id)
     props.items.splice(index,1)
     flash.setMessage(
-      "✅ The brands has been deleted.",
+      "The brand has been deleted.",
 
       "m-4 p-4 bg-green-100 text-green-800 shadow itbms-message"
     );
@@ -82,7 +92,7 @@ async function deleteItem(id){
             :class="key % 2 === 0 ? 'bg-gray-200' : 'bg-white'"
           >
             <router-link
-              :to="`/brands/edit/${item.brandId}`"
+              :to="`/brands/${item.brandId}/edit`"
 
               class="no-underline"
             >
@@ -114,7 +124,7 @@ async function deleteItem(id){
                 Delete Confirmation
               </h2>
               <p class="mb-6 text-gray-800">
-                Do you want to delete <span class="font-medium"> {{ brandName }} </span> brand? 
+                {{ messageDelete }}
               </p>
               <div class="flex justify-end space-x-4">
                 <button
@@ -125,7 +135,7 @@ async function deleteItem(id){
                 </button>
                 <button
                   @click="deleteItem(brandId)"
-
+                  v-if="canDelete"
                   class="itbms-confirm-button bg-[#5eb238] text-white px-4 py-2 rounded hover:bg-[#58914c]"
                 >
                   Confirm

@@ -147,11 +147,12 @@ const focusNext = (nextIndex) => {
               isDisabled ? 'bg-blue-300' : 'bg-blue-500',
             ]"
           >
-            Save
+            save
           </button>
           <button
+            type="button"
             class="itbms-cancel-button px-5 py-2 border rounded-md"
-            @click="() => router.push('/brands')"
+            @click="router.back()"
           >
             Cancel
           </button>
