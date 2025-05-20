@@ -1,15 +1,15 @@
 import { createRouter, createWebHistory } from "vue-router";
-import ProductGalleryView from "@/views/ProductGalleryView.vue";
-import LandingPageView from "@/views/LandingPageView.vue";
-import ProductDetailView from "@/views/ProductDetailView.vue";
-import NotFoundView from "@/views/NotFoundView.vue";
-import Error500View from "@/views/Error500View.vue";
-import AddSaleItem from "@/views/AddSaleItemView.vue";
-import EditSaleItemView from "@/views/EditSaleItemView.vue";
-import ProductListView from "@/views/ProductListView.vue";
-import ManageBrandView from "@/views/ManageBrandView.vue";
-import AddBrandView from "@/views/AddBrandView.vue";
-import EditBrandView from "@/views/EditBrandView.vue";
+import ProductGalleryView from "@/views/product/ProductGalleryView.vue";
+import LandingPageView from "@/views/home/LandingPageView.vue";
+import ProductDetailView from "@/views/product/ProductDetailView.vue";
+import NotFoundView from "@/views/error/NotFoundView.vue";
+import Error500View from "@/views/error/Error500View.vue";
+import AddSaleItem from "@/views/saleItem/AddSaleItemView.vue";
+import EditSaleItemView from "@/views/saleItem/EditSaleItemView.vue";
+import ProductListView from "@/views/product/ProductListView.vue";
+import ManageBrandView from "@/views/ิbrand/ManageBrandView.vue";
+import AddBrandView from "@/views/ิbrand/AddBrandView.vue";
+import EditBrandView from "@/views/ิbrand/EditBrandView.vue";
 
 const routes = [
   {
