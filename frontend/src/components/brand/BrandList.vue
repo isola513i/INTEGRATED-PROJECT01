@@ -67,7 +67,7 @@ async function deleteItem(id) {
 					{{ field }}
 				</div>
 			</div>
-			<div class="w-full grid grid-rows">
+			<div class="w-full grid grid-rows text-gray-600">
 				<div
 					v-for="(item, key, index) in items"
 					class="itbms-row grid grid-cols-3"
@@ -96,13 +96,13 @@ async function deleteItem(id) {
 							class="no-underline"
 						>
 							<p
-								class="itbms-edit-button p-1 px-3 border-1 rounded-md border-blue-400 text-sm text-blue-400"
+								class="itbms-edit-button p-1 px-3 border-1 rounded-md border-blue-500 text-sm text-blue-500"
 							>
 								E
 							</p>
 						</router-link>
 						<button
-							class="itbms-delete-button p-1 px-3 border-1 rounded-md border-blue-400 text-sm text-blue-400"
+							class="itbms-delete-button p-1 px-3 border-1 rounded-md border-red-500 text-sm text-red-500"
 							@click="handleModal(item.brandId, item.name)"
 						>
 							D

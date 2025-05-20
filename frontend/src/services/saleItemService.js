@@ -18,3 +18,13 @@ export const deleteItemById = async (saleItemId) => {
 	return response.data;
 };
 
+export const fetchSaleItemsV2 = async (sortField, sortDirection) => {
+	const params = new URLSearchParams();
+	if (sortField) params.append("sortField", sortField);
+	if (sortDirection) params.append("sortDirection", sortDirection);
+
+	const res = await axios.get(
+		`${import.meta.env.VITE_API_BASE_URL}/v2/sale-items?${params.toString()}`
+	);
+	return res.data;
+};
