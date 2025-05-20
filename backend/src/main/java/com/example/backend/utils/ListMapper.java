@@ -18,9 +18,4 @@ public class  ListMapper {
         return listMapper;
     }
 
-//    public <S, T> PageDto<T> toPageDTO(Page<S> source, Class<T> targetClass, ModelMapper modelMapper) {
-//        PageDto<T> page = modelMapper.map(source, PageDto.class);
-//        page.setContent(mapList(source.getContent(), targetClass, modelMapper));
-//        return page;
-//    }
 }

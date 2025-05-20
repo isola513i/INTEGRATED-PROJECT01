@@ -11,6 +11,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 
@@ -74,6 +75,15 @@ public class SaleItemService {
         entityManager.refresh(savedItem);
         return saleItemRepository.findById(savedItem.getId()).orElseThrow();
         }
+
+    public List<SaleItem> getSaleItemsSorted(String sortField, String sortDirection) {
+        Sort.Direction direction = sortDirection.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+
+        if ("brand.name".equalsIgnoreCase(sortField)) {
+            return saleItemRepository.findAll(Sort.by(direction, "brand.name"));
+        }
+        return saleItemRepository.findAll(Sort.by(Sort.Direction.ASC, "createdOn"));
+    }
 
 }
 
