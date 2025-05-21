@@ -76,14 +76,27 @@ public class SaleItemService {
         return saleItemRepository.findById(savedItem.getId()).orElseThrow();
         }
 
-    public List<SaleItem> getSaleItemsSorted(String sortField, String sortDirection) {
-        Sort.Direction direction = sortDirection.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+    public List<SaleItem> getSaleItemsFilteredAndSorted(
+            List<String> filterBrands, String sortField, String sortDirection
+    ) {
+        Sort.Direction direction = sortDirection != null && sortDirection.equalsIgnoreCase("desc")
+                ? Sort.Direction.DESC : Sort.Direction.ASC;
+
+        Sort sort;
 
         if ("brand.name".equalsIgnoreCase(sortField)) {
-            return saleItemRepository.findAll(Sort.by(direction, "brand.name"));
+            sort = Sort.by(direction, "brand.name");
+        } else {
+            sort = Sort.by(Sort.Direction.ASC, "createdOn");
         }
-        return saleItemRepository.findAll(Sort.by(Sort.Direction.ASC, "createdOn"));
+
+        if (filterBrands != null && !filterBrands.isEmpty()) {
+            return saleItemRepository.findByBrand_NameIn(filterBrands, sort);
+        }
+
+        return saleItemRepository.findAll(sort);
     }
+
 
 }
 
