@@ -21,18 +21,19 @@ public class SaleItemControllerV2 {
     @Autowired
     private SaleItemService saleItemService;
     @Autowired
-    private BrandService brandService;
-    @Autowired
     private ModelMapper modelMapper;
     @Autowired
     private ListMapper listMapper;
 
     @GetMapping("/sale-items")
-    public ResponseEntity<List<SaleItemDto.GetAllSaleItemsDto>> getSortedItems(
+    public ResponseEntity<List<SaleItemDto.GetAllSaleItemsDto>> getFilteredAndSortedItems(
+            @RequestParam(required = false) List<String> filterBrands,
             @RequestParam(required = false) String sortField,
             @RequestParam(defaultValue = "asc") String sortDirection
     ) {
-        List<SaleItem> saleItems = saleItemService.getSaleItemsSorted(sortField, sortDirection);
+        List<SaleItem> saleItems = saleItemService.getSaleItemsFilteredAndSorted(
+                filterBrands, sortField, sortDirection
+        );
         return ResponseEntity.ok(
                 listMapper.mapList(saleItems, SaleItemDto.GetAllSaleItemsDto.class, modelMapper)
         );

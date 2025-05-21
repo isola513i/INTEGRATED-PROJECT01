@@ -1,6 +1,4 @@
-<!-- components/SortButtons.vue -->
 <script setup>
-import { defineEmits, defineProps } from "vue";
 
 const props = defineProps({
 	selected: String,
