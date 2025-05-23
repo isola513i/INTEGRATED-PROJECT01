@@ -7,11 +7,6 @@
 			>Shop smartphones cheaper than anywhere else. 0% interest for up to 10
 			months.</span
 		>
-		<router-link
-			to="/v2/sale-items"
-			class="text-blue-400 hover:underline font-medium ml-1"
-		>
-			Sorted Item Shop
-		</router-link>
+
 	</div>
 </template>
