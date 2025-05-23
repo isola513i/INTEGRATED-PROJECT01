@@ -7,15 +7,20 @@ import ProductCarousel from "@/components/product/ProductCarousel.vue";
 import PromoBar from "@/components/promo/PromoBar.vue";
 import { useFlashStore } from "@/store/useFlashStore";
 import SortButtons from "@/components/sort/SortButtons.vue";
+import BrandFilters from '@/components/filter/BrandFilters.vue';
+import Pagination from "@/components/Pagination/Pagination.vue";
 
 const saleItems = ref([]);
 const flash = useFlashStore();
 const sortType = ref("none");
+const totalPages = ref(20)
+const currentPage = ref(10)
+const pageSize = ref(5); 
 
 const loadItems = async () => {
 	const sortField = sortType.value === "none" ? null : "brand.name";
 	const sortDirection = sortType.value === "none" ? null : sortType.value;
-	saleItems.value = await fetchSaleItemsV2(sortField, sortDirection);
+	saleItems.value = await fetchSaleItemsV2(sortField, sortDirection, filteredBrands.value);
 };
 
 onMounted(loadItems);
@@ -24,6 +29,12 @@ const handleSortChange = (value) => {
 	sortType.value = value;
 	loadItems();
 };
+const filteredBrands = ref([]);
+
+const handleBrandFilterChange = (brands) => {
+  filteredBrands.value = brands;
+  loadItems()
+}
 </script>
 
 <template>
@@ -51,6 +62,9 @@ const handleSortChange = (value) => {
 				</div>
 			</div>
 
+			<div>
+				<BrandFilters @update:brands="handleBrandFilterChange" />
+			</div>
 			<!-- Right side - Sort buttons -->
 			<div class="flex-shrink-0">
 				<SortButtons :selected="sortType" @update:sort="handleSortChange" />
@@ -75,5 +89,12 @@ const handleSortChange = (value) => {
 				No sale item
 			</div>
 		</div>
+		<div class="flex justify-center py-4">
+  			<Pagination
+    		:current-page="currentPage"
+    		:total-pages="totalPages"
+    		@update:page="(page) => console.log(page)"
+  		/>
+</div>
 	</div>
 </template>

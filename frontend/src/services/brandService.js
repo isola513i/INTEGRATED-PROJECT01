@@ -2,7 +2,7 @@ import axios from "axios";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const fetchBrands = async () => {
-	const response = await axios.get(`${API_BASE_URL}/brands`);
+	const response = await axios.get(`${API_BASE_URL}/v1/brands`);
 	return response.data.map((brand) => ({
 		brandId: brand.id || brand.brandId,
 		name: brand.name,
@@ -10,12 +10,12 @@ export const fetchBrands = async () => {
 };
 
 export const fetchBrandById = async (brandId) => {
-	const response = await axios.get(`${API_BASE_URL}/brands/${brandId}`);
+	const response = await axios.get(`${API_BASE_URL}/v1/brands/${brandId}`);
 	return response.data;
 };
 
 export const addBrand = async (brand) => {
-	return await axios.post(`${API_BASE_URL}/brands`, brand, {
+	return await axios.post(`${API_BASE_URL}/v1/brands`, brand, {
 		headers: {
 			"Content-Type": "application/json",
 		},
