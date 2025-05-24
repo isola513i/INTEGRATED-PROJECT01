@@ -8,9 +8,13 @@ import com.example.backend.exceptions.ItemNotFoundException;
 import com.example.backend.repositories.BrandRepository;
 import com.example.backend.repositories.SaleItemRepository;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -97,7 +101,18 @@ public class SaleItemService {
         return saleItemRepository.findAll(sort);
     }
 
+    public Page<SaleItem> findAllSaleItemsPage(List<String> filterBrands, Integer page, Integer size, String sortField, String sortDirection) {
+        if (filterBrands != null && filterBrands.isEmpty()) {
+            filterBrands = null;
+        }
 
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortField != null ? sortField : "createdOn");
+        Pageable pageable = PageRequest.of(page, size, sort);
+        if(filterBrands != null) return saleItemRepository.findByBrandNameIn(filterBrands, pageable);
+        else{
+            return saleItemRepository.findAll(pageable);
+        }
+    }
 }
 
 

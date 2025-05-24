@@ -94,6 +94,8 @@ public class BrandService {
 
         brandRepository.delete(brand);
     }
-
+    public List<Brand> getAllBrandsById(List<Integer> brandIds){
+        return brandRepository.findAllById(brandIds);
+    }
 
 }
