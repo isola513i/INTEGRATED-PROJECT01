@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.util.TimeZone;
+import java.util.List;
 
 @SpringBootApplication
 public class BackendApplication {
@@ -39,4 +39,8 @@ public class BackendApplication {
     public ListMapper listMapper(){
         return ListMapper.getInstance();
     }
+    public <S, T> List<T> mapList(List<S> source, Class<T> targetClass, ModelMapper modelMapper) {
+        return source.stream().map(entity -> modelMapper.map(entity, targetClass)).toList();
+    }
+
 }

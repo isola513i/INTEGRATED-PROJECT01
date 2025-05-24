@@ -1,16 +1,18 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import { useRouter } from "vue-router";
-import axios from "axios";
-import SaleItemForm from "@/components/SaleItemForm.vue";
-import { fetchBrands } from "@/services/saleItemService";
+import { ref, computed, onMounted, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import SaleItemForm from "@/components/form/SaleItemForm.vue";
+import { fetchItemById } from "@/services/saleItemService";
+import { fetchBrands } from "@/services/brandService";
 import { useFlashStore } from "@/store/useFlashStore";
+import axios from "axios";
 
 const router = useRouter();
 const isSubmitting = ref(false);
 const errorMessage = ref("");
 const brands = ref([]);
-const flash = useFlashStore()
+const product = ref({});
+const flash = useFlashStore();
 
 const form = ref({
 	brandId: "",
@@ -24,12 +26,6 @@ const form = ref({
 	quantity: null,
 });
 
-const sortedBrands = computed(() => {
-	return [...brands.value].sort((a, b) =>
-		a.name.localeCompare(b.name, "en", { sensitivity: "base" })
-	);
-});
-
 const initialForm = ref({ ...form.value });
 const isDirty = computed(() => {
 	return JSON.stringify(form.value) !== JSON.stringify(initialForm.value);
@@ -41,17 +37,44 @@ const isFormValid = computed(() => {
 		!!f.brandId &&
 		f.model.trim().length > 0 &&
 		f.price > 0 &&
+		f.quantity > 0 &&
 		f.description.trim().length > 0
 	);
 });
-
+const initProd = ref();
+const route = useRoute();
 onMounted(async () => {
 	try {
 		brands.value = await fetchBrands();
+		const data = await fetchItemById(route.params.id);
+		DataToForm(data);
+		initProd.value = JSON.parse(JSON.stringify(form.value));
 	} catch (error) {
 		errorMessage.value = "Failed to load brands";
 	}
 });
+const isUpdate = ref(false);
+watch(
+	form,
+	(newVal) => {
+		isUpdate.value = JSON.stringify(newVal) !== JSON.stringify(initProd.value);
+	},
+	{ deep: true }
+);
+
+const DataToForm = (data) => {
+	form.value = {
+		brandId: brands.value.find((b) => b.name === data.brandName)?.brandId || "",
+		model: data.model || "",
+		price: data.price ?? null,
+		description: data.description || "",
+		ramGb: data.ramGb ?? null,
+		screenSizeInch: data.screenSizeInch ?? null,
+		storageGb: data.storageGb ?? null,
+		color: data.color || "",
+		quantity: data.quantity ?? null,
+	};
+};
 
 const updateForm = (updatedForm) => {
 	form.value = updatedForm;
@@ -99,9 +122,9 @@ const handleSubmit = async () => {
 			color: form.value.color?.trim() || null,
 		};
 
-		const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/sale-items`;
+		const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/sale-items/${route.params.id}`;
 
-		const response = await axios.post(apiUrl, payload, {
+		const response = await axios.put(apiUrl, payload, {
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -111,16 +134,18 @@ const handleSubmit = async () => {
 			},
 		});
 
-		if (response.status === 201) {
+		if (response.status === 200) {
 			flash.setMessage(
-        	"The sale item has been successfully added.",
-        	"itbms-message m-4 p-4 bg-green-100 text-green-800 shadow "
-
-      );
-	  router.back()
-			// router.push({
-			// 	path: "/sale-items",
-			// 	query: { successMessage: "The sale item has been successfully added." },
+				"✅ The sale item has been updated.",
+				"m-4 p-4 bg-green-100 text-green-800 shadow itbms-message"
+			);
+			router.back();
+			// router.push(`/sale-items/${route.params.id}`);
+			//   path: ,
+			//   query: {
+			//     successMessage: "✅ The sale item has been updated.",
+			//     successMessageStyle:"m-4 p-4 bg-green-100 text-green-800 shadow itbms-message"
+			//   },
 			// });
 		} else {
 			errorMessage.value = `Unexpected response: ${response.status} ${response.statusText}`;
@@ -142,21 +167,7 @@ const handleSubmit = async () => {
 };
 
 const handleCancel = () => {
-	router.push("/sale-items");
-	const emptyForm = {
-		brandId: "",
-		model: "",
-		price: null,
-		description: "",
-		ramGb: null,
-		screenSizeInch: null,
-		storageGb: null,
-		color: "",
-		quantity: null,
-	};
-
-	form.value = emptyForm;
-	initialForm.value = { ...emptyForm };
+	router.back();
 };
 </script>
 
@@ -165,17 +176,26 @@ const handleCancel = () => {
 		<div class="mb-8 flex items-center gap-2">
 			<router-link
 				to="/sale-items"
-				class="text-gray-600 hover:text-black text-xl font-light itbms-home-button"
-			>
-				Home
+				class="itbms-home-button text-gray-600 hover:text-black text-xl font-light"
+				>Home
 			</router-link>
 			<span class="text-gray-400">/</span>
-			<span class="text-xl text-gray-800 font-light">New Sale Item</span>
+			<button
+				@click="router.back()"
+				class="itbms-home-button text-gray-600 hover:text-black text-xl font-light"
+			>
+				back
+			</button>
 		</div>
 
+		<div v-if="errorMessage" class="text-red-600 mb-4">{{ errorMessage }}</div>
+
 		<SaleItemForm
+			v-if="form"
+			:updatePage="true"
+			:isUpdate="isUpdate"
 			:form="form"
-			:brands="sortedBrands"
+			:brands="brands"
 			:isSubmitting="isSubmitting"
 			:isFormValid="isFormValid"
 			:isDirty="isDirty"

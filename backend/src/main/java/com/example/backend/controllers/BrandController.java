@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-//@CrossOrigin(origins = "${app.cors.allowedOrigins}")
+
 @CrossOrigin(origins= "*")
 @RestController
 @RequestMapping("/itb-mshop/v1")
@@ -31,9 +31,7 @@ public class BrandController {
     @GetMapping("/brands/{id}")
     public ResponseEntity<BrandDto.GetBrandDto> getBrandById(@PathVariable int id) {
         return ResponseEntity.ok(modelMapper.map(brandService.getBrandById(id), BrandDto.GetBrandDto.class));
-
     }
-
     @PostMapping("/brands")
     public ResponseEntity<BrandDto.GetBrandDto> addBrand(
             @RequestBody BrandDto.GetBrandDto requestDto)

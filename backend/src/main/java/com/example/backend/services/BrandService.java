@@ -24,9 +24,6 @@ public class BrandService {
     @Autowired
     private EntityManager entityManager;
 
-//    public List<Brand> getAllBrands() {
-//        return brandRepository.findAllByIsDeletedFalse();
-//    }
     public List<Brand> getAllBrands() {
         return brandRepository.findAll();
     }
@@ -97,6 +94,8 @@ public class BrandService {
 
         brandRepository.delete(brand);
     }
-
+    public List<Brand> getAllBrandsById(List<Integer> brandIds){
+        return brandRepository.findAllById(brandIds);
+    }
 
 }

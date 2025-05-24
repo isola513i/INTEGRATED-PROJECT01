@@ -14,7 +14,6 @@ public class BrandDto {
     public static class GetAllBrandDto{
         private Integer id;
         private String name;
-        private Instant createdOn;
     }
     @Data
     @NoArgsConstructor
