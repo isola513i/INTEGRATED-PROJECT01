@@ -1,3 +1,7 @@
+<script>
+import { useRouter } from 'vue-router';
+const router = useRouter()
+</script>
 <template>
   <div class="relative h-[900px] w-full">
     <img
@@ -25,13 +29,13 @@
       >
         Shop Now
       </router-link>
-      <router-link
-      to="/sale-items/list"
+      <button
+      @click="router.push({path:'/sale-items/list'})"
       class="bg-[#0071E3] text-white px-13 py-3 rounded-full font-semibold transition-colors duration-300 hover:bg-[#339DFF] animate__animated animate__fadeInUp Itbms-shopnow"
         style="animation-delay: 0.6s"
     >
       Seller
-    </router-link>
+    </button>
     </div>
     </div>
   </div>

@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHistory , createWebHashHistory} from "vue-router";
 import ProductGalleryView from "@/views/ProductGalleryView.vue";
 import LandingPageView from "@/views/LandingPageView.vue";
 import ProductDetailView from "@/views/ProductDetailView.vue";
@@ -74,7 +74,8 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory('/ssi4/'),
+  //history: createWebHistory('/ssi4/'),
+  history: createWebHashHistory('/ssi4/'),
   routes,
 });
 
