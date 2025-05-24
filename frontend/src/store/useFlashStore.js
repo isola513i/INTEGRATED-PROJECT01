@@ -1,9 +1,9 @@
-import {defineStore , acceptHMRUpdate} from 'pinia' 
+import { defineStore, acceptHMRUpdate } from "pinia";
 
-export const useFlashStore = defineStore('flash',{
-    state: () => ({
-    message: '',
-    style: ''
+export const useFlashStore = defineStore("flash", {
+  state: () => ({
+    message: "",
+    style: "",
   }),
   actions: {
     setMessage(message, style) {
@@ -11,17 +11,17 @@ export const useFlashStore = defineStore('flash',{
       this.style = style;
 
       setTimeout(() => {
-        this.message = '';
-        this.style = '';
+        this.message = "";
+        this.style = "";
       }, 4000);
     },
     clearMessage() {
-      this.message = '';
-      this.style = '';
-    }
-}
-})
+      this.message = "";
+      this.style = "";
+    },
+  },
+});
 //hot module
-if(import.meta.hot){
-    import.meta.hot.accept(acceptHMRUpdate(useFlashStore , import.meta.hot))
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useFlashStore, import.meta.hot));
 }

@@ -4,8 +4,8 @@ import PromoBanner from "@/components/promo/PromoBanner.vue";
 </script>
 
 <template>
-	<PromoBanner />
-	<HeroBanner />
+  <PromoBanner />
+  <HeroBanner />
 </template>
 
 <style scoped></style>

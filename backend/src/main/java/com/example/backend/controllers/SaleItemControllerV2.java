@@ -7,19 +7,20 @@ import com.example.backend.entities.SaleItem;
 import com.example.backend.services.BrandService;
 import com.example.backend.services.SaleItemService;
 import com.example.backend.utils.ListMapper;
+import lombok.Getter;
+import lombok.Setter;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+@CrossOrigin(origins= "*")
 @RequestMapping("itb-mshop/v2")
 @RestController
+@Getter
+@Setter
 public class SaleItemControllerV2 {
     @Autowired
     private SaleItemService saleItemService;
@@ -50,6 +51,8 @@ public class SaleItemControllerV2 {
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(required = false) String sortField,
             @RequestParam(defaultValue = "asc") String sortDirection) {
-        return ResponseEntity.ok(listMapper.toPageDTO(saleItemService.findAllSaleItemsPage(filterBrands, page, size, sortField, sortDirection), SaleItemDto.GetSaleItemDto.class, modelMapper));
+        return ResponseEntity.ok(listMapper.toPageDTO(saleItemService
+                        .findAllSaleItemsPage(filterBrands, page, size, sortField, sortDirection)
+                , SaleItemDto.GetSaleItemDto.class, modelMapper));
     }
 }
