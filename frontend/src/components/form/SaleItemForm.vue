@@ -2,9 +2,9 @@
 const props = defineProps({
 	updatePage: {
 		type: Boolean,
-		default: false, 
+		default: false,
 	},
-	isupdate: Boolean,
+	isUpdate: Boolean,
 	form: Object,
 	brands: Array,
 	isSubmitting: Boolean,
@@ -26,9 +26,9 @@ const trimField = (field, value) => {
 };
 
 const focusNext = (nextIndex) => {
-	const nextInputField = document.getElementById(nextIndex)
-	if(nextInputField) nextInputField.focus()
-}
+	const nextInputField = document.getElementById(nextIndex);
+	if (nextInputField) nextInputField.focus();
+};
 </script>
 
 <template>
@@ -36,7 +36,6 @@ const focusNext = (nextIndex) => {
 		@submit.prevent="$emit('submit')"
 		class="grid grid-cols-12 gap-8 bg-white p-10 rounded-xl shadow-lg"
 	>
-		<!-- Picture Upload -->
 		<div class="col-span-4">
 			<div
 				class="w-full aspect-[4/3] bg-gray-100 flex items-center justify-center text-lg text-gray-400 rounded-lg mb-6 border border-dashed"
@@ -54,9 +53,7 @@ const focusNext = (nextIndex) => {
 			</div>
 		</div>
 
-		<!-- Product Form Fields -->
 		<div class="col-span-8 grid grid-cols-2 gap-6">
-			<!-- Brand -->
 			<div>
 				<label
 					class="block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
@@ -79,7 +76,6 @@ const focusNext = (nextIndex) => {
 				</select>
 			</div>
 
-			<!-- Model -->
 			<div>
 				<label
 					class="block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
@@ -87,7 +83,7 @@ const focusNext = (nextIndex) => {
 					Model
 				</label>
 				<input
-				id="model"
+					id="model"
 					type="text"
 					:value="props.form.model"
 					@input="updateField('model', $event.target.value)"
@@ -97,13 +93,13 @@ const focusNext = (nextIndex) => {
 				/>
 			</div>
 
-			<!-- Price -->
 			<div v-if="!updatePage">
 				<label
 					class="block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
-				>Price</label>
+					>Price</label
+				>
 				<input
-				id="price"
+					id="price"
 					type="number"
 					min="0"
 					step="1"
@@ -117,23 +113,20 @@ const focusNext = (nextIndex) => {
 			</div>
 			<div v-if="updatePage">
 				<label
-				class=" block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
-				>Price</label
+					class="block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
+					>Price</label
 				>
 				<input
-				id="price"
-				type="number"
-				min="0"
-				:value="props.form.price"
-				@input="
-					updateField('price', $event.target.value)
-				"
-				class="itbms-price w-full border px-4 py-2 rounded"
-				@keydown.enter="focusNext('quantity')"
+					id="price"
+					type="number"
+					min="0"
+					:value="props.form.price"
+					@input="updateField('price', $event.target.value)"
+					class="itbms-price w-full border px-4 py-2 rounded"
+					@keydown.enter="focusNext('quantity')"
 				/>
 			</div>
 
-			<!-- Quantity -->
 			<div>
 				<label
 					class="block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
@@ -154,8 +147,6 @@ const focusNext = (nextIndex) => {
 				/>
 			</div>
 
-
-			<!-- RAM -->
 			<div>
 				<label class="block mb-1 font-medium text-gray-700">RAM (GB)</label>
 				<input
@@ -168,13 +159,12 @@ const focusNext = (nextIndex) => {
 				/>
 			</div>
 
-			<!-- Screen Size -->
 			<div>
 				<label class="block mb-1 font-medium text-gray-700"
 					>Screen Size (Inch)</label
 				>
 				<input
-				id="screenSizeInch"
+					id="screenSizeInch"
 					type="number"
 					step="0.1"
 					:value="props.form.screenSizeInch"
@@ -184,12 +174,10 @@ const focusNext = (nextIndex) => {
 				/>
 			</div>
 
-			<!-- Storage -->
 			<div>
-			
 				<label class="block mb-1 font-medium text-gray-700">Storage (GB)</label>
 				<input
-				id="storageGb"
+					id="storageGb"
 					type="number"
 					:value="props.form.storageGb"
 					@input="updateField('storageGb', Number($event.target.value))"
@@ -198,11 +186,10 @@ const focusNext = (nextIndex) => {
 				/>
 			</div>
 
-			<!-- Color -->
 			<div>
 				<label class="block mb-1 font-medium text-gray-700">Color</label>
 				<input
-				id="color"
+					id="color"
 					type="text"
 					:value="props.form.color"
 					@input="updateField('color', $event.target.value)"
@@ -211,7 +198,7 @@ const focusNext = (nextIndex) => {
 					@keydown.enter="focusNext('description')"
 				/>
 			</div>
-			<!-- Description (full width) -->
+
 			<div class="col-span-2">
 				<label
 					class="block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
@@ -228,7 +215,6 @@ const focusNext = (nextIndex) => {
 			</div>
 		</div>
 
-		<!-- Buttons -->
 		<div class="col-span-12 flex justify-center gap-6 mt-10">
 			<button
 				v-if="!updatePage"
@@ -242,7 +228,7 @@ const focusNext = (nextIndex) => {
 			<button
 				v-if="updatePage"
 				type="submit"
-				:disabled="!isupdate || !isFormValid"
+				:disabled="!isUpdate || !isFormValid"
 				class="itbms-save-button bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
 			>
 				Save
