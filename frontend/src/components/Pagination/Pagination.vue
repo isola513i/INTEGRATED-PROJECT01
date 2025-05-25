@@ -10,7 +10,7 @@ const props = defineProps({
 // Emit
 const emit = defineEmits(["update:page"]);
 
-const pageGroupStart = ref(1);
+const pageGroupStart = ref(0)
 
 // คำนวณกลุ่มของหน้า
 
@@ -18,14 +18,12 @@ const pageGroupStart = ref(1);
 const goToPage = (page) => {
   emit("update:page", page);
 
-  // Auto shift page group ถ้ากดไปท้ายหรือหน้าแรกของกลุ่ม
-  if (page === pageGroupStart.value + 9 && page < props.totalPages) {
-    pageGroupStart.value += 1;
-  } else if (page === pageGroupStart.value && page > 1) {
-    pageGroupStart.value -= 1;
+  if (page < pageGroupStart.value) {
+    pageGroupStart.value = page;
+  } else if (page >= pageGroupStart.value + 10) {
+    pageGroupStart.value = Math.max(0, page - 9);
   }
-};
-
+}
 const goFirst = () => {
   emit("update:page", 1);
   pageGroupStart.value = 1;
@@ -36,18 +34,24 @@ const goFirst = () => {
 watch(
   () => props.currentPage,
   (val) => {
-    if (val < pageGroupStart.value || val > pageGroupStart.value + 9) {
+    if (val < pageGroupStart.value || val >=  pageGroupStart.value + 10) {
       pageGroupStart.value = Math.max(1, val - 4);
     }
   },
 );
+const visiblePages = computed(() => {
+  const start = pageGroupStart.value;
+  const end = Math.min(start + 9, props.totalPages - 1);
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+});
+
 </script>
 <template>
   <div class="mt-6 flex flex-wrap justify-center items-center gap-2 text-sm">
     <button
-      @click="goToPage(0)"
+      @click="goFirst()"
       :disabled="currentPage === 0"
-      class="px-3 py-1.5 rounded-full border text-gray-700 bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+      class="itbms-page-first px-3 py-1.5 rounded-full border text-gray-700 bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
     >
       « First
     </button>
@@ -55,26 +59,26 @@ watch(
     <button
       @click="goToPage(currentPage-1)"
       :disabled="currentPage === 0"
-      class="px-3 py-1.5 rounded-full border text-gray-700 bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+      class="itbms-page-prev px-3 py-1.5 rounded-full border text-gray-700 bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
     >
       ‹ Prev
     </button>
 
     <button
-      v-for="page in totalPages"
+      v-for="page in visiblePages"
       :key="page"
-      @click="goToPage(page -1 )"
+      @click="goToPage(page )"
       :class="[
-        'px-3 py-1.5 rounded-full border',
-        page - 1 === currentPage ? 'bg-blue-600 text-white font-bold' : 'bg-white text-gray-700 hover:bg-gray-100',
+        '`itbms-page-${page}` px-3 py-1.5 rounded-full border',
+        page  === currentPage ? 'bg-blue-600 text-white font-bold' : 'bg-white text-gray-700 hover:bg-gray-100',
       ]"
     >
-      {{ page }}
+      {{ page +1 }}
     </button>
     <button
       @click="goToPage(currentPage + 1)"
       :disabled="currentPage + 1 === totalPages"
-      class="px-3 py-1.5 rounded-full border text-gray-700 bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+      class="itbms-page-next px-3 py-1.5 rounded-full border text-gray-700 bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
     >
       Next ›
     </button>
@@ -82,7 +86,7 @@ watch(
     <button
       @click="goToPage(totalPages-1)"
       :disabled="currentPage +1 === totalPages"
-      class="px-3 py-1.5 rounded-full border text-gray-700 bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+      class="itbms-page-last px-3 py-1.5 rounded-full border text-gray-700 bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
     >
       Last »
     </button>
