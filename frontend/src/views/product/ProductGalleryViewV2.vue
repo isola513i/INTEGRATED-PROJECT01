@@ -12,7 +12,7 @@ import Pagination from "@/components/Pagination/Pagination.vue";
 
 const saleItems = ref([]);
 const flash = useFlashStore();
-const pageSize = ref(5);
+const pageSize = ref(10);
 const filteredBrands = ref([]);
 const sortField = ref('id')
 const sortDirection = ref('asc')
