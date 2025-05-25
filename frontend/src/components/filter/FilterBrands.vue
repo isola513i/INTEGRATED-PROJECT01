@@ -59,7 +59,7 @@ function getBrandName(id) {
           v-model="selectedBrand"
           class="flex-grow px-4 h-[42px] text-gray-700 text-base bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
         >
-          <option value="" disabled selected hidden>Filter by brand</option>
+          <option value="" disabled selected hidden>Filter by brand(s)</option>
           <option
             v-for="brand in brandOptions"
             :key="brand.brandId"

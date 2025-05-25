@@ -18,13 +18,13 @@ const routes = [
     name: "Landing",
     component: LandingPageView,
   },
+  // {
+  //   path: "/sale-items",
+  //   name: "SaleItems",
+  //   component: ProductGalleryView,
+  // },
   {
     path: "/sale-items",
-    name: "SaleItems",
-    component: ProductGalleryView,
-  },
-  {
-    path: "/v2/sale-items",
     name: "SaleItemsV2",
     component: ProductGalleryViewV2,
   },
