@@ -8,8 +8,14 @@ const selectedBrand = ref("");
 const selectedBrands = ref([]);
 const brandOptions = ref([]);
 const pageSize = ref(10);
+const filteredBrands = JSON.parse(sessionStorage.getItem("filterBrands") || "[]")
 onMounted(async () => {
   const brands = await fetchBrands();
+  filteredBrands.forEach(name => {
+    console.log(name)
+    selectedBrands.value.push(...(brands.filter((b) => b.name === name)))
+  });
+  console.log(selectedBrands.value)
   brandOptions.value = brands.filter(
     (b) => b.name.toLowerCase() !== "filter by brand",
   );
@@ -120,4 +126,3 @@ function getBrandName(id) {
     </div>
   </div>
 </template>
-

@@ -32,12 +32,6 @@
         >
           Seller
         </router-link>
-        <router-link
-          to="/v2/sale-items"
-          class="bg-[#0071E3] text-white px-13 py-3 rounded-full font-semibold transition-colors duration-300 hover:bg-[#339DFF] animate__animated animate__fadeInUp Itbms-shopnow"
-          style="animation-delay: 0.6s"
-          >Sorted Item Shop
-        </router-link>
       </div>
     </div>
   </div>
