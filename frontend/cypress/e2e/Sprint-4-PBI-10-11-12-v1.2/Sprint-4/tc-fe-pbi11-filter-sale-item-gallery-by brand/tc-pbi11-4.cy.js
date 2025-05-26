@@ -122,6 +122,9 @@ describe(`TC-FE-PBI11-FILTER-SALE-ITEM-GALLERY-BY-BRAND-4\n
         cy.contains('.itbms-filter-item', 'Xiaomi').should('exist').click()
         cy.wait(100)
 
+        cy.get('.itbms-brand-asc').should('exist').as('brand-asc')
+        cy.get('@brand-asc').click()
+
         cy.get('.itbms-brand').then(($brands) => {
             const matched = $brands.filter((index, el) =>
                 el.textContent.toLowerCase().includes('huawei')

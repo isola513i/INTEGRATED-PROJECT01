@@ -66,7 +66,7 @@ const handleSortChange = (value) => {
 };
 const handlePageSizeChange = (size) => {
   pageSize.value = size;
-  loadItems(paginate.value.page);
+  loadItems(0);
 };
 const handleBrandFilterChange = (brands) => {
   filteredBrands.value = brands;
@@ -99,7 +99,7 @@ const handleBrandFilterChange = (brands) => {
         </div>
       </div>
 
-      <div class="">
+      <div>
         <BrandFilters   @update:pageSize="handlePageSizeChange" @update:brands="handleBrandFilterChange" />
       </div>
       <!-- Right side - Sort buttons -->

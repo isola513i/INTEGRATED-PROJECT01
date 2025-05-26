@@ -47,7 +47,7 @@ const visiblePages = computed(() => {
 
 </script>
 <template>
-  <div class="mt-6 flex flex-wrap justify-center items-center gap-2 text-sm">
+  <div v-show="totalPages !== 1" class="mt-6 flex flex-wrap justify-center items-center gap-2 text-sm">
     <button
       @click="goFirst()"
       :disabled="currentPage === 0"

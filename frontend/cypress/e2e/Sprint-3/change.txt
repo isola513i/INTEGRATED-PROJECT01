@@ -1,7 +1,0 @@
-v.1    2025-05-19 initial release tc pbi-pre-6, pbi-6 and pbi-7
-v.1.2  2025-05-19 add body: [] in tc-pbi-pre6-1.cy.js
-                  add tc pbi8,1-3 (no tc-pbi-8-4)
-v.1.3  2025-05-19 add tc pbi8-4, change cy.location to cy.url().should
-v.1.4  2025-05-19 modify tc-pbi8-2, delete "Tecno (2025)" and "Meizu00001Meizu00002Meizu00003"
-
-
