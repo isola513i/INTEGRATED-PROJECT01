@@ -25,8 +25,8 @@ const goToPage = (page) => {
   }
 }
 const goFirst = () => {
-  emit("update:page", 1);
-  pageGroupStart.value = 1;
+  emit("update:page", 0);
+  pageGroupStart.value = 0;
 };
 
 
@@ -69,7 +69,7 @@ const visiblePages = computed(() => {
       :key="page"
       @click="goToPage(page )"
       :class="[
-        '`itbms-page-${page}` px-3 py-1.5 rounded-full border',
+        `itbms-page-${page} px-3 py-1.5 rounded-full border`,
         page  === currentPage ? 'bg-blue-600 text-white font-bold' : 'bg-white text-gray-700 hover:bg-gray-100',
       ]"
     >
