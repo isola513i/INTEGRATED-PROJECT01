@@ -7,15 +7,14 @@ const response = await axios.get(`${API_BASE_URL}/v1/brands`);
 		brandId: brand.id || brand.brandId,
 		name: brand.name,
 	}));
-}
-
+  
 export const fetchBrandById = async (brandId) => {
-  const response = await axios.get(`${API_BASE_URL}/v1/brands/${brandId}`);
-  return response.data;
+	const response = await axios.get(`${API_BASE_URL}/v1/brands/${brandId}`);
+	return response.data;
 };
 
 export const addBrand = async (brand) => {
-  return await axios.post(`${API_BASE_URL}/v1/brands`, brand, {
+	return await axios.post(`${API_BASE_URL}/v1/brands`, brand, {
 		headers: {
 			"Content-Type": "application/json",
 		},
