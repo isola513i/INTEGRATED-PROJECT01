@@ -99,7 +99,7 @@ const handleBrandFilterChange = (brands) => {
         </div>
       </div>
 
-      <div>
+      <div class="">
         <BrandFilters   @update:pageSize="handlePageSizeChange" @update:brands="handleBrandFilterChange" />
       </div>
       <!-- Right side - Sort buttons -->

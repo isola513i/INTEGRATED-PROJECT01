@@ -122,7 +122,7 @@ const handleSubmit = async () => {
       color: form.value.color?.trim() || null,
     };
 
-    const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/sale-items/${route.params.id}`;
+    const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/v1/sale-items/${route.params.id}`;
 
     const response = await axios.put(apiUrl, payload, {
       headers: {

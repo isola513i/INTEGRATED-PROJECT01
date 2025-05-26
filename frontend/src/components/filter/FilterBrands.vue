@@ -4,92 +4,102 @@ import { fetchBrands } from "@/services/brandService";
 
 const emit = defineEmits(["update:brands", "update:pageSize"]);
 
-const selectedBrand = ref("");
 const selectedBrands = ref([]);
 const brandOptions = ref([]);
 const pageSize = ref(10);
+const showDropdown = ref(false);
+
 const filteredBrands = JSON.parse(sessionStorage.getItem("filterBrands") || "[]")
+
 onMounted(async () => {
   const brands = await fetchBrands();
   filteredBrands.forEach(name => {
-    console.log(name)
-    selectedBrands.value.push(...(brands.filter((b) => b.name === name)))
+    const match = brands.find((b) => b.name === name);
+    if (match && !selectedBrands.value.some((b) => b.brandId === match.brandId)) {
+      selectedBrands.value.push({ brandId: match.brandId, name: match.name });
+    }
   });
-  console.log(selectedBrands.value)
   brandOptions.value = brands.filter(
-    (b) => b.name.toLowerCase() !== "filter by brand",
+    (b) => b.name.toLowerCase() !== "filter by brand"
   );
 });
+
 watch(pageSize, (newVal) => {
   emit("update:pageSize", Number(newVal));
 });
-function addBrand() {
-  const brandId = selectedBrand.value;
-  const brand = brandOptions.value.find((b) => b.brandId === brandId);
-  if (brand && !selectedBrands.value.some((b) => b.brandId === brandId)) {
-    selectedBrands.value.push({ brandId: brand.brandId, name: brand.name });
-    emit("update:brands", selectedBrands.value.map((b) => b.name)); // ส่งเฉพาะชื่อ
+
+watch(selectedBrands, () => {
+  emit("update:brands", selectedBrands.value.map(b => b.name));
+});
+
+function toggleDropdown() {
+  showDropdown.value = !showDropdown.value;
+}
+
+function isChecked(brandId) {
+  return selectedBrands.value.some((b) => b.brandId === brandId);
+}
+
+function toggleBrand(brand) {
+  const exists = selectedBrands.value.find((b) => b.brandId === brand.brandId);
+  if (exists) {
+    selectedBrands.value = selectedBrands.value.filter((b) => b.brandId !== brand.brandId);
+  } else {
+    selectedBrands.value = [...selectedBrands.value, { brandId: brand.brandId, name: brand.name }];
   }
-  selectedBrand.value = "";
+  emit("update:brands", selectedBrands.value.map(b => b.name)); // emit ตรงนี้เลย
 }
 
 
 function removeBrand(index) {
   selectedBrands.value.splice(index, 1);
-  emit("update:brands", selectedBrands.value.map((b) => b.name)); // ส่งเฉพาะชื่อ
+  emit("update:brands", selectedBrands.value.map(b => b.name));
 }
-
-
 function clearAll() {
   selectedBrands.value = [];
-  selectedBrand.value = "";
-  emit("update:brands", []);
 }
 
-
-function getBrandName(id) {
-  const found = brandOptions.value.find((b) => b.brandId === id);
-  return found ? found.name : id;
-}
 </script>
 
 <template>
-  <div class="space-y-4">
-    <!-- กลุ่ม Filter + Add + Clear + Page size -->
+  <div class="space-y-4 itbms-brand-filter">
     <div class="flex flex-wrap gap-4 items-center">
-      <!-- Filter + Add + Clear -->
-      <div
-        class="flex items-center w-full md:w-auto border border-gray-300 rounded-lg overflow-hidden"
-      >
-        <select
-          v-model="selectedBrand"
-          class="flex-grow px-4 h-[42px] text-gray-700 text-base bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+      <!-- Custom dropdown -->
+      <div class="relative w-full md:w-auto">
+        <button
+          @click="toggleDropdown"
+          class="w-full md:w-[250px] text-left px-4 h-[42px] bg-white border border-gray-300 rounded-lg text-gray-700 text-base focus:outline-none"
         >
-          <option value="" disabled selected hidden>Filter by brand(s)</option>
-          <option
-            v-for="brand in brandOptions"
+          Filter by brand(s)
+        </button>
+
+        <div
+          v-if="showDropdown"
+          class="absolute mt-1 w-full z-50 bg-white border border-gray-300 rounded-lg max-h-60 overflow-auto shadow-lg"
+        >
+          <div
+            v-for="brand in brandOptions.slice().sort((a, b) => a.name.localeCompare(b.name))"
             :key="brand.brandId"
-            :value="brand.brandId"
-            class="itbms-brand-filter"
+            class="itbms-filter-item px-4 py-2 hover:bg-gray-100 flex items-center gap-2 cursor-pointer"
+            @click="toggleBrand(brand)"
           >
-            {{ brand.name }}
-          </option>
-        </select>
-
-        <button
-          @click="addBrand"
-          class="itbms-brand-filter-button bg-gray-800 hover:bg-blue-600 text-white px-4 h-[42px] text-sm font-medium"
-        >
-          +
-        </button>
-
-        <button
-          @click="clearAll"
-          class="itbms-brand-filter-clear bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 h-[42px] text-sm font-medium"
-        >
-          Clear
-        </button>
+            <input
+              type="checkbox"
+              :checked="isChecked(brand.brandId)"
+              @change="toggleBrand(brand)"
+            />
+            <span>{{ brand.name }}</span>
+          </div>
+        </div>
       </div>
+
+      <!-- Clear -->
+      <button
+        @click="clearAll"
+        class="itbms-brand-filter-clear bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 h-[42px] text-sm font-medium"
+      >
+        Clear
+      </button>
 
       <!-- Page size -->
       <div class="flex items-center gap-2 h-[42px]">
@@ -111,16 +121,16 @@ function getBrandName(id) {
     <div class="flex flex-wrap gap-2 max-w-full">
       <div
         v-for="(brand, index) in selectedBrands"
-        :key="brand.id"
+        :key="brand.brandId"
         class="flex items-center bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full text-sm shadow-sm"
       >
-        <span class="itbms-filter-item truncate max-w-[150px]">{{ brand.name }}</span>
+        <span class=" truncate max-w-[150px]">{{ brand.name }}</span>
         <button
           @click="removeBrand(index)"
           class="itbms-filter-item-clear ml-2 text-blue-500 hover:text-red-500 font-bold"
           title="Remove"
         >
-          &times;
+          x
         </button>
       </div>
     </div>

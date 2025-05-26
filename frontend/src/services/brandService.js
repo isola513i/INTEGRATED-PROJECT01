@@ -7,8 +7,7 @@ export const fetchBrands = async () => {
 		brandId: brand.id || brand.brandId,
 		name: brand.name,
 	}));
-};
-
+  
 export const fetchBrandById = async (brandId) => {
 	const response = await axios.get(`${API_BASE_URL}/v1/brands/${brandId}`);
 	return response.data;

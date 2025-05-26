@@ -13,7 +13,7 @@ const brands = ref([]);
 const flash = useFlashStore();
 
 const form = ref({
-	brandId: "",
+  brandId: "",
 	model: "",
 	price: null,
 	description: "",
