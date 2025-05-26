@@ -1,3 +1,4 @@
+
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
@@ -99,7 +100,7 @@ const handleSubmit = async () => {
 			color: form.value.color?.trim() || null,
 		};
 
-		const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/sale-items`;
+		const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/v1/sale-items`;
 
 		const response = await axios.post(apiUrl, payload, {
 			headers: {

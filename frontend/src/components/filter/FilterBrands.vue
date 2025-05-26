@@ -6,7 +6,7 @@ const emit = defineEmits(["update:brands", "update:pageSize"]);
 
 const selectedBrands = ref([]);
 const brandOptions = ref([]);
-const pageSize = ref(10);
+const pageSize = ref(parseInt(sessionStorage.getItem("pageSize")) || 10);
 const showDropdown = ref(false);
 
 const filteredBrands = JSON.parse(sessionStorage.getItem("filterBrands") || "[]")
@@ -63,6 +63,25 @@ function clearAll() {
 
 <template>
   <div class="space-y-4 itbms-brand-filter">
+     <div class="flex flex-wrap gap-2 max-w-full">
+  <div
+    v-for="(brand, index) in selectedBrands"
+    :key="brand.name"
+    class="flex itbms-brand-filter-item justify-between items-center bg-blue-100 text-blue-800 px-3 py-1.5 rounded-full text-sm shadow-sm max-w-[200px] min-w-0"
+  >
+    <span class="truncate whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px]">
+      {{ brand.name }}
+    </span>
+
+    <button
+      @click="removeBrand(index)"
+      class="itbms-filter-item-clear ml-2 text-blue-500 hover:text-red-500 font-bold flex-shrink-0"
+      title="Remove"
+    >
+      x
+    </button>
+  </div>
+</div>   
     <div class="flex flex-wrap gap-4 items-center">
       <!-- Custom dropdown -->
       <div class="relative w-full md:w-auto">
@@ -80,7 +99,7 @@ function clearAll() {
           <div
             v-for="brand in brandOptions.slice().sort((a, b) => a.name.localeCompare(b.name))"
             :key="brand.brandId"
-            class="itbms-filter-item px-4 py-2 hover:bg-gray-100 flex items-center gap-2 cursor-pointer"
+            class="itbms-filter-item px-4 py-2 text-black hover:bg-gray-100 flex items-center gap-2 cursor-pointer"
             @click="toggleBrand(brand)"
           >
             <input
@@ -118,7 +137,7 @@ function clearAll() {
     </div>
 
     <!-- Selected brands -->
-    <div class="flex flex-wrap gap-2 max-w-full">
+    <!-- <div class="flex flex-wrap gap-2 max-w-full">
       <div
         v-for="(brand, index) in selectedBrands"
         :key="brand.brandId"
@@ -133,6 +152,9 @@ function clearAll() {
           x
         </button>
       </div>
-    </div>
-  </div>
+    </div> -->
+   
+</div>
+
+
 </template>
