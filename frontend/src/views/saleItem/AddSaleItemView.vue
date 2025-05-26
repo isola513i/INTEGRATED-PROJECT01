@@ -25,40 +25,40 @@ const form = ref({
 });
 
 const sortedBrands = computed(() => {
-  return [...brands.value].sort((a, b) =>
+	return [...brands.value].sort((a, b) =>
 		a.name.localeCompare(b.name, "en", { sensitivity: "base" })
 	);
 });
 
 const initialForm = ref({ ...form.value });
 const isDirty = computed(() => {
-  return JSON.stringify(form.value) !== JSON.stringify(initialForm.value);
+	return JSON.stringify(form.value) !== JSON.stringify(initialForm.value);
 });
 
 const isFormValid = computed(() => {
-  const f = form.value;
-  return (
-    !!f.brandId &&
-    f.model.trim().length > 0 &&
-    f.price > 0 &&
-    f.description.trim().length > 0
-  );
+	const f = form.value;
+	return (
+		!!f.brandId &&
+		f.model.trim().length > 0 &&
+		f.price > 0 &&
+		f.description.trim().length > 0
+	);
 });
 
 onMounted(async () => {
-  try {
-    brands.value = await fetchBrands();
-  } catch (error) {
-    errorMessage.value = "Failed to load brands";
-  }
+	try {
+		brands.value = await fetchBrands();
+	} catch (error) {
+		errorMessage.value = "Failed to load brands";
+	}
 });
 
 const updateForm = (updatedForm) => {
-  form.value = updatedForm;
+	form.value = updatedForm;
 };
 
 const handleSubmit = async () => {
-  isSubmitting.value = true;
+	isSubmitting.value = true;
 	errorMessage.value = "";
 
 	try {
@@ -137,7 +137,7 @@ const handleSubmit = async () => {
 };
 
 const handleCancel = () => {
-  router.push("/sale-items");
+	router.push("/sale-items");
 	const emptyForm = {
 		brandId: "",
 		model: "",
@@ -156,27 +156,27 @@ const handleCancel = () => {
 </script>
 
 <template>
-  <div class="p-10 max-w-7xl mx-auto text-gray-800">
-    <div class="mb-8 flex items-center gap-2">
-      <router-link
-        to="/sale-items"
-        class="text-gray-600 hover:text-black text-xl font-light itbms-home-button"
-      >
-        Home
-      </router-link>
-      <span class="text-gray-400">/</span>
-      <span class="text-xl text-gray-800 font-light">New Sale Item</span>
-    </div>
+	<div class="p-10 max-w-7xl mx-auto text-gray-800">
+		<div class="mb-8 flex items-center gap-2">
+			<router-link
+				to="/sale-items"
+				class="text-gray-600 hover:text-black text-xl font-light itbms-home-button"
+			>
+				Home
+			</router-link>
+			<span class="text-gray-400">/</span>
+			<span class="text-xl text-gray-800 font-light">New Sale Item</span>
+		</div>
 
-    <SaleItemForm
-      :form="form"
-      :brands="sortedBrands"
-      :isSubmitting="isSubmitting"
-      :isFormValid="isFormValid"
-      :isDirty="isDirty"
-      @update:form="updateForm"
-      @submit="handleSubmit"
-      @cancel="handleCancel"
-    />
-  </div>
+		<SaleItemForm
+			:form="form"
+			:brands="sortedBrands"
+			:isSubmitting="isSubmitting"
+			:isFormValid="isFormValid"
+			:isDirty="isDirty"
+			@update:form="updateForm"
+			@submit="handleSubmit"
+			@cancel="handleCancel"
+		/>
+	</div>
 </template>
