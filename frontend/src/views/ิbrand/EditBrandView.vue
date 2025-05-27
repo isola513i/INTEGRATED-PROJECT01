@@ -20,7 +20,7 @@ onMounted(async () => {
     console.log(brandId);
     if (isNaN(brandId)) throw new Error("Invalid ID");
     const res = await fetchBrandById(brandId);
-    brand.value = res
+    brand.value = res;
   } catch (error) {
     console.error("Fetch failed:", error);
     flash.setMessage(

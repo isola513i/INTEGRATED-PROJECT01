@@ -2,12 +2,10 @@ package com.example.backend.controllers;
 
 
 import com.example.backend.dtos.SaleItemDto;
-import com.example.backend.entities.Brand;
 import com.example.backend.entities.SaleItem;
 import com.example.backend.services.BrandService;
 import com.example.backend.services.SaleItemService;
 import com.example.backend.utils.ListMapper;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.Getter;
 import lombok.Setter;
 import org.modelmapper.ModelMapper;

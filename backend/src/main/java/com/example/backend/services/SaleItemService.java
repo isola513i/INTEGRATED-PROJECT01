@@ -1,6 +1,5 @@
 package com.example.backend.services;
 
-import ch.qos.logback.core.model.Model;
 import com.example.backend.dtos.SaleItemDto;
 import com.example.backend.entities.Brand;
 import com.example.backend.entities.SaleItem;
@@ -8,7 +7,6 @@ import com.example.backend.exceptions.ItemNotFoundException;
 import com.example.backend.repositories.BrandRepository;
 import com.example.backend.repositories.SaleItemRepository;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;

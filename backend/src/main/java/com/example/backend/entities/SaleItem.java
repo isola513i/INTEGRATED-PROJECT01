@@ -1,6 +1,7 @@
 package com.example.backend.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -35,23 +36,24 @@ public class SaleItem {
     private String description;
 
     @NotNull
+
     @Column(name = "price", nullable = false)
     private Integer price;
 
     @Column(name = "ramGb")
     private Integer ramGb;
 
-    @Column(name = "screenSizeInch", precision = 3, scale = 1)
+    @Column(name = "screenSizeInch", precision = 4, scale = 2)
     private BigDecimal screenSizeInch;
 
     @Column(name = "storageGb")
     private Integer storageGb;
 
-    @Size(max = 30)
-    @Column(name = "color", length = 30)
+    @Size(max = 40)
+    @Column(name = "color", length = 40)
     private String color;
 
-    @NotNull
+
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
