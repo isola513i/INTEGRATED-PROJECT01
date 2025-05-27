@@ -109,6 +109,7 @@ const focusNext = (nextIndex) => {
         <input
           id="price"
           type="number"
+          :max="2600000000"
           min="0"
           step="1"
           :value="props.form.price"
@@ -138,7 +139,7 @@ const focusNext = (nextIndex) => {
         <input
           id="quantity"
           type="number"
-          min="1"
+          min="0"
           step="1"
           :value="props.form.quantity"
           @blur="trimField('quantity', $event.target.value)"
