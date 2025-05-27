@@ -30,7 +30,9 @@ export default {
         />
       </div>
 
-      <h2 class="itbms-brand text-lg sm:text-xl font-semibold text-gray-800 mb-2 text-center">
+      <h2
+        class="itbms-brand text-lg sm:text-xl font-semibold text-gray-800 mb-2 text-center"
+      >
         {{ item.brandName }}
       </h2>
       <p class="itbms-model text-sm text-gray-500 mb-1 text-center">
