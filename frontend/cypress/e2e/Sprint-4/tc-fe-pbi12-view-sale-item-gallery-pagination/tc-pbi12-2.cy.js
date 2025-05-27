@@ -147,7 +147,7 @@ describe(`TC-FE-PBI12-VIEW-SALE-ITEM-GALLERY-PAGINATION-2\n
             expect(response.status).to.eq(204) 
         })
 
-        cy.get('.itbms-page-first').should('exist').click({force: true})
+        cy.get('.itbms-page-0').should('exist').click({force: true})
         cy.wait(100)
 
         cy.get('.itbms-page-0').should('exist')

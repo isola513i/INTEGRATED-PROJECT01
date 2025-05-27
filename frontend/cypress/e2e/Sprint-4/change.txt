@@ -3,3 +3,7 @@ v.1.1  2025-05-26 change line 158 'asus' to 'samsung'
                   add tc pbi-12
 v.1.2  2025-05-26 change step 4,5 add sort brand in descending
 v.1.3  2025-05-27 add tc pbi-13-1,13-2
+v.1.4  2025-05-27 add tc pbi13-3,4,5,6
+                  pbi 12-2 at line 50 change itbms-page-first to itbms-page-0
+                  change "itbms-brand-filter" to "itbms-brand-filter-button" when click to open  
+                  pbi12-3 add cy.wait(100) when clicking the page

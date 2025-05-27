@@ -48,7 +48,7 @@ describe(`TC-FE-PBI11-FILTER-SALE-ITEM-GALLERY-BY-BRAND-3\n
         should show a brand list in alphabetical order (20 brands)\n
         should show "Asus" brand in "Filter by brand(s)" with a clear(x) button.\n
         should show a a list of "ASUS" phones`,()=>{
-        cy.get('.itbms-brand-filter').should('exist').as('brand-filter')
+        cy.get('.itbms-brand-filter-button').should('exist').as('brand-filter')
         cy.get('@brand-filter').click()
         cy.wait(100)
         
@@ -88,7 +88,7 @@ describe(`TC-FE-PBI11-FILTER-SALE-ITEM-GALLERY-BY-BRAND-3\n
     })
 
     it(`[Step 1] should delete the sale item "LG, W41 Pro/6/128GB/5,600".`,()=>{
-        cy.get('.itbms-brand-filter').should('exist').as('brand-filter')
+        cy.get('.itbms-brand-filter-button').should('exist').as('brand-filter')
         cy.get('@brand-filter').click()
         cy.wait(100)
 
@@ -128,7 +128,7 @@ describe(`TC-FE-PBI11-FILTER-SALE-ITEM-GALLERY-BY-BRAND-3\n
 
     it(`[Step 2] Should remove "ASUS" and show "Samsung", "LG" and "OPPO" in "Filter by brand(s)".\n
         should show 10 OPPO phones following by 10 Samsung phones.`,()=>{
-        cy.get('.itbms-brand-filter').should('exist').as('brand-filter')
+        cy.get('.itbms-brand-filter-button').should('exist').as('brand-filter')
         cy.get('@brand-filter').click()
         cy.wait(100)
 
@@ -164,7 +164,7 @@ describe(`TC-FE-PBI11-FILTER-SALE-ITEM-GALLERY-BY-BRAND-3\n
     it(`[Step 3] Should no brand in "Filter by brand(s)".\n
         should show 60 sale items sorted by brand in ascending order.\n
         should show "Apple" phones in the first page and "Xiaomi" phone in the last page.`,()=>{
-        cy.get('.itbms-brand-filter').should('exist').as('brand-filter')
+        cy.get('.itbms-brand-filter-button').should('exist').as('brand-filter')
         cy.get('@brand-filter').click()
         cy.wait(100)
 
