@@ -32,33 +32,34 @@ const focusNext = (nextIndex) => {
 <template>
 	<form
 		@submit.prevent="$emit('submit')"
-		class="grid grid-cols-12 gap-8 bg-white p-10 rounded-xl shadow-lg"
+		class="grid gap-6 md:grid-cols-12 md:gap-8 bg-white p-4 md:p-10 rounded-xl shadow-lg"
 	>
-		<div class="col-span-4">
+		<!-- LEFT: Picture Upload Area -->
+		<div class="md:col-span-4">
 			<div
-				class="w-full aspect-[4/3] bg-gray-100 flex items-center justify-center text-lg text-gray-400 rounded-lg mb-6 border border-dashed"
+				class="w-full aspect-[4/3] bg-gray-100 flex items-center justify-center text-lg text-gray-400 rounded-lg mb-4 md:mb-6 border border-dashed"
 			>
 				No Picture
 			</div>
-			<div class="grid grid-cols-4 gap-4">
+			<div class="grid grid-cols-4 gap-2 md:gap-4">
 				<div
 					v-for="n in 4"
 					:key="n"
-					class="w-16 h-16 bg-gray-50 text-xs text-gray-400 border flex justify-center items-center rounded-lg"
+					class="w-12 h-12 md:w-16 md:h-16 bg-gray-50 text-xs text-gray-400 border flex justify-center items-center rounded-lg"
 				>
 					+
 				</div>
 			</div>
 		</div>
 
-		<div class="col-span-8 grid grid-cols-2 gap-6">
+		<!-- RIGHT: Form Fields -->
+		<div class="md:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
 			<!-- Brand -->
 			<div>
 				<label
 					class="block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
+					>Brand</label
 				>
-					Brand
-				</label>
 				<select
 					:value="props.form.brandId"
 					@blur="trimField('brandId', $event.target.value)"
@@ -83,9 +84,8 @@ const focusNext = (nextIndex) => {
 			<div>
 				<label
 					class="block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
+					>Model</label
 				>
-					Model
-				</label>
 				<input
 					id="model"
 					type="text"
@@ -228,12 +228,11 @@ const focusNext = (nextIndex) => {
 			</div>
 
 			<!-- Description -->
-			<div class="col-span-2">
+			<div class="sm:col-span-2">
 				<label
 					class="block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
+					>Description</label
 				>
-					Description
-				</label>
 				<textarea
 					id="description"
 					:value="props.form.description"
@@ -247,7 +246,10 @@ const focusNext = (nextIndex) => {
 			</div>
 		</div>
 
-		<div class="col-span-12 flex justify-center gap-6 mt-10">
+		<!-- Buttons -->
+		<div
+			class="col-span-1 sm:col-span-2 md:col-span-12 flex flex-col sm:flex-row justify-center gap-4 md:gap-6 mt-6 md:mt-10"
+		>
 			<button
 				v-if="!updatePage"
 				type="submit"

@@ -63,7 +63,6 @@ onMounted(async () => {
 		brands.value = await fetchBrands();
 	} catch (error) {
 		errorMessage.value = "Failed to load brands";
-		console.error("Brand loading error:", error);
 	}
 });
 
