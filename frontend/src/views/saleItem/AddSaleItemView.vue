@@ -1,10 +1,10 @@
-
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, reactive, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import SaleItemForm from "@/components/form/SaleItemForm.vue";
 import { fetchBrands } from "@/services/brandService";
 import { useFlashStore } from "@/store/useFlashStore";
+import { useSaleItemValidator } from "@/validators/useValidation";
 import axios from "axios";
 
 const router = useRouter();
@@ -12,38 +12,49 @@ const isSubmitting = ref(false);
 const errorMessage = ref("");
 const brands = ref([]);
 const flash = useFlashStore();
+const requiredFields = ["brandId", "model", "price", "quantity", "description"];
 
-const form = ref({
-  brandId: "",
+const form = reactive({
+	brandId: "",
 	model: "",
-	price: null,
+	price: "",
 	description: "",
-	ramGb: null,
-	screenSizeInch: null,
-	storageGb: null,
+	ramGb: "",
+	screenSizeInch: "",
+	storageGb: "",
 	color: "",
-	quantity: null,
+	quantity: "",
 });
 
-const sortedBrands = computed(() => {
-	return [...brands.value].sort((a, b) =>
+const { errors, validateAll, isFormValid } = useSaleItemValidator(form);
+
+const initialForm = reactive(JSON.parse(JSON.stringify(form)));
+
+const sortedBrands = computed(() =>
+	[...brands.value].sort((a, b) =>
 		a.name.localeCompare(b.name, "en", { sensitivity: "base" })
-	);
-});
+	)
+);
 
-const initialForm = ref({ ...form.value });
 const isDirty = computed(() => {
-	return JSON.stringify(form.value) !== JSON.stringify(initialForm.value);
+	const allRequiredChanged = requiredFields.every((field) => {
+		return form[field] !== initialForm[field];
+	});
+
+	const allRequiredValid = requiredFields.every((field) => {
+		const value = form[field];
+		return (
+			value !== null &&
+			value !== "" &&
+			(typeof value !== "string" || value.trim() !== "")
+		);
+	});
+
+	return allRequiredChanged && allRequiredValid;
 });
 
-const isFormValid = computed(() => {
-	const f = form.value;
-	return (
-		!!f.brandId &&
-		f.model.trim().length > 0 &&
-		f.price > 0 &&
-		f.description.trim().length > 0
-	);
+const isReadyToSubmit = computed(() => {
+	return isFormValid.value && isDirty.value;
 });
 
 onMounted(async () => {
@@ -51,87 +62,73 @@ onMounted(async () => {
 		brands.value = await fetchBrands();
 	} catch (error) {
 		errorMessage.value = "Failed to load brands";
+		console.error("Brand loading error:", error);
 	}
 });
 
 const updateForm = (updatedForm) => {
-	form.value = updatedForm;
+	Object.assign(form, updatedForm);
 };
 
 const handleSubmit = async () => {
+	validateAll();
+
+	if (!isFormValid.value) {
+		errorMessage.value = "Please correct the form errors";
+		return;
+	}
+
 	isSubmitting.value = true;
 	errorMessage.value = "";
 
 	try {
-		if (!form.value.brandId) {
-			throw new Error("Please select a brand");
-		}
-
-		const brandId = parseInt(form.value.brandId, 10);
-
-		if (isNaN(brandId)) {
-			throw new Error("Invalid brand ID format");
-		}
-
-		const selectedBrand = brands.value.find((b) => {
-			return Number(b.brandId) === brandId;
-		});
+		const brandId = Number(form.brandId);
+		const selectedBrand = brands.value.find(
+			(b) => Number(b.brandId) === brandId
+		);
 
 		if (!selectedBrand) {
-			throw new Error(`Brand with ID ${brandId} not found`);
+			throw new Error("Selected brand not found");
 		}
 
 		const payload = {
-			model: form.value.model.trim(),
+			model: form.model.trim(),
 			brand: {
 				id: brandId,
 				name: selectedBrand.name,
 			},
-			description: form.value.description.trim(),
-			price: Number(form.value.price),
-			ramGb: form.value.ramGb !== null ? Number(form.value.ramGb) : null,
-			screenSizeInch:
-				form.value.screenSizeInch !== null
-					? Number(form.value.screenSizeInch)
-					: null,
-			quantity: Number(form.value.quantity),
-			storageGb:
-				form.value.storageGb !== null ? Number(form.value.storageGb) : null,
-			color: form.value.color?.trim() || null,
+			description: form.description.trim(),
+			price: Number(form.price),
+			ramGb: form.ramGb ? Number(form.ramGb) : null,
+			screenSizeInch: form.screenSizeInch ? Number(form.screenSizeInch) : null,
+			quantity: Number(form.quantity),
+			storageGb: form.storageGb ? Number(form.storageGb) : null,
+			color: form.color?.trim() || null,
 		};
 
-		const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/v1/sale-items`;
-
-		const response = await axios.post(apiUrl, payload, {
-			headers: {
-				"Content-Type": "application/json",
-			},
-			timeout: 10000,
-			validateStatus: function (status) {
-				return status < 500;
-			},
-		});
+		const response = await axios.post(
+			`${import.meta.env.VITE_API_BASE_URL}/v1/sale-items`,
+			payload,
+			{
+				headers: { "Content-Type": "application/json" },
+				timeout: 10000,
+				validateStatus: (status) => status < 500,
+			}
+		);
 
 		if (response.status === 201) {
 			flash.setMessage(
 				"The sale item has been successfully added.",
-				"itbms-message m-4 p-4 bg-green-100 text-green-800 shadow "
+				"itbms-message m-4 p-4 bg-green-100 text-green-800 shadow"
 			);
 			router.back();
 		} else {
-			errorMessage.value = `Unexpected response: ${response.status} ${response.statusText}`;
+			errorMessage.value =
+				response.data?.message ||
+				`Unexpected response: ${response.status} ${response.statusText}`;
 		}
 	} catch (error) {
-		if (error.response) {
-			errorMessage.value =
-				error.response.data?.message ||
-				`Server error: ${error.response.status}`;
-		} else if (error.request) {
-			errorMessage.value =
-				"No response from server. Please check your connection.";
-		} else {
-			errorMessage.value = error.message || "Failed to send request";
-		}
+		handleSubmissionError(error);
 	} finally {
 		isSubmitting.value = false;
 	}
@@ -139,20 +136,25 @@ const handleSubmit = async () => {
 
 const handleCancel = () => {
 	router.push("/sale-items");
-	const emptyForm = {
-		brandId: "",
-		model: "",
-		price: null,
-		description: "",
-		ramGb: null,
-		screenSizeInch: null,
-		storageGb: null,
-		color: "",
-		quantity: null,
-	};
+	resetForm();
+};
 
-	form.value = emptyForm;
-	initialForm.value = { ...emptyForm };
+const handleSubmissionError = (error) => {
+	if (error.response) {
+		errorMessage.value =
+			error.response.data?.message || `Server error: ${error.response.status}`;
+	} else if (error.request) {
+		errorMessage.value =
+			"No response from server. Please check your connection.";
+	} else {
+		errorMessage.value = error.message || "Failed to send request";
+	}
+	console.error("Submission error:", error);
+};
+
+const resetForm = () => {
+	Object.assign(form, initialForm);
+	errorMessage.value = "";
 };
 </script>
 
@@ -173,8 +175,9 @@ const handleCancel = () => {
 			:form="form"
 			:brands="sortedBrands"
 			:isSubmitting="isSubmitting"
-			:isFormValid="isFormValid"
+			:isFormValid="isReadyToSubmit"
 			:isDirty="isDirty"
+			:errors="errors"
 			@update:form="updateForm"
 			@submit="handleSubmit"
 			@cancel="handleCancel"
