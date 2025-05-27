@@ -2,8 +2,6 @@ package com.example.backend.controllers;
 
 import com.example.backend.dtos.PageDto;
 import com.example.backend.dtos.SaleItemDto;
-import com.example.backend.entities.Brand;
-import com.example.backend.entities.SaleItem;
 import com.example.backend.services.BrandService;
 import com.example.backend.services.SaleItemService;
 import com.example.backend.utils.ListMapper;
@@ -11,7 +9,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
