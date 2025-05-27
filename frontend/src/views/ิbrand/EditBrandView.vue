@@ -1,10 +1,12 @@
 <script setup>
 import { useRoute, useRouter } from "vue-router";
-import BrandForm from "@/components/brand/BrandForm.vue";
+import BrandForm from '@/components/brand/BrandForm.vue'
 import { onMounted, ref } from "vue";
 import { fetchBrandById, updateBrand } from "@/services/brandService";
 import { useFlashFormStore } from "@/store/useFlashFormStore";
 import { useFlashStore } from "@/store/useFlashStore";
+import {brandValidations} from "@/validators/useBrandValidation.js"
+const {correctBrandFormat, numberOfNameChar , numberOfCountryOfOriginChar , validWebsiteUrl} = brandValidations();
 
 const route = useRoute();
 const router = useRouter();
@@ -15,6 +17,7 @@ const brand = ref({});
 onMounted(async () => {
   try {
     const brandId = parseInt(route.params.brandId);
+    console.log(brandId);
     if (isNaN(brandId)) throw new Error("Invalid ID");
     const res = await fetchBrandById(brandId);
     brand.value = res;
@@ -22,33 +25,21 @@ onMounted(async () => {
     console.error("Fetch failed:", error);
     flash.setMessage(
       "The brand does not exist.",
-      "itbms-message m-4 p-4 bg-red-100 text-red-800 shadow ",
+      "itbms-message m-4 p-4 bg-red-100 text-red-800 shadow "
     );
     router.push("/brands");
   }
 });
 
-const validator = (input) => {
-  if (
-    typeof input.name !== "string" ||
-    input.name === "" ||
-    /^[^a-zA-Z0-9]+$/.test(input.name)
-  )
-    return false;
-  if (input.websiteUrl === "") input.websiteUrl = null;
-  if (input.countryOfOrigin === "") input.countryOfOrigin = null;
-  return true;
-};
+
 const handleSubmitForm = async (brand) => {
   const formData = new FormData();
-
-  if (!validator(brand)) {
-    flashForm.setMessage(
-      `Please add correct brand's name`,
-      "m-1 p-1 px-2 bg-red-100 text-red-800 shadow itbms-message rounded-md",
-    );
-    return false;
-  }
+  
+  if (!correctBrandFormat(brand)) return false
+  if (!numberOfNameChar(brand.name)) return false
+  if (!(numberOfCountryOfOriginChar(brand.countryOfOrigin))) return false
+  if (!validWebsiteUrl(brand.websiteUrl)) return false
+  
   formData.append("name", brand.name);
   formData.append("websiteUrl", brand.websiteUrl);
   formData.append("isActive", brand.isActive);
@@ -60,18 +51,18 @@ const handleSubmitForm = async (brand) => {
     if (res.status === 200) {
       flash.setMessage(
         "✅ The brand has been updated.",
-        "itbms-message m-4 p-4 bg-green-100 text-green-800 shadow ",
+        "itbms-message m-4 p-4 bg-green-100 text-green-800 shadow "
       );
       router.back();
     } else if (res.status === 400) {
       flashForm.setMessage(
         `Brand name : ${formData.get("name").toLocaleUpperCase()} has been already existed`,
-        "itbms-message m-1 p-1 px-2 bg-red-100 text-red-800 shadow  rounded-md",
+        "itbms-message m-1 p-1 px-2 bg-red-100 text-red-800 shadow  rounded-md"
       );
     } else if (res.status === 500) {
       flash.setMessage(
         "✅ The brand could not be added.",
-        "itbms-message m-1 p-1 px-2 bg-red-100 text-red-800 shadow  rounded-md",
+        "itbms-message m-1 p-1 px-2 bg-red-100 text-red-800 shadow  rounded-md"
       );
     } else {
       console.warn("Unexpected status:", res.status);

@@ -1,13 +1,39 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watchEffect, watch } from "vue";
 import { useFlashFormStore } from "@/store/useFlashFormStore";
 import { useRouter } from "vue-router";
+import { brandValidations } from "@/validators/useBrandValidation.js";
+const {
+  correctBrandFormat,
+  numberOfNameChar,
+  numberOfCountryOfOriginChar,
+  validWebsiteUrl,
+} = brandValidations();
 
 const props = defineProps({
   brandEdit: Object,
 });
 const emit = defineEmits(["submitForm"]);
 const flashForm = useFlashFormStore();
+
+const nameMsg = ref(null);
+const websiteUrlMsg = ref(null);
+const countryOfOriginMsg = ref(null);
+
+flashForm.messages.forEach((messageObj) => {
+  if (messageObj.name === "name") nameMsg.value = messageObj;
+  if (messageObj.name === "websiteUrl") websiteUrlMsg.value = messageObj;
+  if (messageObj.name === "countryOfOrigin")
+    countryOfOriginMsg.value = messageObj;
+});
+
+watchEffect(() => {
+  nameMsg.value = flashForm.messages.find((msg) => msg.name === "name") || null;
+  websiteUrlMsg.value =
+    flashForm.messages.find((msg) => msg.name === "websiteUrl") || null;
+  countryOfOriginMsg.value =
+    flashForm.messages.find((msg) => msg.name === "countryOfOrigin") || null;
+});
 
 const brand = ref({
   name: "",
@@ -42,6 +68,7 @@ function submitData() {
   emit("submitForm", brand.value);
 }
 const handleCancel = () => {
+  flashForm.clearAllMessages();
   router.push({ path: "/brands" });
 };
 
@@ -55,8 +82,37 @@ const isNoChange = computed(() => {
 });
 
 const isDisabled = computed(() => {
-  return isNoChange.value || brand.value.name.trim() === "";
+  return (
+    isNoChange.value ||
+    brand.value.name.trim() === ""||
+    !numberOfNameChar(brand.value.name) ||
+    !numberOfCountryOfOriginChar(brand.value.countryOfOrigin) ||
+    !validWebsiteUrl(brand.value.websiteUrl)
+  );
 });
+
+watch(
+  () => brand.value.name,
+  () => numberOfNameChar(brand.value.name)
+);
+watch(
+  () => brand.value.countryOfOrigin,
+  () => numberOfCountryOfOriginChar(brand.value.countryOfOrigin)
+);
+watch(
+  () => brand.value.websiteUrl,
+  () => validWebsiteUrl(brand.value.websiteUrl)
+);
+
+const onNameChange = () => {
+  numberOfNameChar(brand.value.name);
+};
+const onCountryOfOriginChange = () => {
+  numberOfCountryOfOriginChar(brand.value.countryOfOrigin);
+};
+const onWebsiteUrlChange = () => {
+  validWebsiteUrl(brand.value.websiteUrl);
+};
 
 const focusNext = (nextIndex) => {
   const nextInputField = document.getElementById(nextIndex);
@@ -72,6 +128,7 @@ const focusNext = (nextIndex) => {
       <p class="text-xl font-semibold">Add new Brand</p>
       <form
         id="brandForm"
+        @keydown.enter.prevent
         @submit.prevent="submitData"
         class="w-1/2 flex flex-col gap-5"
       >
@@ -81,9 +138,6 @@ const focusNext = (nextIndex) => {
               class="block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
               >name
             </label>
-            <label v-if="flashForm.message" :class="flashForm.style">
-              {{ flashForm.message }}
-            </label>
           </div>
           <input
             id="name"
@@ -91,8 +145,14 @@ const focusNext = (nextIndex) => {
             placeholder="name"
             class="itbms-name w-full border px-4 py-2 rounded"
             v-model.trim="brand.name"
-            @keydown.enter="focusNext('websiteUrl')"
+            @change="onNameChange"
+            @keydown.enter.prevent="focusNext('websiteUrl')"
           />
+          <div class="mt-4">
+            <label v-if="nameMsg" :class="nameMsg.style">
+              {{ nameMsg.message }}
+            </label>
+          </div>
         </div>
         <div>
           <label class="block mb-1 font-medium text-gray-700 ml-1"
@@ -104,8 +164,14 @@ const focusNext = (nextIndex) => {
             placeholder="Website URL"
             class="itbms-websiteUrl w-full border px-4 py-2 rounded"
             v-model.trim="brand.websiteUrl"
-            @keydown.enter="focusNext('countryOfOrigin')"
+            @keydown.enter.prevent="focusNext('countryOfOrigin')"
+            @change="onWebsiteUrlChange"
           />
+          <div class="mt-4">
+            <label v-if="websiteUrlMsg" :class="websiteUrlMsg.style">
+              {{ websiteUrlMsg.message }}
+            </label>
+          </div>
         </div>
         <div>
           <label class="block mb-1 font-medium text-gray-700 ml-1"
@@ -117,8 +183,14 @@ const focusNext = (nextIndex) => {
             placeholder="Country Of Origin"
             class="itbms-countryOfOrigin w-full border px-4 py-2 rounded"
             v-model.trim="brand.countryOfOrigin"
-            @keydown.enter="focusNext('isActive')"
+            @keydown.enter.prevent="focusNext('isActive')"
+            @change="onCountryOfOriginChange"
           />
+          <div class="mt-4">
+            <label v-if="countryOfOriginMsg" :class="countryOfOriginMsg.style">
+              {{ countryOfOriginMsg.message }}
+            </label>
+          </div>
         </div>
         <div class="flex justify-center">
           <label class="flex items-center gap-2">
@@ -147,7 +219,7 @@ const focusNext = (nextIndex) => {
           <button
             type="button"
             class="itbms-cancel-button px-5 py-2 border rounded-md"
-            @click="router.back()"
+            @click="handleCancel()"
           >
             Cancel
           </button>

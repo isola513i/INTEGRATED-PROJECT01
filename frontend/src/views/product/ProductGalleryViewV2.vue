@@ -90,14 +90,14 @@ const handleBrandFilterChange = (brands) => {
             Add New Sale Item
           </router-link>
         </div>
-        <div class="itbms-manage-brand">
+        <!-- <div class="itbms-manage-brand">
           <router-link
             to="/brands"
             class="block text-center px-6 py-2 bg-[#171717] text-white rounded hover:bg-white hover:text-black hover:border hover:border-black transition-all duration-300 text-sm font-semibold"
           >
             Manage Brand
           </router-link>
-        </div>
+        </div> -->
       </div>
 
       <!-- Filter -->
