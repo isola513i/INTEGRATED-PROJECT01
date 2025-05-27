@@ -126,6 +126,7 @@ describe(`TC-FE-PBI12-VIEW-SALE-ITEM-GALLERY-PAGINATION-3\n
         cy.wait(100)
 
         cy.get('.itbms-page-9').should('exist').click({force: true})
+        cy.wait(100)
 
         cy.get('.itbms-brand').then(($brands) => {
             const matched = $brands.filter((index, el) =>
@@ -205,6 +206,7 @@ describe(`TC-FE-PBI12-VIEW-SALE-ITEM-GALLERY-PAGINATION-3\n
         cy.wait(100)
 
         cy.get('.itbms-page-1').should('exist').click({force: true})
+        cy.wait(100)
 
         cy.get('.itbms-brand').then(($brands) => {
             const matched = $brands.filter((index, el) =>
@@ -283,6 +285,7 @@ describe(`TC-FE-PBI12-VIEW-SALE-ITEM-GALLERY-PAGINATION-3\n
         cy.wait(100)
 
         cy.get('.itbms-page-last').should('exist').click({force: true})
+        cy.wait(100)
 
         cy.get('.itbms-brand').then(($brands) => {
             const matched = $brands.filter((index, el) =>
@@ -320,6 +323,7 @@ describe(`TC-FE-PBI12-VIEW-SALE-ITEM-GALLERY-PAGINATION-3\n
         cy.wait(100)
 
         cy.get('.itbms-page-first').should('exist').click({force: true})
+        cy.wait(100)
 
         cy.get('.itbms-brand').then(($brands) => {
             const matched = $brands.filter((index, el) =>

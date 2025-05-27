@@ -17,7 +17,7 @@ onMounted(async () => {
     const brandId = parseInt(route.params.brandId);
     if (isNaN(brandId)) throw new Error("Invalid ID");
     const res = await fetchBrandById(brandId);
-    if (res.status === 200) brand.value = res.data;
+    brand.value = res;
   } catch (error) {
     console.error("Fetch failed:", error);
     flash.setMessage(

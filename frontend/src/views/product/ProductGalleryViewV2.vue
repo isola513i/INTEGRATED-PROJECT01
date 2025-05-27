@@ -20,54 +20,54 @@ const sortType = ref("");
 const paginate = ref({});
 
 const syncSessionToRefs = () => {
-	pageSize.value = parseInt(sessionStorage.getItem("pageSize")) || 10;
-	sortField.value = sessionStorage.getItem("sortField") || "id";
-	sortDirection.value = sessionStorage.getItem("sortDirection") || "asc";
-	filteredBrands.value = JSON.parse(
-		sessionStorage.getItem("filterBrands") || "[]"
-	);
+  pageSize.value = parseInt(sessionStorage.getItem("pageSize")) || 10;
+  sortField.value = sessionStorage.getItem("sortField") || "id";
+  sortDirection.value = sessionStorage.getItem("sortDirection") || "asc";
+  filteredBrands.value = JSON.parse(
+    sessionStorage.getItem("filterBrands") || "[]",
+  );
 };
 
 const loadItems = async (page) => {
-	sessionStorage.setItem("page", page);
-	sessionStorage.setItem("pageSize", pageSize.value);
-	sessionStorage.setItem("sortField", sortField.value);
-	sessionStorage.setItem("sortDirection", sortDirection.value);
-	sessionStorage.setItem("filterBrands", JSON.stringify(filteredBrands.value));
+  sessionStorage.setItem("page", page);
+  sessionStorage.setItem("pageSize", pageSize.value);
+  sessionStorage.setItem("sortField", sortField.value);
+  sessionStorage.setItem("sortDirection", sortDirection.value);
+  sessionStorage.setItem("filterBrands", JSON.stringify(filteredBrands.value));
 
-	paginate.value = await fetchSaleItemsV2(
-		JSON.parse(sessionStorage.getItem("filterBrands")),
-		parseInt(sessionStorage.getItem("page")),
-		parseInt(sessionStorage.getItem("pageSize")),
-		sessionStorage.getItem("sortField"),
-		sessionStorage.getItem("sortDirection")
-	);
+  paginate.value = await fetchSaleItemsV2(
+    JSON.parse(sessionStorage.getItem("filterBrands")),
+    parseInt(sessionStorage.getItem("page")),
+    parseInt(sessionStorage.getItem("pageSize")),
+    sessionStorage.getItem("sortField"),
+    sessionStorage.getItem("sortDirection"),
+  );
 
-	saleItems.value = paginate.value.content;
+  saleItems.value = paginate.value.content;
 };
 
 onMounted(() => {
-	syncSessionToRefs();
-	loadItems(parseInt(sessionStorage.getItem("page")) || 0);
+  syncSessionToRefs();
+  loadItems(parseInt(sessionStorage.getItem("page")) || 0);
 });
 
 const handleSortChange = (value) => {
-	if (value == "none") {
-		sortDirection.value = "asc";
-		sortField.value = "id";
-	} else {
-		sortDirection.value = value;
-		sortField.value = "brand.name";
-	}
-	loadItems(paginate.value.page);
+  if (value == "none") {
+    sortDirection.value = "asc";
+    sortField.value = "id";
+  } else {
+    sortDirection.value = value;
+    sortField.value = "brand.name";
+  }
+  loadItems(paginate.value.page);
 };
 const handlePageSizeChange = (size) => {
-	pageSize.value = size;
-	loadItems(0);
+  pageSize.value = size;
+  loadItems(0);
 };
 const handleBrandFilterChange = (brands) => {
-	filteredBrands.value = brands;
-	loadItems(0);
+  filteredBrands.value = brands;
+  loadItems(0);
 };
 </script>
 

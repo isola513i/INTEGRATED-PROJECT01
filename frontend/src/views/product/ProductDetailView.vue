@@ -100,7 +100,7 @@ const deleteItem = async () => {
 
     <div
       v-if="product"
-      class="max-w-7xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-10"
+      class="itbms-row max-w-7xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-10"
     >
       <div>
         <div
