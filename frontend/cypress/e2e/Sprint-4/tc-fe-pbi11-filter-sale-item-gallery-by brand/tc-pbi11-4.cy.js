@@ -51,7 +51,7 @@ describe(`TC-FE-PBI11-FILTER-SALE-ITEM-GALLERY-BY-BRAND-4\n
         should refresh sale item gallery page.\n
         should show "Huawei" and "Xiaomi" brand in "Filter by brand(s)".\n
         should show a list of "Huawei" and "Xiaomi" phones.`,()=>{
-        cy.get('.itbms-brand-filter').should('exist').as('brand-filter')
+        cy.get('.itbms-brand-filter-button').should('exist').as('brand-filter')
         cy.get('@brand-filter').click()
         cy.wait(100)
 
@@ -80,7 +80,7 @@ describe(`TC-FE-PBI11-FILTER-SALE-ITEM-GALLERY-BY-BRAND-4\n
     it(`[Step 3 and 5] should show sale item list page and navigate back to sale item gallery page.\n
         should show "Huawei" and "Xiaomi" brand in "Filter by brand(s)".\n
         should show a list of "Huawei" and "Xiaomi" phones.".`,()=>{
-        cy.get('.itbms-brand-filter').should('exist').as('brand-filter')
+        cy.get('.itbms-brand-filter-button').should('exist').as('brand-filter')
         cy.get('@brand-filter').click()
         cy.wait(100)
 
@@ -112,7 +112,7 @@ describe(`TC-FE-PBI11-FILTER-SALE-ITEM-GALLERY-BY-BRAND-4\n
     it(`[Step 4 and 5] should show manage brand page and navigate back to sale item gallery page.\n
         should show "Huawei" and "Xiaomi" brand in "Filter by brand(s)".\n
         should show a list of "Huawei" and "Xiaomi" phones.".`,()=>{
-        cy.get('.itbms-brand-filter').should('exist').as('brand-filter')
+        cy.get('.itbms-brand-filter-button').should('exist').as('brand-filter')
         cy.get('@brand-filter').click()
         cy.wait(100)
 

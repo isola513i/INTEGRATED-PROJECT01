@@ -49,7 +49,7 @@ describe(`TC-FE-PBI11-FILTER-SALE-ITEM-GALLERY-BY-BRAND-1\n
         should show a brand list in alphabetical order (20 brands)\n
         should show "Asus" brand in "Filter by brand(s)" with a clear(x) button.\n
         should show a a list of "ASUS" phones`,()=>{
-        cy.get('.itbms-brand-filter').should('exist').as('brand-filter')
+        cy.get('.itbms-brand-filter-button').should('exist').as('brand-filter')
         cy.get('@brand-filter').click()
         cy.wait(100)
         
@@ -135,7 +135,7 @@ describe(`TC-FE-PBI11-FILTER-SALE-ITEM-GALLERY-BY-BRAND-1\n
 
     it(`[step 3] should show "ASUS", "Samsung" and "LG" in "Filter by brand(s)".\n
         should show a a list of "ASUS", "Samsung" and "LG" phones with "Samsung" phones shown first`,()=>{
-        cy.get('.itbms-brand-filter').should('exist').as('brand-filter')
+        cy.get('.itbms-brand-filter-button').should('exist').as('brand-filter')
         cy.get('@brand-filter').click()
         cy.wait(100)
 

@@ -57,7 +57,7 @@ describe(`TC-FE-PBI12-VIEW-SALE-ITEM-GALLERY-PAGINATION-5\n
         cy.get('.itbms-brand-desc').should('exist').click()
         cy.wait(100)
 
-        cy.get('.itbms-brand-filter').should('exist').as('brand-filter')
+        cy.get('.itbms-brand-filter-button').should('exist').as('brand-filter')
         cy.get('@brand-filter').click()
         cy.wait(100)
 
@@ -109,7 +109,7 @@ describe(`TC-FE-PBI12-VIEW-SALE-ITEM-GALLERY-PAGINATION-5\n
         cy.get('.itbms-brand-desc').should('exist').click()
         cy.wait(100)
 
-        cy.get('.itbms-brand-filter').should('exist').as('brand-filter')
+        cy.get('.itbms-brand-filter-button').should('exist').as('brand-filter')
         cy.get('@brand-filter').click()
         cy.wait(100)
 
