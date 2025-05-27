@@ -18,11 +18,12 @@ const pageGroupStart = ref(0);
 const goToPage = (page) => {
 	emit("update:page", page);
 
-	if (page < pageGroupStart.value) {
-		pageGroupStart.value = page;
-	} else if (page >= pageGroupStart.value + 10) {
-		pageGroupStart.value = Math.max(0, page - 9);
-	}
+  if (page < pageGroupStart.value) {
+    pageGroupStart.value = page;
+  } else if (page >= pageGroupStart.value + 10) {
+    pageGroupStart.value = Math.max(0, page - 9);
+  }
+  
 };
 const goFirst = () => {
 	emit("update:page", 0);
@@ -31,12 +32,13 @@ const goFirst = () => {
 
 // ถ้า currentPage เปลี่ยนจาก parent (เช่น เปลี่ยน filter) ให้ sync กลุ่ม
 watch(
-	() => props.currentPage,
-	(val) => {
-		if (val < pageGroupStart.value || val >= pageGroupStart.value + 10) {
-			pageGroupStart.value = Math.max(1, val - 4);
-		}
-	}
+  () => props.currentPage,
+  (val) => {
+    if (val < pageGroupStart.value || val >= pageGroupStart.value + 10) {
+      pageGroupStart.value = Math.max(1, val - 4);
+    }
+  },
+  
 );
 const visiblePages = computed(() => {
 	const start = pageGroupStart.value;

@@ -1,9 +1,9 @@
 package com.example.backend.services;
 
-import com.example.backend.entities.Brand;
 import com.example.backend.dtos.BrandDto;
 import java.time.Instant;
 
+import com.example.backend.entities.Brand;
 import com.example.backend.exceptions.BrandHasSaleItemsException;
 import com.example.backend.exceptions.DuplicateNameException;
 import com.example.backend.exceptions.ItemNotFoundException;
