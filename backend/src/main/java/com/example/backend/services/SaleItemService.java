@@ -105,8 +105,10 @@ public class SaleItemService {
         if (filterBrands != null && filterBrands.isEmpty()) {
             filterBrands = null;
         }
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection),
+                        sortField != null ? sortField : "createdOn")
+                .and(Sort.by(Sort.Direction.ASC, "id")); // secondary sort
 
-        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortField != null ? sortField : "createdOn");
         Pageable pageable = PageRequest.of(page, size, sort);
         if(filterBrands != null) return saleItemRepository.findByBrandNameIn(filterBrands, pageable);
         else{
