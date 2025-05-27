@@ -1,6 +1,4 @@
 <script setup>
-import { reactive } from "vue";
-import { useSaleItemValidator } from "@/validators/useValidation";
 const props = defineProps({
 	updatePage: {
 		type: Boolean,
@@ -10,24 +8,9 @@ const props = defineProps({
 	brands: Array,
 	isUpdate: Boolean,
 	isSubmitting: Boolean,
-	isFormValid: Boolean,
-	isDirty: Boolean,
+	isReadyToSubmit: Boolean,
 	errors: Object,
 });
-
-const form = reactive({
-	model: "",
-	brandId: "",
-	price: "",
-	quantity: "",
-	description: "",
-	ramGb: "",
-	screenSizeInch: "",
-	storageGb: "",
-	color: "",
-});
-
-const { isFormValid } = useSaleItemValidator(form);
 
 const emit = defineEmits(["update:form", "submit", "cancel", "blur"]);
 
@@ -49,37 +32,37 @@ const focusNext = (nextIndex) => {
 <template>
 	<form
 		@submit.prevent="$emit('submit')"
-		class="grid grid-cols-12 gap-8 bg-white p-10 rounded-xl shadow-lg"
+		class="grid gap-6 md:grid-cols-12 md:gap-8 bg-white p-4 md:p-10 rounded-xl shadow-lg"
 	>
-		<!-- Image Section -->
-		<div class="col-span-4">
+		<!-- LEFT: Picture Upload Area -->
+		<div class="md:col-span-4">
 			<div
-				class="w-full aspect-[4/3] bg-gray-100 flex items-center justify-center text-lg text-gray-400 rounded-lg mb-6 border border-dashed"
+				class="w-full aspect-[4/3] bg-gray-100 flex items-center justify-center text-lg text-gray-400 rounded-lg mb-4 md:mb-6 border border-dashed"
 			>
 				No Picture
 			</div>
-			<div class="grid grid-cols-4 gap-4">
+			<div class="grid grid-cols-4 gap-2 md:gap-4">
 				<div
 					v-for="n in 4"
 					:key="n"
-					class="w-16 h-16 bg-gray-50 text-xs text-gray-400 border flex justify-center items-center rounded-lg"
+					class="w-12 h-12 md:w-16 md:h-16 bg-gray-50 text-xs text-gray-400 border flex justify-center items-center rounded-lg"
 				>
 					+
 				</div>
 			</div>
 		</div>
 
-		<!-- Form Fields Section -->
-		<div class="col-span-8 grid grid-cols-2 gap-6">
+		<!-- RIGHT: Form Fields -->
+		<div class="md:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
 			<!-- Brand -->
 			<div>
 				<label
 					class="block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
+					>Brand</label
 				>
-					Brand
-				</label>
 				<select
 					:value="props.form.brandId"
+					@blur="trimField('brandId', $event.target.value)"
 					@change="updateField('brandId', Number($event.target.value) || '')"
 					class="itbms-brand w-full border px-4 py-2 rounded"
 				>
@@ -92,16 +75,17 @@ const focusNext = (nextIndex) => {
 						{{ brand.name }}
 					</option>
 				</select>
-				<p class="text-red-500 text-sm mt-1">{{ props.errors.brandId }}</p>
+				<p class="text-red-500 text-sm mt-1 itbms-message">
+					{{ props.errors.brandId }}
+				</p>
 			</div>
 
 			<!-- Model -->
 			<div>
 				<label
 					class="block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
+					>Model</label
 				>
-					Model
-				</label>
 				<input
 					id="model"
 					type="text"
@@ -111,7 +95,9 @@ const focusNext = (nextIndex) => {
 					class="itbms-model w-full border px-4 py-2 rounded"
 					@keydown.enter="focusNext('price')"
 				/>
-				<p class="text-red-500 text-sm mt-1">{{ props.errors.model }}</p>
+				<p class="text-red-500 text-sm mt-1 itbms-message">
+					{{ props.errors.model }}
+				</p>
 			</div>
 
 			<!-- Price -->
@@ -126,6 +112,7 @@ const focusNext = (nextIndex) => {
 					min="0"
 					step="1"
 					:value="props.form.price"
+					@blur="trimField('price', $event.target.value)"
 					@input="
 						updateField(
 							'price',
@@ -137,7 +124,9 @@ const focusNext = (nextIndex) => {
 					class="itbms-price w-full border px-4 py-2 rounded"
 					@keydown.enter="focusNext('quantity')"
 				/>
-				<p class="text-red-500 text-sm mt-1">{{ props.errors.price }}</p>
+				<p class="text-red-500 text-sm mt-1 itbms-message">
+					{{ props.errors.price }}
+				</p>
 			</div>
 
 			<!-- Quantity -->
@@ -152,13 +141,16 @@ const focusNext = (nextIndex) => {
 					min="1"
 					step="1"
 					:value="props.form.quantity"
+					@blur="trimField('quantity', $event.target.value)"
 					@input="
 						updateField('quantity', Math.max(1, Number($event.target.value)))
 					"
 					class="itbms-quantity w-full border px-4 py-2 rounded"
 					@keydown.enter="focusNext('ramGb')"
 				/>
-				<p class="text-red-500 text-sm mt-1">{{ props.errors.quantity }}</p>
+				<p class="text-red-500 text-sm mt-1 itbms-message">
+					{{ props.errors.quantity }}
+				</p>
 			</div>
 
 			<!-- RAM -->
@@ -170,10 +162,13 @@ const focusNext = (nextIndex) => {
 					min="1"
 					:value="props.form.ramGb"
 					@input="updateField('ramGb', Number($event.target.value))"
+					@blur="trimField('ramGb', $event.target.value)"
 					class="itbms-ramGb w-full border px-4 py-2 rounded"
 					@keydown.enter="focusNext('screenSizeInch')"
 				/>
-				<p class="text-red-500 text-sm mt-1">{{ props.errors.ramGb }}</p>
+				<p class="text-red-500 text-sm mt-1 itbms-message">
+					{{ props.errors.ramGb }}
+				</p>
 			</div>
 
 			<!-- Screen Size -->
@@ -188,10 +183,11 @@ const focusNext = (nextIndex) => {
 					min="0"
 					:value="props.form.screenSizeInch"
 					@input="updateField('screenSizeInch', Number($event.target.value))"
+					@blur="trimField('screenSizeInch', $event.target.value)"
 					class="itbms-screenSizeInch w-full border px-4 py-2 rounded"
 					@keydown.enter="focusNext('storageGb')"
 				/>
-				<p class="text-red-500 text-sm mt-1">
+				<p class="text-red-500 text-sm mt-1 itbms-message">
 					{{ props.errors.screenSizeInch }}
 				</p>
 			</div>
@@ -202,12 +198,16 @@ const focusNext = (nextIndex) => {
 				<input
 					id="storageGb"
 					type="number"
+					min="1"
 					:value="props.form.storageGb"
 					@input="updateField('storageGb', Number($event.target.value))"
+					@blur="trimField('storageGb', $event.target.value)"
 					class="itbms-storageGb w-full border px-4 py-2 rounded"
 					@keydown.enter="focusNext('color')"
 				/>
-				<p class="text-red-500 text-sm mt-1">{{ props.errors.storageGb }}</p>
+				<p class="text-red-500 text-sm mt-1 itbms-message">
+					{{ props.errors.storageGb }}
+				</p>
 			</div>
 
 			<!-- Color -->
@@ -222,16 +222,17 @@ const focusNext = (nextIndex) => {
 					class="itbms-color w-full border px-4 py-2 rounded"
 					@keydown.enter="focusNext('description')"
 				/>
-				<p class="text-red-500 text-sm mt-1">{{ props.errors.color }}</p>
+				<p class="text-red-500 text-sm mt-1 itbms-message">
+					{{ props.errors.color }}
+				</p>
 			</div>
 
 			<!-- Description -->
-			<div class="col-span-2">
+			<div class="sm:col-span-2">
 				<label
 					class="block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
+					>Description</label
 				>
-					Description
-				</label>
 				<textarea
 					id="description"
 					:value="props.form.description"
@@ -239,15 +240,20 @@ const focusNext = (nextIndex) => {
 					@blur="trimField('description', $event.target.value)"
 					class="itbms-description w-full border px-4 py-2 rounded resize-none"
 				></textarea>
-				<p class="text-red-500 text-sm mt-1">{{ props.errors.description }}</p>
+				<p class="text-red-500 text-sm mt-1 itbms-message">
+					{{ props.errors.description }}
+				</p>
 			</div>
 		</div>
 
-		<div class="col-span-12 flex justify-center gap-6 mt-10">
+		<!-- Buttons -->
+		<div
+			class="col-span-1 sm:col-span-2 md:col-span-12 flex flex-col sm:flex-row justify-center gap-4 md:gap-6 mt-6 md:mt-10"
+		>
 			<button
 				v-if="!updatePage"
 				type="submit"
-				:disabled="!isFormValid || !isDirty || isSubmitting"
+				:disabled="!isReadyToSubmit || isSubmitting"
 				class="itbms-save-button bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
 			>
 				{{ isSubmitting ? "Saving..." : "Save" }}
@@ -256,7 +262,7 @@ const focusNext = (nextIndex) => {
 			<button
 				v-if="updatePage"
 				type="submit"
-				:disabled="!isFormValid || isSubmitting"
+				:disabled="!isReadyToSubmit || isSubmitting"
 				class="itbms-save-button bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
 			>
 				Save

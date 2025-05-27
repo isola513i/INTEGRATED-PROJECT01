@@ -30,7 +30,10 @@ export function useSaleItemValidator(form) {
 			typeof value === "string" && value.trim() !== "",
 		isInteger: (value) => /^\d+$/.test(String(value)),
 		isPositiveInteger: (value) => /^[1-9]\d*$/.test(String(value)),
-		isPositiveDecimal: (value) => /^\d+(\.\d{1,2})?$/.test(String(value)),
+		isPositiveDecimal: (value) => {
+			const num = parseFloat(value);
+			return /^\d+(\.\d{1,2})?$/.test(value) && !isNaN(num) && num > 0;
+		},
 		isValidUrl: (value) => {
 			try {
 				new URL(value);
@@ -100,31 +103,6 @@ export function useSaleItemValidator(form) {
 				return "Color must be 1–40 characters long or not specified.";
 			if (value.length > 40)
 				return "Color must be 1–40 characters long or not specified.";
-			return "";
-		},
-		brandName: () => {
-			const value = form.brandName?.trim() || "";
-			if (value === "") return "";
-			if (!validationUtils.isNonEmptyString(value))
-				return "Brand name must be 1–30 characters long or not specified.";
-			if (value.length > 30)
-				return "Brand name must be 1–30 characters long or not specified.";
-			return "";
-		},
-		brandUrl: () => {
-			const value = form.brandUrl?.trim() || "";
-			if (value === "") return "";
-			if (!validationUtils.isValidUrl(value))
-				return "Brand URL must be a valid URL or not specified.";
-			return "";
-		},
-		brandCountry: () => {
-			const value = form.brandCountry?.trim() || "";
-			if (value === "") return "";
-			if (!validationUtils.isNonEmptyString(value))
-				return "Brand country of origin must be 1–80 characters long or not specified.";
-			if (value.length > 80)
-				return "Brand country of origin must be 1–80 characters long or not specified.";
 			return "";
 		},
 	};
