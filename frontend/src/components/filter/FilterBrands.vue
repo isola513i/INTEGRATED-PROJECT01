@@ -1,7 +1,6 @@
 <script setup>
 import { ref, onMounted, watch } from "vue";
 import { fetchBrands } from "@/services/brandService";
-import { FunnelIcon } from "@heroicons/vue/24/solid";
 
 const emit = defineEmits(["update:brands", "update:pageSize"]);
 
@@ -137,7 +136,6 @@ function clearAll() {
           class="itbms-brand-filter-button p-2 pt-3 hover:bg-gray-100 text-gray-700"
           title="Filter by brand"
         >
-          <FunnelIcon class="w-5 h-5" />
         </button>
       </div>
       
