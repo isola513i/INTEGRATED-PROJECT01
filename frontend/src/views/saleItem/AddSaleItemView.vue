@@ -12,7 +12,6 @@ const isSubmitting = ref(false);
 const errorMessage = ref("");
 const brands = ref([]);
 const flash = useFlashStore();
-const requiredFields = ["brandId", "model", "price", "quantity", "description"];
 
 const form = reactive({
 	brandId: "",
@@ -26,7 +25,8 @@ const form = reactive({
 	quantity: "",
 });
 
-const { errors, validateAll, isFormValid } = useSaleItemValidator(form);
+const { errors, validateAll, isFormValid, validateField } =
+	useSaleItemValidator(form);
 
 const initialForm = reactive(JSON.parse(JSON.stringify(form)));
 
@@ -36,6 +36,7 @@ const sortedBrands = computed(() =>
 	)
 );
 
+const requiredFields = ["brandId", "model", "price", "quantity", "description"];
 const isDirty = computed(() => {
 	const allRequiredChanged = requiredFields.every((field) => {
 		return form[field] !== initialForm[field];
@@ -175,12 +176,12 @@ const resetForm = () => {
 			:form="form"
 			:brands="sortedBrands"
 			:isSubmitting="isSubmitting"
-			:isFormValid="isReadyToSubmit"
-			:isDirty="isDirty"
+			:isReadyToSubmit="isReadyToSubmit"
 			:errors="errors"
 			@update:form="updateForm"
 			@submit="handleSubmit"
 			@cancel="handleCancel"
+			@blur="validateField"
 		/>
 	</div>
 </template>
