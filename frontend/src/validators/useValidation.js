@@ -48,15 +48,15 @@ export function useSaleItemValidator(form) {
     model: () => {
       const value = form.model?.trim() || "";
       if (!validationUtils.isNonEmptyString(value))
-        return "Model must be 1–60 characters long.";
-      if (value.length > 60) return "Model must be 1–60 characters long.";
+        return "Model must be 1-60 characters long.";
+      if (value.length > 60) return "Model must be 1-60 characters long.";
       return "";
     },
     brandId: () => (!form.brandId ? "Brand must be selected." : ""),
     description: () => {
       const value = form.description?.trim() || "";
       if (!validationUtils.isNonEmptyString(value))
-        return "Description must be 1–65,535 characters long.";
+        return "Description must be 1-65,535 characters long.";
       return "";
     },
     price: () => {
@@ -100,9 +100,9 @@ export function useSaleItemValidator(form) {
       const value = form.color?.trim() || "";
       if (value === "") return "";
       if (!validationUtils.isNonEmptyString(value))
-        return "Color must be 1–40 characters long or not specified.";
+        return "Color must be 1-40 characters long or not specified.";
       if (value.length > 40)
-        return "Color must be 1–40 characters long or not specified.";
+        return "Color must be 1-40 characters long or not specified.";
       return "";
     },
   };
@@ -127,4 +127,3 @@ export function useSaleItemValidator(form) {
     isFormValid,
   };
 }
-////////////rpkbprkgergerk[hjbrineibejvbkekve]

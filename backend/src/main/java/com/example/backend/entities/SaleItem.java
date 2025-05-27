@@ -36,7 +36,6 @@ public class SaleItem {
     private String description;
 
     @NotNull
-
     @Column(name = "price", nullable = false)
     private Integer price;
 
@@ -53,7 +52,7 @@ public class SaleItem {
     @Column(name = "color", length = 40)
     private String color;
 
-
+    @NotNull
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
