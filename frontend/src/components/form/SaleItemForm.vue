@@ -63,10 +63,10 @@ const focusNext = (nextIndex) => {
         <select
           :value="props.form.brandId"
           @blur="trimField('brandId', $event.target.value)"
-          @change="updateField('brandId', Number($event.target.value) || '')"
+          @change="updateField('brandId',($event.target.value) || '')"
           class="itbms-brand w-full border px-4 py-2 rounded"
         >
-          <option value="" disabled>Select brand</option>
+          <option value="" hidden>Select brand</option>
           <option
             v-for="brand in brands"
             :key="brand.brandId"
@@ -109,7 +109,6 @@ const focusNext = (nextIndex) => {
         <input
           id="price"
           type="number"
-          :max="2600000000"
           min="0"
           step="1"
           :value="props.form.price"
@@ -119,7 +118,7 @@ const focusNext = (nextIndex) => {
               'price',
               updatePage
                 ? $event.target.value
-                : Math.max(0, Number($event.target.value)),
+                : Math.max(Number($event.target.value)),
             )
           "
           class="itbms-price w-full border px-4 py-2 rounded"
@@ -143,9 +142,7 @@ const focusNext = (nextIndex) => {
           step="1"
           :value="props.form.quantity"
           @blur="trimField('quantity', $event.target.value)"
-          @input="
-            updateField('quantity', Math.max(0, Number($event.target.value)))
-          "
+          @input="updateField('quantity', $event.target.value)"
           class="itbms-quantity w-full border px-4 py-2 rounded"
           @keydown.enter="focusNext('ramGb')"
         />
@@ -162,7 +159,7 @@ const focusNext = (nextIndex) => {
           type="number"
           min="1"
           :value="props.form.ramGb"
-          @input="updateField('ramGb', Number($event.target.value))"
+          @input="updateField('ramGb',($event.target.value))"
           @blur="trimField('ramGb', $event.target.value)"
           class="itbms-ramGb w-full border px-4 py-2 rounded"
           @keydown.enter="focusNext('screenSizeInch')"
@@ -183,7 +180,7 @@ const focusNext = (nextIndex) => {
           step="0.01"
           min="0"
           :value="props.form.screenSizeInch"
-          @input="updateField('screenSizeInch', Number($event.target.value))"
+          @input="updateField('screenSizeInch',($event.target.value))"
           @blur="trimField('screenSizeInch', $event.target.value)"
           class="itbms-screenSizeInch w-full border px-4 py-2 rounded"
           @keydown.enter="focusNext('storageGb')"
@@ -201,7 +198,7 @@ const focusNext = (nextIndex) => {
           type="number"
           min="1"
           :value="props.form.storageGb"
-          @input="updateField('storageGb', Number($event.target.value))"
+          @input="updateField('storageGb',($event.target.value))"
           @blur="trimField('storageGb', $event.target.value)"
           class="itbms-storageGb w-full border px-4 py-2 rounded"
           @keydown.enter="focusNext('color')"
