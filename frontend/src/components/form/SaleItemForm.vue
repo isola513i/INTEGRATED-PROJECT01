@@ -1,6 +1,4 @@
 <script setup>
-import { reactive } from "vue";
-import { useSaleItemValidator } from "@/validators/useValidation";
 const props = defineProps({
 	updatePage: {
 		type: Boolean,
@@ -10,24 +8,9 @@ const props = defineProps({
 	brands: Array,
 	isUpdate: Boolean,
 	isSubmitting: Boolean,
-	isFormValid: Boolean,
-	isDirty: Boolean,
+	isReadyToSubmit: Boolean,
 	errors: Object,
 });
-
-const form = reactive({
-	model: "",
-	brandId: "",
-	price: "",
-	quantity: "",
-	description: "",
-	ramGb: "",
-	screenSizeInch: "",
-	storageGb: "",
-	color: "",
-});
-
-const { isFormValid } = useSaleItemValidator(form);
 
 const emit = defineEmits(["update:form", "submit", "cancel", "blur"]);
 
@@ -51,7 +34,6 @@ const focusNext = (nextIndex) => {
 		@submit.prevent="$emit('submit')"
 		class="grid grid-cols-12 gap-8 bg-white p-10 rounded-xl shadow-lg"
 	>
-		<!-- Image Section -->
 		<div class="col-span-4">
 			<div
 				class="w-full aspect-[4/3] bg-gray-100 flex items-center justify-center text-lg text-gray-400 rounded-lg mb-6 border border-dashed"
@@ -69,7 +51,6 @@ const focusNext = (nextIndex) => {
 			</div>
 		</div>
 
-		<!-- Form Fields Section -->
 		<div class="col-span-8 grid grid-cols-2 gap-6">
 			<!-- Brand -->
 			<div>
@@ -80,6 +61,7 @@ const focusNext = (nextIndex) => {
 				</label>
 				<select
 					:value="props.form.brandId"
+					@blur="trimField('brandId', $event.target.value)"
 					@change="updateField('brandId', Number($event.target.value) || '')"
 					class="itbms-brand w-full border px-4 py-2 rounded"
 				>
@@ -92,7 +74,9 @@ const focusNext = (nextIndex) => {
 						{{ brand.name }}
 					</option>
 				</select>
-				<p class="text-red-500 text-sm mt-1">{{ props.errors.brandId }}</p>
+				<p class="text-red-500 text-sm mt-1 itbms-message">
+					{{ props.errors.brandId }}
+				</p>
 			</div>
 
 			<!-- Model -->
@@ -111,7 +95,9 @@ const focusNext = (nextIndex) => {
 					class="itbms-model w-full border px-4 py-2 rounded"
 					@keydown.enter="focusNext('price')"
 				/>
-				<p class="text-red-500 text-sm mt-1">{{ props.errors.model }}</p>
+				<p class="text-red-500 text-sm mt-1 itbms-message">
+					{{ props.errors.model }}
+				</p>
 			</div>
 
 			<!-- Price -->
@@ -126,6 +112,7 @@ const focusNext = (nextIndex) => {
 					min="0"
 					step="1"
 					:value="props.form.price"
+					@blur="trimField('price', $event.target.value)"
 					@input="
 						updateField(
 							'price',
@@ -137,7 +124,9 @@ const focusNext = (nextIndex) => {
 					class="itbms-price w-full border px-4 py-2 rounded"
 					@keydown.enter="focusNext('quantity')"
 				/>
-				<p class="text-red-500 text-sm mt-1">{{ props.errors.price }}</p>
+				<p class="text-red-500 text-sm mt-1 itbms-message">
+					{{ props.errors.price }}
+				</p>
 			</div>
 
 			<!-- Quantity -->
@@ -152,13 +141,16 @@ const focusNext = (nextIndex) => {
 					min="1"
 					step="1"
 					:value="props.form.quantity"
+					@blur="trimField('quantity', $event.target.value)"
 					@input="
 						updateField('quantity', Math.max(1, Number($event.target.value)))
 					"
 					class="itbms-quantity w-full border px-4 py-2 rounded"
 					@keydown.enter="focusNext('ramGb')"
 				/>
-				<p class="text-red-500 text-sm mt-1">{{ props.errors.quantity }}</p>
+				<p class="text-red-500 text-sm mt-1 itbms-message">
+					{{ props.errors.quantity }}
+				</p>
 			</div>
 
 			<!-- RAM -->
@@ -170,10 +162,13 @@ const focusNext = (nextIndex) => {
 					min="1"
 					:value="props.form.ramGb"
 					@input="updateField('ramGb', Number($event.target.value))"
+					@blur="trimField('ramGb', $event.target.value)"
 					class="itbms-ramGb w-full border px-4 py-2 rounded"
 					@keydown.enter="focusNext('screenSizeInch')"
 				/>
-				<p class="text-red-500 text-sm mt-1">{{ props.errors.ramGb }}</p>
+				<p class="text-red-500 text-sm mt-1 itbms-message">
+					{{ props.errors.ramGb }}
+				</p>
 			</div>
 
 			<!-- Screen Size -->
@@ -188,10 +183,11 @@ const focusNext = (nextIndex) => {
 					min="0"
 					:value="props.form.screenSizeInch"
 					@input="updateField('screenSizeInch', Number($event.target.value))"
+					@blur="trimField('screenSizeInch', $event.target.value)"
 					class="itbms-screenSizeInch w-full border px-4 py-2 rounded"
 					@keydown.enter="focusNext('storageGb')"
 				/>
-				<p class="text-red-500 text-sm mt-1">
+				<p class="text-red-500 text-sm mt-1 itbms-message">
 					{{ props.errors.screenSizeInch }}
 				</p>
 			</div>
@@ -202,12 +198,16 @@ const focusNext = (nextIndex) => {
 				<input
 					id="storageGb"
 					type="number"
+					min="1"
 					:value="props.form.storageGb"
 					@input="updateField('storageGb', Number($event.target.value))"
+					@blur="trimField('storageGb', $event.target.value)"
 					class="itbms-storageGb w-full border px-4 py-2 rounded"
 					@keydown.enter="focusNext('color')"
 				/>
-				<p class="text-red-500 text-sm mt-1">{{ props.errors.storageGb }}</p>
+				<p class="text-red-500 text-sm mt-1 itbms-message">
+					{{ props.errors.storageGb }}
+				</p>
 			</div>
 
 			<!-- Color -->
@@ -222,7 +222,9 @@ const focusNext = (nextIndex) => {
 					class="itbms-color w-full border px-4 py-2 rounded"
 					@keydown.enter="focusNext('description')"
 				/>
-				<p class="text-red-500 text-sm mt-1">{{ props.errors.color }}</p>
+				<p class="text-red-500 text-sm mt-1 itbms-message">
+					{{ props.errors.color }}
+				</p>
 			</div>
 
 			<!-- Description -->
@@ -239,7 +241,9 @@ const focusNext = (nextIndex) => {
 					@blur="trimField('description', $event.target.value)"
 					class="itbms-description w-full border px-4 py-2 rounded resize-none"
 				></textarea>
-				<p class="text-red-500 text-sm mt-1">{{ props.errors.description }}</p>
+				<p class="text-red-500 text-sm mt-1 itbms-message">
+					{{ props.errors.description }}
+				</p>
 			</div>
 		</div>
 
@@ -247,7 +251,7 @@ const focusNext = (nextIndex) => {
 			<button
 				v-if="!updatePage"
 				type="submit"
-				:disabled="!isFormValid || !isDirty || isSubmitting"
+				:disabled="!isReadyToSubmit || isSubmitting"
 				class="itbms-save-button bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
 			>
 				{{ isSubmitting ? "Saving..." : "Save" }}
@@ -256,7 +260,7 @@ const focusNext = (nextIndex) => {
 			<button
 				v-if="updatePage"
 				type="submit"
-				:disabled="!isFormValid || isSubmitting"
+				:disabled="!isReadyToSubmit || isSubmitting"
 				class="itbms-save-button bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
 			>
 				Save
