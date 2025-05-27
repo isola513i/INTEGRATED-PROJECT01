@@ -140,14 +140,14 @@ function clearAll() {
           <FunnelIcon class="w-5 h-5" />
         </button>
       </div>
-
-      <!-- Clear -->
-      <button
-        @click="clearAll"
-        class="itbms-brand-filter-clear bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 h-[42px] text-sm font-medium cursor-pointer"
-      >
-        Clear
-      </button>
+      
+			<!-- Clear -->
+			<button
+				@click="clearAll"
+				class="itbms-brand-filter-clear block text-center px-6 py-2 bg-[#171717] text-white rounded hover:bg-white hover:text-black hover:border hover:border-black transition-all duration-300 text-sm font-semibold cursor-pointer"
+			>
+				Clear
+			</button>
 
       <!-- Page size -->
       <div class="flex items-center gap-2 h-[42px]">
