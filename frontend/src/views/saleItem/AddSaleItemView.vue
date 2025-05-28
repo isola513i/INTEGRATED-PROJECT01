@@ -135,7 +135,7 @@ const handleSubmit = async () => {
 };
 
 const handleCancel = () => {
-  router.push("/sale-items");
+  router.back()
   resetForm();
 };
 

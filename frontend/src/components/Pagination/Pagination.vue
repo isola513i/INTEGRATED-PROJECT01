@@ -96,6 +96,7 @@ const visiblePages = computed(() => {
 		<!-- Last (hidden on mobile) -->
 		<button
 			@click="goToPage(totalPages - 1)"
+			
 			:disabled="currentPage + 1 === totalPages"
 			class="hidden sm:inline-block itbms-page-last px-3 py-1.5 md:px-3 md:py-1.5 rounded-full border text-gray-700 bg-white hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
 		>

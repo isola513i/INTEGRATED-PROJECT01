@@ -1,40 +1,66 @@
-import axios from "axios";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const fetchBrands = async () => {
-  const response = await axios.get(`${API_BASE_URL}/v1/brands`);
-  return response.data.map((brand) => ({
+  const response = await fetch(`${API_BASE_URL}/v1/brands`);
+  if (!response.ok) throw new Error("Failed to fetch brands");
+  const data = await response.json();
+  return data.map((brand) => ({
     brandId: brand.id || brand.brandId,
     name: brand.name,
   }));
 };
 
 export const fetchBrandById = async (brandId) => {
-  const response = await axios.get(`${API_BASE_URL}/v1/brands/${brandId}`);
-  return response.data;
+  const response = await fetch(`${API_BASE_URL}/v1/brands/${brandId}`);
+  if (!response.ok) throw new Error("Failed to fetch brand");
+  return await response.json();
 };
 
 export const addBrand = async (brand) => {
-  return await axios.post(`${API_BASE_URL}/v1/brands`, brand, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-    timeout: 10000,
-    validateStatus: (status) => status < 500,
-  });
+   try {
+      const res = await fetch(`${API_BASE_URL}/v1/brands`, {
+         method: 'POST',
+         headers: {
+            'Content-Type': 'application/json',
+         },
+         body: JSON.stringify(brand),
+      });
+
+      if (!res.ok) throw new Error('Failed to create new brand')
+
+      return await res.json();
+   } catch (error) {
+      console.error('API error:', error);
+      return { success: false, error };
+   }
 };
 
 export const updateBrand = async (brandId, brand) => {
-  return await axios.put(`${API_BASE_URL}/v1/brands/${brandId}`, brand, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-    timeout: 10000,
-    validateStatus: (status) => status < 500,
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/v1/brands/${brandId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(brand),
+      signal: controller.signal,
+    });
+
+    if (response.status >= 500) throw new Error("Server error");
+
+    return await response.json();
+  } finally {
+    clearTimeout(timeout);
+  }
 };
 
 export const deleteBrandById = async (brandId) => {
-  const response = await axios.delete(`${API_BASE_URL}/v1/brands/${brandId}`);
-  return response.data;
+  const response = await fetch(`${API_BASE_URL}/v1/brands/${brandId}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) throw new Error("Failed to delete brand");
+  return true;
 };
