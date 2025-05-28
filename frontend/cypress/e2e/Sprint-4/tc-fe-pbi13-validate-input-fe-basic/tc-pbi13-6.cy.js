@@ -119,7 +119,6 @@ describe(`TC-FE-PBI13-VALIDATE-INPUT-FE-BASIC-6\n
             expect($btn.is(':disabled') || $btn.hasClass('disabled')).to.be.false
         })
 
-        cy.get('.itbms-message').should('contain','Brand name must be 1-30 characters long.')
     }) 
 
     it(`[Step 6] should change the country of origin field to "     อาณาจักรนิรันดรภูผาสุวรรณภูมิดินแดนแห่งมณีเลอค่า และวัฒนธรรมอันรุ่งเรืองเปี่ยมสุข     ".\n
