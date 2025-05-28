@@ -64,12 +64,12 @@ describe(`TC-FE-PBI13-VALIDATE-INPUT-FE-BASIC-3\n
     })
 
     it(`[Step 6] should change the description field to "     " and navigate to next file.\n
-        should show an error message "Description must be 1-65,535 characters long."\n
+        should show an error message "Description must be 1-16,384 characters long."\n
         should disable the "save" button.`,()=>{
         
         cy.get('.itbms-description').clear().type("     ")
         cy.get('.itbms-description').blur() ;
-        cy.get('.itbms-message').should('contain','Description must be 1-65,535 characters long.')
+        cy.get('.itbms-message').should('contain','Description must be 1-16,384 characters long.')
 
         cy.get('.itbms-save-button').as('save') ;
         cy.get('@save').should(($btn)=>{

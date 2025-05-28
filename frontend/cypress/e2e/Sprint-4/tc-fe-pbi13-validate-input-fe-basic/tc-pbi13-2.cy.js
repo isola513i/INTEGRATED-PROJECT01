@@ -138,7 +138,7 @@ describe(`TC-FE-PBI13-VALIDATE-INPUT-FE-BASIC-2\n
         cy.get('@save').should(($btn)=>{
             expect($btn.is(':disabled') || $btn.hasClass('disabled')).to.be.true
         })
-        cy.contains('.itbms-message','Description must be 1-65,535 characters long.').should('exist') ;
+        cy.contains('.itbms-message','Description must be 1-16,384 characters long.').should('exist') ;
     })
 
     it(`[Step 1.5] should have "Add Sale Item" button and click to open the page for entry new sale item\n
@@ -169,7 +169,7 @@ describe(`TC-FE-PBI13-VALIDATE-INPUT-FE-BASIC-2\n
         cy.get('@save').should(($btn)=>{
             expect($btn.is(':disabled') || $btn.hasClass('disabled')).to.be.true
         })
-        cy.contains('.itbms-message','Description must be 1-65,535 characters long.').should('exist') ;
+        cy.contains('.itbms-message','Description must be 1-16,384 characters long.').should('exist') ;
     })
 
     it(`[Step 1.6] should have "Add Sale Item" button and click to open the page for entry new sale item\n
