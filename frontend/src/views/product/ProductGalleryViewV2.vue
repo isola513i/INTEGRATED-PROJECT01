@@ -1,6 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { ref, onMounted } from "vue";
 import { fetchSaleItemsV2 } from "@/services/saleItemService";
 import SaleItemCard from "@/components/product/SaleItemCard.vue";
 import ProductCarousel from "@/components/product/ProductCarousel.vue";
