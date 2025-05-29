@@ -23,11 +23,23 @@ public class BrandDto {
         private Integer noOfSaleItems;
     }
     @Data
-    @NoArgsConstructor
     public static class UpdateBrandDto {
         private String name;
         private String websiteUrl;
-        private Boolean isActive;
+        private Boolean isActive=true;
         private String countryOfOrigin;
+
+        public void setName(){
+            this.name = clean(name);
+        }
+        public void setWebsiteUrl(){
+            this.websiteUrl = clean(websiteUrl);
+        }
+        public void setCountryOfOrigin(){
+            this.countryOfOrigin = clean(countryOfOrigin);
+        }
+        private String clean(String input) {
+            return (input != null && !input.trim().isEmpty()) ? input.trim() : null;
+        }
     }
 }

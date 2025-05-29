@@ -45,7 +45,7 @@ const handleSubmitForm = async (brand) => {
 
 	const submitBrand = {
 		name: brand.name,
-		websiteUrl: BrandForm.websiteUrl,
+		websiteUrl: brand.websiteUrl,
 		isActive: brand.isActive,
 		countryOfOrigin: brand.countryOfOrigin,
 	};
