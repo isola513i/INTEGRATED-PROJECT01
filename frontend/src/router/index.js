@@ -73,7 +73,7 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory("/ssi4/"),
+  history: createWebHistory("/ssi4/"), // nested path
   routes,
 });
 

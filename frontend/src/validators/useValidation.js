@@ -43,7 +43,6 @@ export function useSaleItemValidator(form) {
 			}
 		},
 	};
-
 	const validators = {
 		model: () => {
 			const value = form.model?.trim() || "";
