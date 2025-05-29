@@ -11,10 +11,6 @@ const props = defineProps({
 const emit = defineEmits(["update:page", "go-to-last"]);
 
 const pageGroupStart = ref(0);
-
-// คำนวณกลุ่มของหน้า
-
-// เปลี่ยนหน้า
 const goToPage = (page) => {
 	emit("update:page", page);
 
@@ -31,7 +27,7 @@ const goFirst = () => {
 const goToLast = () => {
 	emit("go-to-last");
 };
-// ถ้า currentPage เปลี่ยนจาก parent (เช่น เปลี่ยน filter) ให้ sync กลุ่ม
+
 watch(
 	() => props.currentPage,
 	(val) => {

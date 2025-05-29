@@ -2,19 +2,25 @@
 import { ref, reactive, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import SaleItemForm from "@/components/form/SaleItemForm.vue";
-import { fetchItemById, updateSaleItem } from "@/services/saleItemService";
+import {
+	fetchItemById,
+	addSaleItem,
+	updateSaleItem,
+} from "@/services/saleItemService";
 import { fetchBrands } from "@/services/brandService";
 import { useFlashStore } from "@/store/useFlashStore";
 import { useSaleItemValidator } from "@/validators/useValidation";
 
-const router = useRouter();
-const initProd = ref();
 const route = useRoute();
-const isUpdate = ref(false);
+const router = useRouter();
+const flash = useFlashStore();
+
+const isEditMode = computed(() => !!route.params.id);
 const isSubmitting = ref(false);
+const isUpdate = ref(false);
 const errorMessage = ref("");
 const brands = ref([]);
-const flash = useFlashStore();
+const originalItemData = ref(null);
 
 const form = reactive({
 	brandId: "",
@@ -28,26 +34,17 @@ const form = reactive({
 	quantity: null,
 });
 
+const requiredFields = ["brandId", "model", "price", "quantity", "description"];
+
 const { errors, validateAll, isFormValid, validateField } =
 	useSaleItemValidator(form);
 
 const initialForm = reactive(JSON.parse(JSON.stringify(form)));
-const requiredFields = ["brandId", "model", "price", "quantity", "description"];
-
-Object.keys(form).forEach((field) => {
-	watch(
-		() => form[field],
-		() => {
-			validateField(field);
-			checkFormUpdate();
-		}
-	);
-});
 
 const isDirty = computed(() => {
-	const allRequiredChanged = requiredFields.every((field) => {
-		return form[field] !== initialForm[field];
-	});
+	const allRequiredChanged = requiredFields.every(
+		(field) => form[field] !== initialForm[field]
+	);
 
 	const allRequiredValid = requiredFields.every((field) => {
 		const value = form[field];
@@ -62,26 +59,56 @@ const isDirty = computed(() => {
 });
 
 const isReadyToSubmit = computed(() => {
-	return isFormValid.value && isDirty.value && isUpdate.value;
+	return (
+		isFormValid.value && isDirty.value && (!isEditMode.value || isUpdate.value)
+	);
 });
 
-const checkFormUpdate = () => {
-	isUpdate.value = JSON.stringify(form) !== JSON.stringify(initProd.value);
-};
+const sortedBrands = computed(() =>
+	[...brands.value].sort((a, b) =>
+		a.name.localeCompare(b.name, "en", { sensitivity: "base" })
+	)
+);
 
 onMounted(async () => {
 	try {
 		brands.value = await fetchBrands();
-		const data = await fetchItemById(route.params.id);
-		DataToForm(data);
-		initProd.value = JSON.parse(JSON.stringify(form));
-	} catch (error) {
+
+		if (isEditMode.value) {
+			const data = await fetchItemById(route.params.id);
+			populateForm(data);
+			originalItemData.value = JSON.parse(JSON.stringify(form));
+		} else {
+			Object.assign(initialForm, JSON.parse(JSON.stringify(form)));
+		}
+
+		watchFields();
+	} catch (err) {
 		errorMessage.value = "Failed to load data";
-		console.error("Loading error:", error);
+		console.error("Load Error:", err);
 	}
 });
 
-const DataToForm = (data) => {
+const watchFields = () => {
+	Object.keys(form).forEach((field) => {
+		watch(
+			() => form[field],
+			() => {
+				validateField(field);
+				if (isEditMode.value) {
+					checkFormUpdate();
+				}
+			}
+		);
+	});
+};
+
+const checkFormUpdate = () => {
+	isUpdate.value =
+		JSON.stringify(form) !== JSON.stringify(originalItemData.value);
+};
+
+const populateForm = (data) => {
 	Object.assign(form, {
 		brandId: brands.value.find((b) => b.name === data.brandName)?.brandId || "",
 		model: data.model || "",
@@ -111,22 +138,15 @@ const handleSubmit = async () => {
 	errorMessage.value = "";
 
 	try {
-		if (!form.brandId) throw new Error("Please select a brand");
-
-		const brandId = parseInt(form.brandId, 10);
-		if (isNaN(brandId)) throw new Error("Invalid brand ID format");
-
+		const brandId = Number(form.brandId);
 		const selectedBrand = brands.value.find(
 			(b) => Number(b.brandId) === brandId
 		);
-		if (!selectedBrand) throw new Error(`Brand with ID ${brandId} not found`);
+		if (!selectedBrand) throw new Error("Selected brand not found");
 
 		const payload = {
 			model: form.model.trim(),
-			brand: {
-				id: brandId,
-				name: selectedBrand.name,
-			},
+			brand: { id: brandId, name: selectedBrand.name },
 			description: form.description.trim(),
 			price: Number(form.price),
 			ramGb: form.ramGb !== null ? Number(form.ramGb) : null,
@@ -137,12 +157,20 @@ const handleSubmit = async () => {
 			color: form.color?.trim() || null,
 		};
 
-		await updateSaleItem(route.params.id, payload);
+		if (isEditMode.value) {
+			await updateSaleItem(route.params.id, payload);
+			flash.setMessage(
+				"✅ The sale item has been successfully updated.",
+				"m-4 p-4 bg-green-100 text-green-800 shadow itbms-message"
+			);
+		} else {
+			await addSaleItem(payload);
+			flash.setMessage(
+				"✅ The sale item has been successfully added.",
+				"m-4 p-4 bg-green-100 text-green-800 shadow itbms-message"
+			);
+		}
 
-		flash.setMessage(
-			"✅ The sale item has been updated.",
-			"m-4 p-4 bg-green-100 text-green-800 shadow itbms-message"
-		);
 		router.back();
 	} catch (error) {
 		handleSubmissionError(error);
@@ -165,7 +193,7 @@ const handleSubmissionError = (error) => {
 };
 
 const handleCancel = () => {
-	router.push("/sale-items");
+	router.back();
 	resetForm();
 };
 
@@ -180,32 +208,29 @@ const resetForm = () => {
 		<div class="mb-8 flex items-center gap-2">
 			<router-link
 				to="/sale-items"
-				class="itbms-home-button text-gray-600 hover:text-black text-xl font-light"
-				>Home
+				class="text-gray-600 hover:text-black text-xl font-light itbms-home-button"
+			>
+				Home
 			</router-link>
 			<span class="text-gray-400">/</span>
-			<button
-				@click="router.back()"
-				class="itbms-home-button text-gray-600 hover:text-black text-xl font-light"
-			>
-				back
-			</button>
+			<span class="text-xl text-gray-800 font-light">
+				{{ isEditMode ? "Edit Sale Item" : "New Sale Item" }}
+			</span>
 		</div>
 
 		<div v-if="errorMessage" class="text-red-600 mb-4">{{ errorMessage }}</div>
 
 		<SaleItemForm
-			v-if="form"
-			:updatePage="true"
-			:isUpdate="isUpdate"
 			:form="form"
-			:brands="brands"
+			:brands="sortedBrands"
 			:isSubmitting="isSubmitting"
 			:isReadyToSubmit="isReadyToSubmit"
 			:errors="errors"
+			:isUpdate="isEditMode"
 			@update:form="updateForm"
 			@submit="handleSubmit"
 			@cancel="handleCancel"
+			@blur="validateField"
 		/>
 	</div>
 </template>
