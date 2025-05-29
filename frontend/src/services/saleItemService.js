@@ -1,63 +1,58 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-const handleResponse = async (response) => {
-	if (!response.ok) {
-		const errorData = await response.json().catch(() => ({}));
-		throw new Error(errorData.message || "Something went wrong");
-	}
-	return response.json();
-};
-
 export const fetchSaleItems = async () => {
 	const response = await fetch(`${API_BASE_URL}/v1/sale-items`);
-	return handleResponse(response);
+	if (!response.ok) throw new Error("Failed to fetch sale items");
+	return await response.json();
 };
 
 export const fetchItemById = async (saleItemId) => {
 	const response = await fetch(`${API_BASE_URL}/v1/sale-items/${saleItemId}`);
-	return handleResponse(response);
+	if (!response.ok) throw new Error("Failed to fetch item");
+	return await response.json();
 };
 
 export const addSaleItem = async (payload) => {
-	const controller = new AbortController();
-	const timeoutId = setTimeout(() => controller.abort(), 10000);
-
 	try {
-		const response = await fetch(`${API_BASE_URL}/v1/sale-items`, {
+		const res = await fetch(`${API_BASE_URL}/v1/sale-items`, {
 			method: "POST",
-			headers: { "Content-Type": "application/json" },
+			headers: {
+				"Content-Type": "application/json",
+			},
 			body: JSON.stringify(payload),
-			signal: controller.signal,
 		});
 
-		clearTimeout(timeoutId);
-		return handleResponse(response);
+		if (!res.ok) throw new Error("Failed to create new sale item");
+
+		return await res.json();
 	} catch (error) {
-		clearTimeout(timeoutId);
-		throw error;
+		console.error("API error:", error);
+		return { success: false, error };
 	}
 };
 
-export const updateSaleItem = async (saleItemId, payload) => {
+export const updateSaleItem = async (saleItemId, saleItem) => {
 	const controller = new AbortController();
-	const timeoutId = setTimeout(() => controller.abort(), 10000);
+	const timeout = setTimeout(() => controller.abort(), 10000);
 
 	try {
 		const response = await fetch(
 			`${API_BASE_URL}/v1/sale-items/${saleItemId}`,
 			{
 				method: "PUT",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(payload),
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(saleItem),
 				signal: controller.signal,
 			}
 		);
 
-		clearTimeout(timeoutId);
-		return handleResponse(response);
-	} catch (error) {
-		clearTimeout(timeoutId);
-		throw error;
+		if (response.status >= 500) throw new Error("Server error");
+
+		return await response.json();
+	} finally {
+		clearTimeout(timeout);
 	}
 };
 
@@ -65,7 +60,8 @@ export const deleteItemById = async (saleItemId) => {
 	const response = await fetch(`${API_BASE_URL}/v1/sale-items/${saleItemId}`, {
 		method: "DELETE",
 	});
-	return handleResponse(response);
+	if (!response.ok) throw new Error("Failed to delete item");
+	return true;
 };
 
 export const fetchSaleItemsV2 = async (
@@ -82,17 +78,15 @@ export const fetchSaleItemsV2 = async (
 	let searchParams = `?page=${page}&size=${size}`;
 	if (sortField) searchParams += `&sortField=${sortField}`;
 	if (sortDirection) searchParams += `&sortDirection=${sortDirection}`;
-	filterBrands.forEach((brand) => {
-		searchParams += `&filterBrands=${encodeURIComponent(brand)}`;
-	});
+	filterBrands.forEach((brand) => (searchParams += `&filterBrands=${brand}`));
 
 	try {
 		const response = await fetch(
 			`${API_BASE_URL}/v2/sale-items${searchParams}`
 		);
-		return handleResponse(response);
+		if (!response.ok) throw new Error("Failed to fetch sale items");
+		return await response.json();
 	} catch (error) {
 		console.error("Failed to fetch sale items:", error);
-		throw error;
 	}
 };

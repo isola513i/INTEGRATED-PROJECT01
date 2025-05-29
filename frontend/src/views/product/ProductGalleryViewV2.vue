@@ -50,12 +50,11 @@ onMounted(() => {
 	loadItems(parseInt(sessionStorage.getItem("page")) || 0);
 });
 async function handleGoToLast() {
-    await loadItems(0)
-    const totalPages =  paginate.value.totalPages
-    const lastPageIndex = totalPages - 1
-    await loadItems(lastPageIndex)
-
-  }
+	await loadItems(0);
+	const totalPages = paginate.value.totalPages;
+	const lastPageIndex = totalPages - 1;
+	await loadItems(lastPageIndex);
+}
 const handleSortChange = (value) => {
 	if (value == "none") {
 		sortDirection.value = "asc";
@@ -77,25 +76,25 @@ const handleBrandFilterChange = (brands) => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-white">
-    <PromoBar />
-    <ProductCarousel />
+	<div class="min-h-screen bg-white">
+		<PromoBar />
+		<ProductCarousel />
 
-    <!-- Responsive Controls Section -->
-    <div
-      class="flex flex-col md:flex-row flex-wrap gap-4 justify-between items-start md:items-center pt-10 py-2 px-4"
-    >
-      <!-- Buttons: Add & Manage -->
-      <div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-        <div class="itbms-sale-item-add">
-          <router-link
-            to="/sale-items/add"
-            class="block text-center px-6 py-2 bg-[#171717] text-white rounded hover:bg-white hover:text-black hover:border hover:border-black transition-all duration-300 text-sm font-semibold"
-          >
-            Add New Sale Item
-          </router-link>
-        </div>
-        <!-- <div class="itbms-manage-brand">
+		<!-- Responsive Controls Section -->
+		<div
+			class="flex flex-col md:flex-row flex-wrap gap-4 justify-between items-start md:items-center pt-10 py-2 px-4"
+		>
+			<!-- Buttons: Add & Manage -->
+			<div class="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+				<div class="itbms-sale-item-add">
+					<router-link
+						to="/sale-items/add"
+						class="block text-center px-6 py-2 bg-[#171717] text-white rounded hover:bg-white hover:text-black hover:border hover:border-black transition-all duration-300 text-sm font-semibold"
+					>
+						Add New Sale Item
+					</router-link>
+				</div>
+				<!-- <div class="itbms-manage-brand">
           <router-link
             to="/brands"
             class="block text-center px-6 py-2 bg-[#171717] text-white rounded hover:bg-white hover:text-black hover:border hover:border-black transition-all duration-300 text-sm font-semibold"
@@ -103,53 +102,52 @@ const handleBrandFilterChange = (brands) => {
             Manage Brand
           </router-link>
         </div> -->
-      </div>
+			</div>
 
-      <!-- Filter -->
-      <div class="w-full md:w-auto">
-        <BrandFilters
-          @update:pageSize="handlePageSizeChange"
-          @update:brands="handleBrandFilterChange"
-        />
-      </div>
+			<!-- Filter -->
+			<div class="w-full md:w-auto">
+				<BrandFilters
+					@update:pageSize="handlePageSizeChange"
+					@update:brands="handleBrandFilterChange"
+				/>
+			</div>
 
-      <!-- Sort -->
-      <div class="w-full sm:w-auto flex justify-end md:justify-start">
-        <SortButtons :selected="sortType" @update:sort="handleSortChange" />
-      </div>
-    </div>
+			<!-- Sort -->
+			<div class="w-full sm:w-auto flex justify-end md:justify-start">
+				<SortButtons :selected="sortType" @update:sort="handleSortChange" />
+			</div>
+		</div>
 
-    <!-- Flash message -->
-    <div v-if="flash.message" :class="flash.style" class="px-4">
-      {{ flash.message }}
-    </div>
+		<!-- Flash message -->
+		<div v-if="flash.message" :class="flash.style" class="px-4">
+			{{ flash.message }}
+		</div>
 
-    <!-- Product Cards -->
-    <div class="px-4 py-2">
-      <div
-        v-if="saleItems.length > 0"
-        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
-      >
-        <SaleItemCard
-          v-for="item in saleItems"
-          :key="item.saleItemId"
-          :item="item"
-        />
-      </div>
-      <div v-else class="p-10 text-center text-gray-400 text-xl">
-        No sale item
-      </div>
-    </div>
+		<!-- Product Cards -->
+		<div class="px-4 py-2">
+			<div
+				v-if="saleItems.length > 0"
+				class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
+			>
+				<SaleItemCard
+					v-for="item in saleItems"
+					:key="item.saleItemId"
+					:item="item"
+				/>
+			</div>
+			<div v-else class="p-10 text-center text-gray-400 text-xl">
+				No sale item
+			</div>
+		</div>
 
-    <!-- Pagination -->
-    <div class="flex justify-center py-4">
-      <Pagination
-        :current-page="paginate.page"
-        :total-pages="paginate.totalPages"
-        @update:page="(page) => loadItems(page)"
-        @go-to-last="handleGoToLast"
-
-      />
-    </div>
-  </div>
+		<!-- Pagination -->
+		<div class="flex justify-center py-4">
+			<Pagination
+				:current-page="paginate.page"
+				:total-pages="paginate.totalPages"
+				@update:page="(page) => loadItems(page)"
+				@go-to-last="handleGoToLast"
+			/>
+		</div>
+	</div>
 </template>

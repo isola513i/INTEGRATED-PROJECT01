@@ -10,7 +10,7 @@ import { useSaleItemValidator } from "@/validators/useValidation";
 const router = useRouter();
 const initProd = ref();
 const route = useRoute();
-const isUpdate = ref(false); //
+const isUpdate = ref(false);
 const isSubmitting = ref(false);
 const errorMessage = ref("");
 const brands = ref([]);
@@ -111,21 +111,15 @@ const handleSubmit = async () => {
 	errorMessage.value = "";
 
 	try {
-		if (!form.brandId) {
-			throw new Error("Please select a brand");
-		}
+		if (!form.brandId) throw new Error("Please select a brand");
 
 		const brandId = parseInt(form.brandId, 10);
-		if (isNaN(brandId)) {
-			throw new Error("Invalid brand ID format");
-		}
+		if (isNaN(brandId)) throw new Error("Invalid brand ID format");
 
 		const selectedBrand = brands.value.find(
 			(b) => Number(b.brandId) === brandId
 		);
-		if (!selectedBrand) {
-			throw new Error(`Brand with ID ${brandId} not found`);
-		}
+		if (!selectedBrand) throw new Error(`Brand with ID ${brandId} not found`);
 
 		const payload = {
 			model: form.model.trim(),
@@ -158,8 +152,12 @@ const handleSubmit = async () => {
 };
 
 const handleSubmissionError = (error) => {
-	if (error.name === "AbortError") {
-		errorMessage.value = "Request timed out.";
+	if (error.response) {
+		errorMessage.value =
+			error.response.data?.message || `Server error: ${error.response.status}`;
+	} else if (error.request) {
+		errorMessage.value =
+			"No response from server. Please check your connection.";
 	} else {
 		errorMessage.value = error.message || "Failed to send request";
 	}
@@ -183,8 +181,8 @@ const resetForm = () => {
 			<router-link
 				to="/sale-items"
 				class="itbms-home-button text-gray-600 hover:text-black text-xl font-light"
-				>Home</router-link
-			>
+				>Home
+			</router-link>
 			<span class="text-gray-400">/</span>
 			<button
 				@click="router.back()"

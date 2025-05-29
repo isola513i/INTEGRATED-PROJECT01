@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from "vue-router";
-import ProductGalleryView from "@/views/product/ProductGalleryView.vue";
 import LandingPageView from "@/views/home/LandingPageView.vue";
 import ProductDetailView from "@/views/product/ProductDetailView.vue";
 import NotFoundView from "@/views/error/NotFoundView.vue";
@@ -8,9 +7,8 @@ import AddSaleItem from "@/views/saleItem/AddSaleItemView.vue";
 import EditSaleItemView from "@/views/saleItem/EditSaleItemView.vue";
 import ProductListView from "@/views/product/ProductListView.vue";
 import ManageBrandView from "@/views/ิbrand/ManageBrandView.vue";
-import AddBrandView from "@/views/ิbrand/AddBrandView.vue";
-import EditBrandView from "@/views/ิbrand/EditBrandView.vue";
-import ProductGalleryViewV2 from "@/views/product/ProductGalleryViewV2.vue";
+import AddEditBrandView from "@/views/ิbrand/AddEditBrandView.vue";
+import ProductGalleryView from "@/views/product/ProductGalleryView.vue";
 
 const routes = [
   {
@@ -21,7 +19,7 @@ const routes = [
   {
     path: "/sale-items",
     name: "SaleItemsV2",
-    component: ProductGalleryViewV2,
+    component: ProductGalleryView,
   },
   {
     path: "/sale-items/:id",
@@ -51,12 +49,12 @@ const routes = [
   {
     path: "/brands/add",
     name: "AddBrandView",
-    component: AddBrandView,
+    component: AddEditBrandView,
   },
   {
     path: "/brands/:brandId/edit",
     name: "EditBrandView",
-    component: EditBrandView,
+    component: AddEditBrandView,
   },
   {
     path: "/not-found",

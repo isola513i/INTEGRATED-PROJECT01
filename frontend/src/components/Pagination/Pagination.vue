@@ -93,6 +93,7 @@ const visiblePages = computed(() => {
       Next ›
     </button>
 
+
     <!-- Last (hidden on mobile) -->
     <button
       @click="goToLast"

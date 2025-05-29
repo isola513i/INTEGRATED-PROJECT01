@@ -28,13 +28,14 @@ const form = reactive({
 const { errors, validateAll, isFormValid, validateField } =
 	useSaleItemValidator(form);
 
+const initialForm = reactive(JSON.parse(JSON.stringify(form)));
+
 const sortedBrands = computed(() =>
 	[...brands.value].sort((a, b) =>
 		a.name.localeCompare(b.name, "en", { sensitivity: "base" })
 	)
 );
 
-const initialForm = reactive(JSON.parse(JSON.stringify(form)));
 const requiredFields = ["brandId", "model", "price", "quantity", "description"];
 const isDirty = computed(() => {
 	const allRequiredChanged = requiredFields.every((field) => {
@@ -58,7 +59,6 @@ const isReadyToSubmit = computed(() => {
 });
 
 onMounted(async () => {
-	validateAll();
 	try {
 		brands.value = await fetchBrands();
 	} catch (error) {
@@ -71,6 +71,13 @@ const updateForm = (updatedForm) => {
 };
 
 const handleSubmit = async () => {
+	validateAll();
+
+	if (!isFormValid.value) {
+		errorMessage.value = "Please correct the form errors";
+		return;
+	}
+
 	isSubmitting.value = true;
 	errorMessage.value = "";
 
@@ -114,13 +121,17 @@ const handleSubmit = async () => {
 };
 
 const handleCancel = () => {
-	router.push("/sale-items");
+	router.back();
 	resetForm();
 };
 
 const handleSubmissionError = (error) => {
-	if (error.name === "AbortError") {
-		errorMessage.value = "Request timed out.";
+	if (error.response) {
+		errorMessage.value =
+			error.response.data?.message || `Server error: ${error.response.status}`;
+	} else if (error.request) {
+		errorMessage.value =
+			"No response from server. Please check your connection.";
 	} else {
 		errorMessage.value = error.message || "Failed to send request";
 	}
