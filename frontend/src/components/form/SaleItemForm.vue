@@ -52,33 +52,33 @@ const focusNext = (nextIndex) => {
 			</div>
 		</div>
 
-    <!-- RIGHT: Form Fields -->
-    <div class="md:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
-      <!-- Brand -->
-      <div>
-        <label
-          class="block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
-          >Brand</label
-        >
-        <select
-          :value="props.form.brandId"
-          @blur="trimField('brandId', $event.target.value)"
-          @change="updateField('brandId', $event.target.value || '')"
-          class="itbms-brand w-full border px-4 py-2 rounded"
-        >
-          <option value="" hidden>Select brand</option>
-          <option
-            v-for="brand in brands"
-            :key="brand.brandId"
-            :value="brand.brandId"
-          >
-            {{ brand.name }}
-          </option>
-        </select>
-        <p class="text-red-500 text-sm mt-1 itbms-message">
-          {{ props.errors.brandId }}
-        </p>
-      </div>
+		<!-- RIGHT: Form Fields -->
+		<div class="md:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+			<!-- Brand -->
+			<div>
+				<label
+					class="block mb-1 font-medium text-gray-700 after:content-['*'] after:text-red-500 ml-1"
+					>Brand</label
+				>
+				<select
+					:value="props.form.brandId"
+					@blur="trimField('brandId', $event.target.value)"
+					@change="updateField('brandId', $event.target.value || '')"
+					class="itbms-brand w-full border px-4 py-2 rounded"
+				>
+					<option value="" hidden>Select brand</option>
+					<option
+						v-for="brand in brands"
+						:key="brand.brandId"
+						:value="brand.brandId"
+					>
+						{{ brand.name }}
+					</option>
+				</select>
+				<p class="text-red-500 text-sm mt-1 itbms-message">
+					{{ props.errors.brandId }}
+				</p>
+			</div>
 
 			<!-- Model -->
 			<div>
@@ -150,63 +150,63 @@ const focusNext = (nextIndex) => {
 					{{ props.errors.quantity }}
 				</p>
 			</div>
-      
-      <!-- RAM -->
-      <div>
-        <label class="block mb-1 font-medium text-gray-700">RAM (GB)</label>
-        <input
-          id="ramGb"
-          type="number"
-          min="1"
-          :value="props.form.ramGb"
-          @input="updateField('ramGb', $event.target.value)"
-          @blur="trimField('ramGb', $event.target.value)"
-          class="itbms-ramGb w-full border px-4 py-2 rounded"
-          @keydown.enter="focusNext('screenSizeInch')"
-        />
-        <p class="text-red-500 text-sm mt-1 itbms-message">
-          {{ props.errors.ramGb }}
-        </p>
-      </div>
 
-      <!-- Screen Size -->
-      <div>
-        <label class="block mb-1 font-medium text-gray-700"
-          >Screen Size (Inch)</label
-        >
-        <input
-          id="screenSizeInch"
-          type="number"
-          step="0.01"
-          min="0"
-          :value="props.form.screenSizeInch"
-          @input="updateField('screenSizeInch', $event.target.value)"
-          @blur="trimField('screenSizeInch', $event.target.value)"
-          class="itbms-screenSizeInch w-full border px-4 py-2 rounded"
-          @keydown.enter="focusNext('storageGb')"
-        />
-        <p class="text-red-500 text-sm mt-1 itbms-message">
-          {{ props.errors.screenSizeInch }}
-        </p>
-      </div>
+			<!-- RAM -->
+			<div>
+				<label class="block mb-1 font-medium text-gray-700">RAM (GB)</label>
+				<input
+					id="ramGb"
+					type="number"
+					min="1"
+					:value="props.form.ramGb"
+					@input="updateField('ramGb', $event.target.value)"
+					@blur="trimField('ramGb', $event.target.value)"
+					class="itbms-ramGb w-full border px-4 py-2 rounded"
+					@keydown.enter="focusNext('screenSizeInch')"
+				/>
+				<p class="text-red-500 text-sm mt-1 itbms-message">
+					{{ props.errors.ramGb }}
+				</p>
+			</div>
 
-      <!-- Storage -->
-      <div>
-        <label class="block mb-1 font-medium text-gray-700">Storage (GB)</label>
-        <input
-          id="storageGb"
-          type="number"
-          min="1"
-          :value="props.form.storageGb"
-          @input="updateField('storageGb', $event.target.value)"
-          @blur="trimField('storageGb', $event.target.value)"
-          class="itbms-storageGb w-full border px-4 py-2 rounded"
-          @keydown.enter="focusNext('color')"
-        />
-        <p class="text-red-500 text-sm mt-1 itbms-message">
-          {{ props.errors.storageGb }}
-        </p>
-      </div>
+			<!-- Screen Size -->
+			<div>
+				<label class="block mb-1 font-medium text-gray-700"
+					>Screen Size (Inch)</label
+				>
+				<input
+					id="screenSizeInch"
+					type="number"
+					step="0.01"
+					min="0"
+					:value="props.form.screenSizeInch"
+					@input="updateField('screenSizeInch', $event.target.value)"
+					@blur="trimField('screenSizeInch', $event.target.value)"
+					class="itbms-screenSizeInch w-full border px-4 py-2 rounded"
+					@keydown.enter="focusNext('storageGb')"
+				/>
+				<p class="text-red-500 text-sm mt-1 itbms-message">
+					{{ props.errors.screenSizeInch }}
+				</p>
+			</div>
+
+			<!-- Storage -->
+			<div>
+				<label class="block mb-1 font-medium text-gray-700">Storage (GB)</label>
+				<input
+					id="storageGb"
+					type="number"
+					min="1"
+					:value="props.form.storageGb"
+					@input="updateField('storageGb', $event.target.value)"
+					@blur="trimField('storageGb', $event.target.value)"
+					class="itbms-storageGb w-full border px-4 py-2 rounded"
+					@keydown.enter="focusNext('color')"
+				/>
+				<p class="text-red-500 text-sm mt-1 itbms-message">
+					{{ props.errors.storageGb }}
+				</p>
+			</div>
 
 			<!-- Color -->
 			<div>
