@@ -15,7 +15,7 @@ export function brandValidations() {
       flashForm.setMessage(
         "name",
         `Brand name must be 1-30 characters long.`,
-        "m-1 p-1 px-2 bg-red-100 text-red-800 shadow itbms-message rounded-md"
+        "m-1 p-1 px-2 bg-red-100 text-red-800 shadow itbms-message rounded-md",
       );
       return false;
     } else {
@@ -24,15 +24,15 @@ export function brandValidations() {
     }
   }
   function numberOfCountryOfOriginChar(countryOfOrigin) {
-    if(countryOfOrigin === null){
+    if (countryOfOrigin === null) {
       flashForm.removeMessage("countryOfOrigin");
-      return true
+      return true;
     }
     if (countryOfOrigin.length > 80) {
       flashForm.setMessage(
         "countryOfOrigin",
         `Brand country of origin must be 1-80 characters long or not specified.`,
-        "m-1 p-1 px-2 bg-red-100 text-red-800 shadow itbms-message rounded-md"
+        "m-1 p-1 px-2 bg-red-100 text-red-800 shadow itbms-message rounded-md",
       );
       return false;
     } else {
@@ -41,21 +41,21 @@ export function brandValidations() {
     }
   }
   function validWebsiteUrl(websiteUrl) {
-    if(websiteUrl === '' || websiteUrl ===  null){ 
-        flashForm.removeMessage("websiteUrl");
-        return true}
-      try {
-        new URL(websiteUrl);
-        flashForm.removeMessage("websiteUrl");
-        return true;
-      } catch {
-        flashForm.setMessage(
-          "websiteUrl",
-          `Brand URL must be a valid URL or not specified.`,
-          "m-1 p-1 px-2 bg-red-100 text-red-800 shadow itbms-message rounded-md"
-        );
-        return false;
-
+    if (websiteUrl === "" || websiteUrl === null) {
+      flashForm.removeMessage("websiteUrl");
+      return true;
+    }
+    try {
+      new URL(websiteUrl);
+      flashForm.removeMessage("websiteUrl");
+      return true;
+    } catch {
+      flashForm.setMessage(
+        "websiteUrl",
+        `Brand URL must be a valid URL or not specified.`,
+        "m-1 p-1 px-2 bg-red-100 text-red-800 shadow itbms-message rounded-md",
+      );
+      return false;
     }
   }
   return {

@@ -33,9 +33,9 @@ export const useFlashFormStore = defineStore("flashForm", {
   }),
 
   actions: {
-    setMessage(name ,message, style) {
-      const id = Date.now()
-      this.messages.push({ id,name, message, style });
+    setMessage(name, message, style) {
+      const id = Date.now();
+      this.messages.push({ id, name, message, style });
     },
 
     clearAllMessages() {
@@ -43,7 +43,7 @@ export const useFlashFormStore = defineStore("flashForm", {
     },
 
     removeMessage(name) {
-      this.messages = this.messages.filter(msg => msg.name !== name);
+      this.messages = this.messages.filter((msg) => msg.name !== name);
     },
   },
 });

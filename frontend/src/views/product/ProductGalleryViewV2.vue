@@ -50,7 +50,13 @@ onMounted(() => {
   syncSessionToRefs();
   loadItems(parseInt(sessionStorage.getItem("page")) || 0);
 });
+async function handleGoToLast() {
+    await loadItems(0)
+    const totalPages =  paginate.value.totalPages
+    const lastPageIndex = totalPages - 1
+    await loadItems(lastPageIndex)
 
+  }
 const handleSortChange = (value) => {
   if (value == "none") {
     sortDirection.value = "asc";
@@ -142,6 +148,8 @@ const handleBrandFilterChange = (brands) => {
         :current-page="paginate.page"
         :total-pages="paginate.totalPages"
         @update:page="(page) => loadItems(page)"
+        @go-to-last="handleGoToLast"
+
       />
     </div>
   </div>
