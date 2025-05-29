@@ -124,14 +124,14 @@ const focusNext = (nextIndex) => {
 <template>
   <div class="flex justify-center text-black">
     <div
-      class="w-8/10 border border-gray-800 shadow-md m-5 rounded-md p-5 flex flex-col items-center"
+      class="w-full md:w-5/10 border border-gray-800 shadow-md m-5 rounded-md p-1 py-3 md:p-5 flex flex-col items-center"
     >
       <p class="text-xl font-semibold">Add new Brand</p>
       <form
         id="brandForm"
         @keydown.enter.prevent
         @submit.prevent="submitData"
-        class="w-1/2 flex flex-col gap-5"
+        class="md:w-3/5 w-8/10 flex flex-col gap-5"
       >
         <div>
           <div class="flex">
