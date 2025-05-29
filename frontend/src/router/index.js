@@ -18,11 +18,6 @@ const routes = [
     name: "Landing",
     component: LandingPageView,
   },
-  // {
-  //   path: "/sale-items",
-  //   name: "SaleItems",
-  //   component: ProductGalleryView,
-  // },
   {
     path: "/sale-items",
     name: "SaleItemsV2",
@@ -80,7 +75,7 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory("/ssi4/"),
+  history: createWebHistory("/ssi4/"), // nested path
   routes,
 });
 

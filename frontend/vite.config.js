@@ -6,7 +6,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 // https://vite.dev/config/
 export default defineConfig({
-  base:'/ssi4/',
+  base:'/ssi4/', // ตรงนี้ คือ nested path
   plugins: [vue(), vueDevTools(), tailwindcss()],
   resolve: {
     alias: {

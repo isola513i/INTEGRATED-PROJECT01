@@ -28,6 +28,24 @@ onMounted(async () => {
     (b) => b.name.toLowerCase() !== "filter by brand",
   );
 });
+import { onBeforeUnmount } from "vue";
+
+// สร้าง ref ไปผูกกับ container
+const dropdownRef = ref(null);
+
+function handleClickOutside(event) {
+  if (dropdownRef.value && !dropdownRef.value.contains(event.target)) {
+    showDropdown.value = false;
+  }
+}
+onMounted(() => {
+  document.addEventListener("click", handleClickOutside);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("click", handleClickOutside);
+});
+
 
 watch(pageSize, (newVal) => {
   emit("update:pageSize", Number(newVal));
@@ -103,7 +121,8 @@ function clearAll() {
     </div>
     <div class="flex flex-wrap gap-4 items-center">
       <!-- Custom dropdown -->
-      <div class="relative w-full md:w-auto">
+      <div class="relative w-full md:w-auto"
+      ref="dropdownRef">
         <button
           @click="toggleDropdown"
           class="w-full md:w-[250px] text-left px-4 h-[42px] bg-white border border-gray-300 rounded-lg text-gray-700 text-base focus:outline-none cursor-pointer"
@@ -114,7 +133,8 @@ function clearAll() {
         <div
           v-if="showDropdown"
           class="absolute mt-1 w-full z-50 bg-white border border-gray-300 rounded-lg max-h-60 overflow-auto shadow-lg"
-        >
+
+          >
           <div
             v-for="brand in brandOptions
               .slice()
@@ -122,6 +142,7 @@ function clearAll() {
             :key="brand.brandId"
             class="itbms-filter-item px-4 py-2 text-black hover:bg-gray-100 flex items-center gap-2 cursor-pointer"
             @click="toggleBrand(brand)"
+
           >
             <input
               type="checkbox"
@@ -133,19 +154,23 @@ function clearAll() {
         </div>
         <button
           @click="toggleDropdown"
-          class="itbms-brand-filter-button p-2 pt-3 hover:bg-gray-100 text-gray-700"
-          title="Filter by brand"
+          class="itbms-brand-filter-button p-2 pt-3 text-gray-700"
+          
         >
-        </button>
+        <img
+        src="@/assets/images/filter/filterButton.png"
+        alt="Filter"
+        class="h-5 w-5"
+      /></button>
       </div>
-      
-			<!-- Clear -->
-			<button
-				@click="clearAll"
-				class="itbms-brand-filter-clear block text-center px-6 py-2 bg-[#171717] text-white rounded hover:bg-white hover:text-black hover:border hover:border-black transition-all duration-300 text-sm font-semibold cursor-pointer"
-			>
-				Clear
-			</button>
+
+      <!-- Clear -->
+      <button
+        @click="clearAll"
+        class="itbms-brand-filter-clear block text-center px-6 py-2 bg-[#171717] text-white rounded hover:bg-white hover:text-black hover:border hover:border-[#171717] transition-all duration-300 text-sm font-semibold cursor-pointer"
+      >
+        Clear
+      </button>
 
       <!-- Page size -->
       <div class="flex items-center gap-2 h-[42px]">
