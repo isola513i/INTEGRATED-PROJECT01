@@ -6,8 +6,8 @@ import Error500View from "@/views/error/Error500View.vue";
 import AddSaleItem from "@/views/saleItem/AddSaleItemView.vue";
 import EditSaleItemView from "@/views/saleItem/EditSaleItemView.vue";
 import ProductListView from "@/views/product/ProductListView.vue";
-import ManageBrandView from "@/views/ิbrand/ManageBrandView.vue";
-import AddEditBrandView from "@/views/ิbrand/AddEditBrandView.vue";
+import ManageBrandView from "@/views/brand/ManageBrandView.vue";
+import AddEditBrandView from "@/views/brand/AddEditBrandView.vue";
 import ProductGalleryView from "@/views/product/ProductGalleryView.vue";
 
 const routes = [
