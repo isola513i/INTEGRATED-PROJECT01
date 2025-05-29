@@ -13,6 +13,7 @@ const {
 const props = defineProps({
   brandEdit: Object,
 });
+
 const emit = defineEmits(["submitForm"]);
 const flashForm = useFlashFormStore();
 
@@ -84,7 +85,7 @@ const isNoChange = computed(() => {
 const isDisabled = computed(() => {
   return (
     isNoChange.value ||
-    brand.value.name.trim() === ""||
+    brand.value.name.trim() === "" ||
     !numberOfNameChar(brand.value.name) ||
     !numberOfCountryOfOriginChar(brand.value.countryOfOrigin) ||
     !validWebsiteUrl(brand.value.websiteUrl)
@@ -93,15 +94,15 @@ const isDisabled = computed(() => {
 
 watch(
   () => brand.value.name,
-  () => numberOfNameChar(brand.value.name)
+  () => numberOfNameChar(brand.value.name),
 );
 watch(
   () => brand.value.countryOfOrigin,
-  () => numberOfCountryOfOriginChar(brand.value.countryOfOrigin)
+  () => numberOfCountryOfOriginChar(brand.value.countryOfOrigin),
 );
 watch(
   () => brand.value.websiteUrl,
-  () => validWebsiteUrl(brand.value.websiteUrl)
+  () => validWebsiteUrl(brand.value.websiteUrl),
 );
 
 const onNameChange = () => {
@@ -121,9 +122,9 @@ const focusNext = (nextIndex) => {
 </script>
 
 <template>
-  <div class="flex justify-center">
+  <div class="flex justify-center text-black">
     <div
-      class="w-8/10 border-1 border-gray-400 shadow-md m-5 rounded-md p-5 flex flex-col items-center"
+      class="w-8/10 border border-gray-800 shadow-md m-5 rounded-md p-5 flex flex-col items-center"
     >
       <p class="text-xl font-semibold">Add new Brand</p>
       <form

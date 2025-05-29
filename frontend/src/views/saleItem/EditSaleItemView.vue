@@ -11,7 +11,7 @@ import axios from "axios";
 const router = useRouter();
 const initProd = ref();
 const route = useRoute();
-const isUpdate = ref(false);
+const isUpdate = ref(false); //
 const isSubmitting = ref(false);
 const errorMessage = ref("");
 const brands = ref([]);

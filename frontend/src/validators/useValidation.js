@@ -53,10 +53,12 @@ export function useSaleItemValidator(form) {
       return "";
     },
     brandId: () => (!form.brandId ? "Brand must be selected." : ""),
+
     description: () => {
       const value = form.description?.trim() || "";
-      if (!validationUtils.isNonEmptyString(value))
-        return "Description must be 1-16,384 characters long.";
+      if (!validationUtils.isNonEmptyString(value) || value.length > 16384) {
+        return "Description must be 1–16,384 characters long.";
+      }
       return "";
     },
     price: () => {
