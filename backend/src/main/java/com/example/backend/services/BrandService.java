@@ -1,7 +1,6 @@
 package com.example.backend.services;
 
 import com.example.backend.dtos.BrandDto;
-import java.time.Instant;
 
 import com.example.backend.entities.Brand;
 import com.example.backend.exceptions.BrandHasSaleItemsException;
@@ -45,7 +44,6 @@ public class BrandService {
 
     @Transactional
     public  Brand addBrand(BrandDto.GetBrandDto brandDto) {
-        brandDto.setId(null);
         if (brandDto == null) {
             throw new IllegalArgumentException("Request must not be null");    }
         String name = brandDto.getName() != null ? brandDto.getName().trim() : null;
@@ -65,37 +63,31 @@ public class BrandService {
     }
 
     public Brand updateBrand(int id, BrandDto.UpdateBrandDto request) {
-        Brand brand = brandRepository.findByIdAndIsDeletedFalse(id)
+        Brand brand = brandRepository.findById(id)
                 .orElseThrow(() -> new ItemNotFoundException("Brand not found"));
-        String trimmedName = request.getName() != null ? request.getName().trim() : null;
-        if (trimmedName == null || trimmedName.isEmpty()) {
+
+        if (request.getName() == null) {
             throw new IllegalArgumentException("Name must not be empty");
         }
-        boolean isDuplicate = brandRepository
-                .existsByNameAndIdNotAndIsDeletedFalse(trimmedName, id);
+        boolean isDuplicate = brandRepository.existsByNameAndIdNot(request.getName(),id);
         if (isDuplicate) {
             throw new DuplicateNameException("Duplicate name");
         }
-        brand.setName(trimmedName);
-        brand.setWebsiteUrl(request.getWebsiteUrl() != null ? request.getWebsiteUrl().trim() : null);
-        brand.setCountryOfOrigin(request.getCountryOfOrigin() != null ? request.getCountryOfOrigin().trim() : null);
-        Boolean isActive = request.getIsActive();
-        brand.setIsActive(isActive != null ? isActive : brand.getIsActive());
-        brand.setUpdatedOn(Instant.now());
-        return brandRepository.save(brand);
+        brand.setName(request.getName());
+        brand.setWebsiteUrl(request.getWebsiteUrl());
+        brand.setCountryOfOrigin(request.getCountryOfOrigin());
+        brand.setIsActive(request.getIsActive());
+        Brand updatedBrand = brandRepository.saveAndFlush(brand);
+        return brandRepository.findById(updatedBrand.getId()).orElseThrow();
     }
 
     public void deleteBrand(Integer id){
-        Brand brand = brandRepository.findByIdAndIsDeletedFalse(id)
+        Brand brand = brandRepository.findById(id)
                 .orElseThrow(() -> new ItemNotFoundException("Brand not found"));
         if (saleItemRepository.existsByBrand_Id(id)) {
             throw new BrandHasSaleItemsException("Brand has sale item(s)");
         }
-
         brandRepository.delete(brand);
-    }
-    public List<Brand> getAllBrandsById(List<Integer> brandIds){
-        return brandRepository.findAllById(brandIds);
     }
 
 }
