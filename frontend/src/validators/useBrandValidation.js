@@ -15,7 +15,7 @@ export function brandValidations() {
       flashForm.setMessage(
         "name",
         `Brand name must be 1-30 characters long.`,
-        "m-1 p-1 px-2 bg-red-100 text-red-800 shadow itbms-message rounded-md",
+        "m-1 p-1 px-2 bg-red-100 text-red-800 text-sm md:text-md shadow itbms-message rounded-md",
       );
       return false;
     } else {
@@ -32,7 +32,7 @@ export function brandValidations() {
       flashForm.setMessage(
         "countryOfOrigin",
         `Brand country of origin must be 1-80 characters long or not specified.`,
-        "m-1 p-1 px-2 bg-red-100 text-red-800 shadow itbms-message rounded-md",
+        "m-1 p-1 px-2 bg-red-100 text-red-800 text-sm md:text-md shadow itbms-message rounded-md",
       );
       return false;
     } else {
@@ -53,7 +53,7 @@ export function brandValidations() {
       flashForm.setMessage(
         "websiteUrl",
         `Brand URL must be a valid URL or not specified.`,
-        "m-1 p-1 px-2 bg-red-100 text-red-800 shadow itbms-message rounded-md",
+        "m-1 p-1 px-2 bg-red-100 text-red-800 text-sm md:text-md shadow itbms-message rounded-md",
       );
       return false;
     }
