@@ -1,5 +1,4 @@
 <script setup>
-import router from "@/router";
 import { deleteItemById } from "@/services/saleItemService";
 import { ref } from "vue";
 import { useFlashStore } from "@/store/useFlashStore";
@@ -30,7 +29,7 @@ const fields = [
 ];
 async function deleteItem(id) {
   try {
-    await deleteItemById(id); // ถ้าได้ 204 ตรงนี้จะสำเร็จ
+    await deleteItemById(id); 
     const index = props.items.findIndex((item) => item.id === id);
     props.items.splice(index, 1);
     flash.setMessage(
