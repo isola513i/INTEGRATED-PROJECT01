@@ -26,12 +26,11 @@ export const addBrand = async (brand) => {
          body: JSON.stringify(brand),
       });
 
-      if (!res.ok) throw new Error('Failed to create new brand')
-
+      if(!res.ok) return null
+      
       return await res.json();
    } catch (error) {
-      console.error('API error:', error);
-      return { success: false, error };
+      return null
    }
 };
 
@@ -48,9 +47,6 @@ export const updateBrand = async (brandId, brand) => {
       body: JSON.stringify(brand),
       signal: controller.signal,
     });
-
-    if (response.status >= 500) throw new Error("Server error");
-
     return await response.json();
   } finally {
     clearTimeout(timeout);
