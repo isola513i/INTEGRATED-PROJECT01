@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted } from "vue";
 import { fetchSaleItemsV2 } from "@/services/saleItemService";
 import SaleItemCard from "@/components/product/SaleItemCard.vue";
 import ProductCarousel from "@/components/product/ProductCarousel.vue";
@@ -49,7 +49,12 @@ onMounted(() => {
 	syncSessionToRefs();
 	loadItems(parseInt(sessionStorage.getItem("page")) || 0);
 });
-
+async function handleGoToLast() {
+	await loadItems(0);
+	const totalPages = paginate.value.totalPages;
+	const lastPageIndex = totalPages - 1;
+	await loadItems(lastPageIndex);
+}
 const handleSortChange = (value) => {
 	if (value == "none") {
 		sortDirection.value = "asc";
@@ -89,6 +94,14 @@ const handleBrandFilterChange = (brands) => {
 						Add New Sale Item
 					</router-link>
 				</div>
+				<!-- <div class="itbms-manage-brand">
+          <router-link
+            to="/brands"
+            class="block text-center px-6 py-2 bg-[#171717] text-white rounded hover:bg-white hover:text-black hover:border hover:border-black transition-all duration-300 text-sm font-semibold"
+          >
+            Manage Brand
+          </router-link>
+        </div> -->
 			</div>
 
 			<!-- Filter -->
@@ -133,6 +146,7 @@ const handleBrandFilterChange = (brands) => {
 				:current-page="paginate.page"
 				:total-pages="paginate.totalPages"
 				@update:page="(page) => loadItems(page)"
+				@go-to-last="handleGoToLast"
 			/>
 		</div>
 	</div>
