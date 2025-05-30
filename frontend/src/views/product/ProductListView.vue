@@ -3,8 +3,8 @@ import { ref, onMounted, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { fetchSaleItems } from "@/services/saleItemService";
 import SaleItemList from "@/components/product/SaleItemList.vue";
-import ProductCarousel from "@/components/product/ProductCarousel.vue";
-import PromoBar from "@/components/promo/PromoBar.vue";
+import ProductCarousel from "@/views/product/components/ProductCarousel.vue";
+import PromoBar from "@/views/product/components/PromoBar.vue";
 import { useFlashStore } from "@/store/useFlashStore";
 
 const saleItems = ref([]);

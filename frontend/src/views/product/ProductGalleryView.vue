@@ -2,8 +2,8 @@
 import { ref, onMounted, computed } from "vue";
 import { fetchSaleItemsV2 } from "@/services/saleItemService";
 import SaleItemCard from "@/components/product/SaleItemCard.vue";
-import ProductCarousel from "@/components/product/ProductCarousel.vue";
-import PromoBar from "@/components/promo/PromoBar.vue";
+import ProductCarousel from "@/views/product/components/ProductCarousel.vue";
+import PromoBar from "@/views/product/components/PromoBar.vue";
 import { useFlashStore } from "@/store/useFlashStore";
 import SortButtons from "@/components/sort/SortButtons.vue";
 import BrandFilters from "@/components/filter/FilterBrands.vue";

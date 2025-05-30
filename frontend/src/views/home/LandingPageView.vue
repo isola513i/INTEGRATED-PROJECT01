@@ -1,6 +1,6 @@
 <script setup>
-import HeroBanner from "@/components/Home/HeroBanner.vue";
-import PromoBanner from "@/components/promo/PromoBanner.vue";
+import HeroBanner from "@/views/home/components/HeroBanner.vue";
+import PromoBanner from "@/views/home/components/PromoBanner.vue";
 </script>
 
 <template>
