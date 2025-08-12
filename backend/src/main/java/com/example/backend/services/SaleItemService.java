@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 
 import java.util.List;
@@ -29,6 +30,7 @@ public class SaleItemService {
     private EntityManager entityManager;
     @Autowired
     private ModelMapper modelMapper;
+
     public List<SaleItem> allSaleItems() {
         return saleItemRepository.findAllByOrderByCreatedOnAscIdAsc();
     }
@@ -47,7 +49,7 @@ public class SaleItemService {
     public SaleItem updateSaleItem(Integer id, SaleItemDto.GetCreateSaleItemDto saleItemDto) {
         SaleItem saleItem = saleItemRepository.findById(id).orElseThrow(() -> new ItemNotFoundException("SaleItem not found for this id :: " + id));
         Brand brand = brandRepository.findById(saleItemDto.getBrand().getId()).orElseThrow(
-                () -> new ItemNotFoundException("Brand not found for this id :: " + saleItemDto.getBrand().getId() ));
+                () -> new ItemNotFoundException("Brand not found for this id :: " + saleItemDto.getBrand().getId()));
         saleItem.setModel(saleItemDto.getModel());
         saleItem.setBrand(brand);
         saleItem.setDescription(saleItemDto.getDescription());
@@ -64,35 +66,41 @@ public class SaleItemService {
     }
 
     @Transactional
-    public SaleItem addSaleItem( SaleItem saleItem) {
+    public SaleItem addSaleItem(SaleItem saleItem) {
         if (saleItem.getBrand() == null || saleItem.getBrand().getId() == null) {
             throw new IllegalArgumentException("Brand id must not be null");
         }
         Brand brand = brandRepository.
                 findById(saleItem.getBrand().getId()).orElseThrow(
-                        ()-> new ItemNotFoundException("Brand not found for this id :: "
+                        () -> new ItemNotFoundException("Brand not found for this id :: "
                                 + saleItem.getBrand().getId()));
         saleItem.setBrand(brand);
         SaleItem savedItem = saleItemRepository.saveAndFlush(saleItem);
         entityManager.refresh(savedItem);
         return saleItemRepository.findById(savedItem.getId()).orElseThrow();
-        }
+    }
 
 
-    public Page<SaleItem> findAllSaleItemsPage(List<String> filterBrands, Integer page, Integer size, String sortField, String sortDirection) {
-        if (filterBrands != null && filterBrands.isEmpty()) {
-            filterBrands = null;
-        }
+    public Page<SaleItem> findAllSaleItemsPage(
+            List<String> filterBrands,
+            Integer page,
+            Integer size,
+            String sortField,
+            String sortDirection,
+            Double lowerPrice,
+            Double upperPrice,
+            List<Integer> storageSizes) {
+
         Sort sort = Sort.by(Sort.Direction.fromString(sortDirection),
                         sortField != null ? sortField : "createdOn")
                 .and(Sort.by(Sort.Direction.ASC, "id")); // secondary sort
-
         Pageable pageable = PageRequest.of(page, size, sort);
-        if(filterBrands != null) return saleItemRepository.findByBrandNameIn(filterBrands, pageable);
-        else{
-            return saleItemRepository.findAll(pageable);
-        }
+       if(CollectionUtils.isEmpty(filterBrands)){
+           filterBrands = null;
+       }
+       if(CollectionUtils.isEmpty(storageSizes)){ // null or empty return true
+           storageSizes = null;
+       }
+        return saleItemRepository.findByFilters(filterBrands, lowerPrice, upperPrice, storageSizes,pageable);
     }
 }
-
-

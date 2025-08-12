@@ -7,6 +7,7 @@ import com.example.backend.entities.SaleItem;
 import com.example.backend.services.BrandService;
 import com.example.backend.services.SaleItemService;
 import com.example.backend.utils.ListMapper;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.Getter;
 import lombok.Setter;
 import org.modelmapper.ModelMapper;
@@ -62,12 +63,21 @@ public class SaleItemController {
     @GetMapping("/v2/sale-items")
     public ResponseEntity<PageDto<SaleItemDto.GetSaleItemDto>> getSaleItems(
             @RequestParam(required = false) List<String> filterBrands,
-            @RequestParam Integer page,
+            @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(required = false) String sortField,
-            @RequestParam(defaultValue = "asc") String sortDirection) {
+            @RequestParam(defaultValue = "asc") String sortDirection,
+            @RequestParam(required = false) Double lowerPrice,
+            @RequestParam(required = false) Double upperPrice,
+            @RequestParam(required = false) List<Integer> storageSizes
+            ) {
+        if(lowerPrice != null && upperPrice != null && lowerPrice > upperPrice){
+            Double tempPrice = lowerPrice;
+            lowerPrice = upperPrice;
+            upperPrice = tempPrice;
+        }
         return ResponseEntity.ok(listMapper.toPageDTO(saleItemService
-                        .findAllSaleItemsPage(filterBrands, page, size, sortField, sortDirection)
+                        .findAllSaleItemsPage(filterBrands, page, size, sortField, sortDirection, lowerPrice, upperPrice, storageSizes)
                 , SaleItemDto.GetSaleItemDto.class, modelMapper));
     }
 
