@@ -8,6 +8,8 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -60,5 +62,9 @@ public class SaleItem {
 
     @Column(name = "updatedOn", nullable = false, insertable = false,updatable = false)
     private Instant updatedOn;
+
+    @OneToMany(mappedBy = "saleItem", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("position ASC")
+    private List<SaleItemPicture> pictures = new ArrayList<>();
 
 }
