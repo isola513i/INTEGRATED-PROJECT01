@@ -1,7 +1,6 @@
 package com.example.backend.services;
 
 import com.example.backend.dtos.PictureDto;
-import com.example.backend.dtos.ReorderRequest;
 import com.example.backend.entities.SaleItemPicture;
 import com.example.backend.exceptions.ItemNotFoundException;
 import com.example.backend.repositories.SaleItemPictureRepository;
@@ -12,7 +11,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class SaleItemPictureService {
