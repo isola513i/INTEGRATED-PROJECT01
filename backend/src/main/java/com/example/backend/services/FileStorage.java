@@ -34,7 +34,11 @@ public class FileStorage {
     }
 
     public void deleteIfExists(String relativePath) {
-        try { Paths.get("uploads").resolve(relativePath).toFile().delete(); } catch (Exception ignore) {}
+        try {
+            Paths.get(baseDir).resolve(relativePath).toFile().delete();
+        } catch (Exception ex) {
+            logger.error("Failed to delete file: {}", relativePath, ex);
+        }
     }
 }
 
