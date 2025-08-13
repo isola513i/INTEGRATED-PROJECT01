@@ -18,7 +18,7 @@ public class ExceptionController {
         MyErrorResponse myErrorResponse = new MyErrorResponse(HttpStatus.NOT_FOUND.value(),HttpStatus.NOT_FOUND.name(),ex.getMessage(), request.getRequestURI());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(myErrorResponse);
     }
-    @ExceptionHandler(org.springframework.web.multipart.MaxUploadSizeExceededException.class)
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<MyErrorResponse> handleMaxUpload(MaxUploadSizeExceededException ex,
                                                            HttpServletRequest request) {
         MyErrorResponse body = new MyErrorResponse(
