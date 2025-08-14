@@ -3,7 +3,6 @@ package com.example.backend.controllers;
 import com.example.backend.dtos.PictureDto;
 import com.example.backend.dtos.SavePicturesRequest;
 import com.example.backend.services.SaleItemPictureService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
