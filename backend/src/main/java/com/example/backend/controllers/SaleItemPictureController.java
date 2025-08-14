@@ -1,8 +1,8 @@
 package com.example.backend.controllers;
 
 import com.example.backend.dtos.PictureDto;
+import com.example.backend.dtos.SavePicturesRequest;
 import com.example.backend.services.SaleItemPictureService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,8 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/sale-items/{itemId}/pictures")
 public class SaleItemPictureController {
-    @Autowired
-    private SaleItemPictureService service;
+    private final SaleItemPictureService service;
     public SaleItemPictureController(SaleItemPictureService service) { this.service = service; }
 
     @GetMapping
@@ -31,5 +30,11 @@ public class SaleItemPictureController {
     @DeleteMapping("/{pictureId}")
     public void delete(@PathVariable Integer itemId, @PathVariable Integer pictureId) {
         service.delete(itemId, pictureId);
+    }
+
+    @PutMapping("/save")
+    public List<PictureDto> saveState(@PathVariable Integer itemId,
+                                      @RequestBody @jakarta.validation.Valid SavePicturesRequest req) {
+        return service.saveState(itemId, req);
     }
 }
