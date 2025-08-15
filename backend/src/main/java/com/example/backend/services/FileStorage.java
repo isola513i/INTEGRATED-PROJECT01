@@ -37,7 +37,8 @@ public class FileStorage {
         try {
             Paths.get(baseDir).resolve(relativePath).toFile().delete();
         } catch (Exception ex) {
-            logger.error("Failed to delete file: {}", relativePath, ex);
+            //logger.error("Failed to delete file: {}", relativePath, ex);
+            //logger.error
         }
     }
 }
