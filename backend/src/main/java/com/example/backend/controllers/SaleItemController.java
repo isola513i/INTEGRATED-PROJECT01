@@ -1,6 +1,5 @@
 package com.example.backend.controllers;
 
-
 import com.example.backend.dtos.PageDto;
 import com.example.backend.dtos.SaleItemDto;
 import com.example.backend.entities.SaleItem;
@@ -14,10 +13,10 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
 
 @RestController
 @Getter
@@ -37,9 +36,10 @@ public class SaleItemController {
     public ResponseEntity<List<SaleItemDto.GetAllSaleItemsDto>> getAllItems(){
         return ResponseEntity.ok(listMapper.mapList(saleItemService.allSaleItems(),SaleItemDto.GetAllSaleItemsDto.class,modelMapper));
     }
+
     @GetMapping("/v1/sale-items/{saleItemId}")
     public ResponseEntity<SaleItemDto.GetSaleItemDto> getSaleItemById(@PathVariable Integer saleItemId){
-        return ResponseEntity.ok(modelMapper.map(saleItemService.findSaleItemById(saleItemId), SaleItemDto.GetSaleItemDto.class));
+        return ResponseEntity.ok(saleItemService.getSaleItemDto(saleItemId));
     }
 
     @PutMapping("/v1/sale-items/{saleItemId}")
@@ -55,11 +55,13 @@ public class SaleItemController {
         SaleItemDto.GetSaleItemDto dto = modelMapper.map(savedItem, SaleItemDto.GetSaleItemDto.class);
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
+
     @DeleteMapping("/v1/sale-items/{saleItemId}")
     public ResponseEntity<Void> deleteSaleItem(@PathVariable Integer saleItemId){
         saleItemService.deleteSaleItem(saleItemId);
         return ResponseEntity.noContent().build();
     }
+
     @GetMapping("/v2/sale-items")
     public ResponseEntity<PageDto<SaleItemDto.GetSaleItemDto>> getSaleItems(
             @RequestParam(required = false) List<String> filterBrands,

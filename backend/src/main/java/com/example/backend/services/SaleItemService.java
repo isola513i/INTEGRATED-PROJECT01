@@ -32,7 +32,7 @@ public class SaleItemService {
     private ModelMapper modelMapper;
 
     public List<SaleItem> allSaleItems() {
-        return saleItemRepository.findAllByOrderByCreatedOnAscIdAsc();
+        return saleItemRepository.findAllWithBrandOrderByCreatedOnAscIdAsc();
     }
 
     public SaleItem findSaleItemById(Integer id) {
@@ -80,7 +80,6 @@ public class SaleItemService {
         return saleItemRepository.findById(savedItem.getId()).orElseThrow();
     }
 
-
     public Page<SaleItem> findAllSaleItemsPage(
             List<String> filterBrands,
             Integer page,
@@ -93,14 +92,35 @@ public class SaleItemService {
 
         Sort sort = Sort.by(Sort.Direction.fromString(sortDirection),
                         sortField != null ? sortField : "createdOn")
-                .and(Sort.by(Sort.Direction.ASC, "id")); // secondary sort
+                .and(Sort.by(Sort.Direction.ASC, "id"));
         Pageable pageable = PageRequest.of(page, size, sort);
        if(CollectionUtils.isEmpty(filterBrands)){
            filterBrands = null;
        }
-       if(CollectionUtils.isEmpty(storageSizes)){ // null or empty return true
+       if(CollectionUtils.isEmpty(storageSizes)){
            storageSizes = null;
        }
-        return saleItemRepository.findByFilters(filterBrands, lowerPrice, upperPrice, storageSizes,pageable);
+        return saleItemRepository.findByFiltersWithBrand(filterBrands, lowerPrice, upperPrice, storageSizes,pageable);
+    }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public SaleItemDto.GetSaleItemDto getSaleItemDto(Integer id) {
+        var s = saleItemRepository.findByIdWithBrand(id)
+                .orElseThrow(() -> new ItemNotFoundException("SaleItem not found"));
+        var d = new SaleItemDto.GetSaleItemDto();
+        d.setId(s.getId());
+        d.setModel(s.getModel());
+        d.setBrandId(s.getBrand().getId());
+        d.setBrandName(s.getBrand().getName());
+        d.setDescription(s.getDescription());
+        d.setPrice(s.getPrice());
+        d.setRamGb(s.getRamGb());
+        d.setScreenSizeInch(s.getScreenSizeInch());
+        d.setQuantity(s.getQuantity());
+        d.setStorageGb(s.getStorageGb());
+        d.setColor(s.getColor());
+        d.setCreatedOn(s.getCreatedOn());
+        d.setUpdatedOn(s.getUpdatedOn());
+        return d;
     }
 }

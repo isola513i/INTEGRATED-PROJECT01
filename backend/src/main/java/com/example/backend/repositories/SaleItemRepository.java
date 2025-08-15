@@ -8,24 +8,41 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface SaleItemRepository extends JpaRepository<SaleItem,Integer> {
-     List<SaleItem> findAllByOrderByCreatedOnAscIdAsc();
-     boolean existsByBrand_Id(Integer brandId);
-     int countByBrandId(Integer brandId);
-     @Query("""
-        SELECT s
-        FROM SaleItem s
-        WHERE (:brands IS NULL OR s.brand.name IN :brands)
-          AND (:lowerPrice IS NULL OR s.price >= :lowerPrice)
-          AND (:upperPrice IS NULL OR s.price <= :upperPrice)
-          AND (:storageSizes IS NULL OR s.storageGb IN :storageSizes)
-    """)
-     Page<SaleItem> findByFilters(
-             @Param("brands") List<String> brands,
-             @Param("lowerPrice") Double lowerPrice,
-             @Param("upperPrice") Double upperPrice,
-             @Param("storageSizes") List<Integer> storageSizes,
-             Pageable pageable);
-
+    @Query("select s from SaleItem s join fetch s.brand order by s.createdOn asc, s.id asc")
+    List<SaleItem> findAllWithBrandOrderByCreatedOnAscIdAsc();
+    boolean existsByBrand_Id(Integer brandId);
+    int countByBrandId(Integer brandId);
+    @Query(
+            value = """
+            select s
+            from SaleItem s
+                 join fetch s.brand b
+            where (:brands is null or b.name in :brands)
+              and (:lowerPrice is null or s.price >= :lowerPrice)
+              and (:upperPrice is null or s.price <= :upperPrice)
+              and (:storageSizes is null or s.storageGb in :storageSizes)
+            """,
+            countQuery = """
+            select count(s)
+            from SaleItem s
+                 join s.brand b
+            where (:brands is null or b.name in :brands)
+              and (:lowerPrice is null or s.price >= :lowerPrice)
+              and (:upperPrice is null or s.price <= :upperPrice)
+              and (:storageSizes is null or s.storageGb in :storageSizes)
+            """
+    )
+    Page<SaleItem> findByFiltersWithBrand(
+            @Param("brands") List<String> brands,
+            @Param("lowerPrice") Double lowerPrice,
+            @Param("upperPrice") Double upperPrice,
+            @Param("storageSizes") List<Integer> storageSizes,
+            Pageable pageable
+    );
+    @Query("select s from SaleItem s join fetch s.brand where s.id = :id")
+    Optional<SaleItem> findByIdWithBrand(@Param("id") Integer id);
 }
+

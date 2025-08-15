@@ -65,6 +65,7 @@ public class SaleItem {
 
     @OneToMany(mappedBy = "saleItem", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("position ASC")
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private List<SaleItemPicture> pictures = new ArrayList<>();
 
 }
