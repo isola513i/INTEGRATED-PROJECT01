@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/sale-items/{itemId}/pictures")
+@RequestMapping("/itb-mshop/v1/sale-items/{itemId}/pictures")
 public class SaleItemPictureController {
     private final SaleItemPictureService service;
     public SaleItemPictureController(SaleItemPictureService service) { this.service = service; }
