@@ -1,8 +1,5 @@
 package com.example.backend.dtos;
 
-import com.example.backend.entities.Brand;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -18,10 +15,8 @@ public class SaleItemDto {
     public static class GetAllSaleItemsDto {
         private Integer id;
         private String model;
-
         private Integer brandId;
         private String brandName;
-
         private Integer price;
         private Integer ramGb;
         private Integer storageGb;
@@ -33,10 +28,8 @@ public class SaleItemDto {
     public static class GetSaleItemDto {
         private Integer id;
         private String model;
-
         private Integer brandId;
         private String brandName;
-
         private String description;
         private Integer price;
         private Integer ramGb;
