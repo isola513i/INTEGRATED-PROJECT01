@@ -9,7 +9,6 @@ import lombok.Setter;
 import org.hibernate.annotations.*;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -44,10 +43,10 @@ public class SaleItemPicture {
 
     @CreationTimestamp
     @Column(name = "createdOn", nullable = false, updatable = false)
-    private LocalDateTime createdOn;
+    private Instant createdOn;
 
     @UpdateTimestamp
     @Column(name = "updatedOn", nullable = false)
-    private LocalDateTime updatedOn;
+    private Instant updatedOn;
 
 }
