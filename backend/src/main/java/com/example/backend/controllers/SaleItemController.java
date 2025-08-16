@@ -21,6 +21,7 @@ import java.util.List;
 @RestController
 @Getter
 @Setter
+@CrossOrigin("*")
 @RequestMapping("/itb-mshop")
 public class SaleItemController {
     @Autowired
