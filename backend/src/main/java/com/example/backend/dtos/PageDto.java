@@ -15,13 +15,18 @@ public class PageDto<T> {
     private Boolean last;
     private Boolean first;
     private Integer totalPages;
-    private Integer totalElements;
+    private long totalElements;
     private Integer size;
     private String sort;
+
     @JsonIgnore
     private Integer number;
+
     @JsonProperty("page")
     public Integer getPage() {
         return number;
     }
+
+    @JsonProperty("page")
+    public void setPage(int page) { this.number = page; }
 }
