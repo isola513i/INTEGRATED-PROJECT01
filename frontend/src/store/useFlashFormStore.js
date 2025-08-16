@@ -1,4 +1,3 @@
-
 import { defineStore, acceptHMRUpdate } from "pinia";
 
 export const useFlashFormStore = defineStore("flashForm", {
@@ -21,7 +20,6 @@ export const useFlashFormStore = defineStore("flashForm", {
     },
   },
 });
-
 
 if (import.meta.hot) {
   import.meta.hot.accept(acceptHMRUpdate(useFlashFormStore, import.meta.hot));

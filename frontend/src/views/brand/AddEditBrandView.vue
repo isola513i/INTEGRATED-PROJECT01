@@ -30,7 +30,7 @@ onMounted(async () => {
       console.error("Fetch failed:", error);
       flash.setMessage(
         "The brand does not exist.",
-        "itbms-message m-4 p-4 bg-red-100 text-red-800 shadow "
+        "itbms-message m-4 p-4 bg-red-100 text-red-800 shadow ",
       );
       router.push("/brands");
     }
@@ -52,23 +52,22 @@ const handleSubmitForm = async (brand) => {
   if (route.params.brandId) {
     try {
       const res = await updateBrand(route.params.brandId, submitBrand);
-      if (res.status !== 400 ) {
+      if (res.status !== 400) {
         flash.setMessage(
           "✅ The brand has been updated.",
-          "itbms-message m-4 p-4 bg-green-100 text-green-800 shadow "
+          "itbms-message m-4 p-4 bg-green-100 text-green-800 shadow ",
         );
-		router.back();
+        router.back();
       }
       if (res.status === 400) {
         flash.setMessage(
-        `Brand name: ${submitBrand.name} already existed.`,
-        "m-1 p-1 px-2 bg-red-100 text-red-800 shadow itbms-message rounded-md"
-      );
-      router.back();
+          `Brand name: ${submitBrand.name} already existed.`,
+          "m-1 p-1 px-2 bg-red-100 text-red-800 shadow itbms-message rounded-md",
+        );
+        router.back();
       }
     } catch (error) {
       console.error("Error adding brand:", error);
-      
     }
   } else {
     try {
@@ -76,13 +75,13 @@ const handleSubmitForm = async (brand) => {
       if (res === null) {
         flash.setMessage(
           `Brand name: ${submitBrand.name} already existed.`,
-          "m-1 p-1 px-2 bg-red-100 text-red-800 shadow itbms-message rounded-md"
+          "m-1 p-1 px-2 bg-red-100 text-red-800 shadow itbms-message rounded-md",
         );
         router.back();
       } else {
         flash.setMessage(
           "The brand has been added.",
-          "itbms-message m-4 p-4 bg-green-100 text-green-800 shadow"
+          "itbms-message m-4 p-4 bg-green-100 text-green-800 shadow",
         );
         router.back();
       }

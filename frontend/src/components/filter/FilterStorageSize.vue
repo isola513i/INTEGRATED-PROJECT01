@@ -1,0 +1,102 @@
+<!-- <script setup>
+import { ref, watch, onMounted } from "vue";
+
+const emit = defineEmits(["update:storage"]);
+
+const selectedStorage = ref([]);
+const storageOptions = ref([
+  { label: "32 GB", value: "32" },
+  { label: "64 GB", value: "64" },
+  { label: "128 GB", value: "128" },
+  { label: "256 GB", value: "256" },
+  { label: "512 GB", value: "512" },
+  { label: "1 TB", value: "1000" },
+]);
+const showStorageDropdown = ref(false);
+
+function isStorageChecked(value) {
+  return selectedStorage.value.includes(value);
+}
+
+function toggleStorage(option) {
+  if (selectedStorage.value.includes(option.value)) {
+    selectedStorage.value = selectedStorage.value.filter(
+      (v) => v !== option.value
+    );
+  } else {
+    selectedStorage.value = [...selectedStorage.value, option.value];
+  }
+}
+
+function removeStorage(index) {
+  selectedStorage.value.splice(index, 1);
+}
+
+function formatStorage(size) {
+  if (size >= 1000) {
+    const tb = size / 1000;
+    return Number.isInteger(tb) ? `${tb} TB` : `${tb.toFixed(1)} TB`;
+  }
+  return `${size} GB`;
+}
+
+onMounted(() => {
+  const savedStorage = JSON.parse(
+    sessionStorage.getItem("selectedStorage") || "[]"
+  );
+  selectedStorage.value = savedStorage;
+});
+
+watch(selectedStorage, (newVal) => {
+  emit("update:storage", newVal);
+  sessionStorage.setItem("selectedStorage", JSON.stringify(newVal));
+});
+</script>
+
+<template>
+  <div
+    class="flex-1 text-center cursor-pointer relative"
+    @click="showStorageDropdown = !showStorageDropdown"
+  >
+    <p class="text-sm font-semibold text-black">Storage Size</p>
+    <div class="flex flex-wrap justify-center gap-1 mt-1">
+      <template v-if="selectedStorage.length">
+        <span
+          v-for="(s, index) in selectedStorage"
+          :key="s"
+          class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-xs flex items-center gap-1"
+        >
+          {{ formatStorage(s) }}
+          <button
+            @click.stop="removeStorage(index)"
+            class="text-purple-500 hover:text-red-500 font-bold"
+          >
+            x
+          </button>
+        </span>
+      </template>
+
+      <template v-else>
+        <span class="text-gray-500 text-xs">Storage Range</span>
+      </template>
+    </div>
+    <div
+      v-if="showStorageDropdown"
+      class="absolute mt-2 bg-white border border-gray-300 rounded-lg shadow-lg z-50 w-64"
+    >
+      <div
+        v-for="option in storageOptions"
+        :key="option.value"
+        class="px-4 py-2 text-black hover:bg-gray-100 flex items-center gap-2 cursor-pointer"
+        @click.stop="toggleStorage(option)"
+      >
+        <input
+          type="checkbox"
+          :checked="isStorageChecked(option.value)"
+          @change="toggleStorage(option)"
+        />
+        <span>{{ option.label }}</span>
+      </div>
+    </div>
+  </div>
+</template> -->

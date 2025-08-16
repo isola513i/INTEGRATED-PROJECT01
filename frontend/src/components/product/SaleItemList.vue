@@ -29,7 +29,7 @@ const fields = [
 ];
 async function deleteItem(id) {
   try {
-    await deleteItemById(id); 
+    await deleteItemById(id);
     const index = props.items.findIndex((item) => item.id === id);
     props.items.splice(index, 1);
     flash.setMessage(

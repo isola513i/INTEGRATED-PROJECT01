@@ -16,6 +16,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/itb-mshop/v1")
+@CrossOrigin("*")
 public class BrandController {
     @Autowired
     private ModelMapper modelMapper;
