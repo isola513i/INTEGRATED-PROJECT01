@@ -136,7 +136,7 @@ public class SaleItemService {
     }
 
     @Transactional
-    public SaleItemV2Dto.SaleItemV2Response createSaleItemWithImages(SaleItemV2Dto.SaleItemV2Request req) throws IOException {
+    public SaleItemV2Dto.SaleItemV2Response createSaleItemWithImages(SaleItemV2Dto.SaleItemWithImageInfo req) throws IOException {
         var s = req.getSaleItem();
         if (s == null) throw new IllegalArgumentException("saleItem is required");
         if (s.getBrand() == null || s.getBrand().getId() == null)
@@ -188,7 +188,7 @@ public class SaleItemService {
     @Transactional
     public SaleItemV2Dto.SaleItemV2Response updateSaleItemWithImages(
             Integer itemId,
-            SaleItemV2Dto.UpdatePicturesRequest req
+            SaleItemV2Dto.SaleItemWithImageInfo req
     ) throws IOException {
 
         var infos = Optional.ofNullable(req.getImageInfos()).orElse(List.of());
@@ -197,7 +197,7 @@ public class SaleItemService {
 
         var deleteIds = infos.stream()
                 .filter(i -> i.getStatus() == ImageStatus.DELETE)
-                .map(SaleItemV2Dto.ImageInfoDto::getPictureId)
+                .map(SaleItemV2Dto.SaleItemImageRequest::getPictureId)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
 
