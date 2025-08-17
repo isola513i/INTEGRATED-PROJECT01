@@ -1,4 +1,6 @@
 <script setup>
+import ConfirmationModal from "../actions/ConfirmationModal.vue";
+import Alert from "../actions/Alert.vue";
 const props = defineProps({
   updatePage: {
     type: Boolean,
@@ -28,9 +30,13 @@ const focusNext = (nextIndex) => {
   if (nextInputField) nextInputField.focus();
 };
 
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { previewBinaryFile } from "../../services/previewBinary.js";
 const imageFiles = ref([]);
+const selectedPreviewImage = ref(0);
+const isShowDeleteModal = ref(false);
+const deleteIndex = ref()
+const isUploadImageError = ref(false)
 const chooseBinaryFiles = (event) => {
   for (const file of event.target.files) {
     if (
@@ -38,38 +44,94 @@ const chooseBinaryFiles = (event) => {
       file.name.toLowerCase().endsWith(".jpg") ||
       file.name.toLowerCase().endsWith(".png")
     ) {
-		imageFiles.value.push(previewBinaryFile(file));
+      // duplicateName = imageFiles.value.filter((image) => image.name === file.name)
+      // file.name = `file.name`
+      imageFiles.value.push({ name: file.name, url: previewBinaryFile(file) , file });
     }
   }
 };
+//handle user add image more than four
+watch(imageFiles.value, (newVal) => {
+  if (newVal.length > 4) {
+    isUploadImageError.value = true
+    imageFiles.value.splice(4);
+    //imageFiles.value = newVal.slice(0, 4)
+  }else  isUploadImageError.value = false
+}, { deep: true });
 
-const removeImage = (index) => {
-  imageFiles.value.splice(index, 1);
+const choosePreview = (index) => {
+  selectedPreviewImage.value = index;
+};
+const switchImageUp = (index) => {
+  const image = imageFiles.value.splice(index, 1)[0]; // remove item
+  imageFiles.value.splice(index - 1, 0, image);
+};
+const switchImageDown = (index) => {
+  const image = imageFiles.value.splice(index, 1)[0]; // remove item
+  imageFiles.value.splice(index + 1, 0, image);
+};
+const handleShowDeleteModal = (index) => {
+	deleteIndex.value = index
+  isShowDeleteModal.value = !isShowDeleteModal.value;
+};
+const handleConfirmDeletePicture = () => {
+  imageFiles.value.splice(deleteIndex.value, 1);
+  isShowDeleteModal.value = !isShowDeleteModal.value
+};
+const handleCancelDeletePicture = () => {
+  isShowDeleteModal.value = !isShowDeleteModal.value;
 };
 </script>
 
 <template>
+   <Alert
+    v-if="isUploadImageError"
+    type="error"
+    message="Maximum 4 pictures are allowed."
+    class="itbms-message"
+    icon="⚠️"
+    />
   <form
-    @submit.prevent="$emit('submit')"
+    @submit.prevent="$emit('submit', imageFiles)"
     class="grid gap-6 md:grid-cols-12 md:gap-8 bg-white p-4 md:p-10 rounded-xl shadow-lg"
   >
+
     <!-- LEFT: Picture Upload Area -->
     <div class="md:col-span-4">
       <div
-        class="w-full aspect-[4/3] bg-gray-100 flex items-center justify-center text-lg text-gray-400 rounded-lg mb-4 md:mb-6 border border-dashed"
+        class="w-full aspect-[4/3] bg-gray-100 flex items-center justify-center rounded-lg mb-4 md:mb-6 border border-dashed"
       >
-        No Picture
+        <span v-show="!imageFiles.length">No picture</span>
+        <img
+          v-if="imageFiles.length >= 1"
+          :src="imageFiles[selectedPreviewImage].url"
+          class="w-full h-full object-cover"
+        />
       </div>
-      <div class="grid grid-cols-4 gap-2 md:gap-4">
+
+      <div class="grid grid-cols-4 gap-2">
         <div
-          v-for="(image , index) in imageFiles"
+          v-for="(image, index) in imageFiles"
           :key="index"
-          class="w-12 h-12 md:w-20 md:h-16 bg-gray-50 "
+          class="w-20 h-20 bg-gray-50 border-2 border-gray-200 p-0.5 relative"
         >
-          <img :src="image">
+          <img
+            :src="image.url"
+            class="w-full h-full object-cover"
+            :class="`itbms-picture-file${index+1}`"
+            @click="choosePreview(index)"
+          />
+         
+          <ConfirmationModal
+            v-show="isShowDeleteModal"
+            title="Delete picture"
+            message="Do you want to delete this picture?"
+            @confirm="handleConfirmDeletePicture"
+            @cancel="handleCancelDeletePicture"
+          />
         </div>
       </div>
-      <div class="mt-5">
+      <div class="mt-10">
         <input
           id="fileInput"
           type="file"
@@ -82,10 +144,42 @@ const removeImage = (index) => {
         <!-- Styled label as + button -->
         <label
           for="fileInput"
-          class="font-md p-2 border-2 border-amber-600 rounded-md text-sm text-white bg-amber-500"
+          class="itbms-upload-button font-md p-2 border-2 border-amber-600 rounded-md text-sm text-white bg-amber-500"
         >
           Upload Pictures
         </label>
+      </div>
+      <div class="mt-5">
+        <div v-for="(image, index) in imageFiles" :key="index" class="flex">
+          <p :key="index" class="bg-blue-200 rounded-md text-gray-500 mb-2">
+            {{ image.name }}
+          </p>
+           <button
+            type="button"
+            @click="handleShowDeleteModal(index)"
+            class="px-3 m-2 text-center bg-red-300 rounded-xl"
+          >
+            x
+          </button>
+          <div>
+            <button
+              type="button"
+              v-show="index != 0"
+              @click="switchImageUp(index)"
+              :class="`itbms-picture-file${index+1}-up`"
+            >
+              ▲
+            </button>
+            <button
+              type="button"
+              v-show="index != imageFiles.length - 1"
+              @click="switchImageDown(index)"
+              :class="`itbms-picture-file${index+1}-down`"
+            >
+              ▼
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -287,15 +381,6 @@ const removeImage = (index) => {
     >
       <button
         v-if="!updatePage"
-        type="submit"
-        :disabled="!isReadyToSubmit || isSubmitting"
-        class="itbms-save-button bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
-      >
-        {{ isSubmitting ? "Saving..." : "Save" }}
-      </button>
-
-      <button
-        v-if="updatePage"
         type="submit"
         :disabled="!isReadyToSubmit || isSubmitting"
         class="itbms-save-button bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"

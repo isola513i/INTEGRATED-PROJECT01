@@ -22,8 +22,9 @@ public class SaleItemPicture {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "saleItemId", nullable = false)
+    @org.hibernate.annotations.OnDelete(action = OnDeleteAction.CASCADE)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private SaleItem saleItem;
 
     @Size(max = 255)

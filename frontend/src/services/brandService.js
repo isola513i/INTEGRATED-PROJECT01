@@ -17,21 +17,21 @@ export const fetchBrandById = async (brandId) => {
 };
 
 export const addBrand = async (brand) => {
-   try {
-      const res = await fetch(`${API_BASE_URL}/v1/brands`, {
-         method: 'POST',
-         headers: {
-            'Content-Type': 'application/json',
-         },
-         body: JSON.stringify(brand),
-      });
+  try {
+    const res = await fetch(`${API_BASE_URL}/v1/brands`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(brand),
+    });
 
-      if(!res.ok) return null
-      
-      return await res.json();
-   } catch (error) {
-      return null
-   }
+    if (!res.ok) return null;
+
+    return await res.json();
+  } catch (error) {
+    return null;
+  }
 };
 
 export const updateBrand = async (brandId, brand) => {

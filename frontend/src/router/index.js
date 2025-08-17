@@ -77,8 +77,8 @@ const routes = [
 ];
 
 const router = createRouter({
-	history: createWebHistory("/ssi4/"),
-	routes,
+  history: createWebHistory("/ssi4/"),
+  routes,
 });
 
 export default router;
