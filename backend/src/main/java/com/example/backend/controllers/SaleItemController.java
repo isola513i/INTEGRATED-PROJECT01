@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -119,30 +120,13 @@ public class SaleItemController {
     }
 
     @GetMapping("/v2/sale-items/{id}")
-    public ResponseEntity<SaleItemV2Dto.SaleItemV2Response> getSaleItemByIdV2(@PathVariable Integer id) {
-        return ResponseEntity.ok(saleItemService.sendV2Response(id));
+    public ResponseEntity<SaleItemV2Dto.SaleItemV2Response> getSaleItemV2ById(
+            @PathVariable("id") Integer saleItemIdPath) {
+
+        var saleItemResponse = saleItemService.sendV2Response(saleItemIdPath);
+        return ResponseEntity.ok(saleItemResponse);
     }
 
-    @GetMapping("/v2/sale-items/{id}/images")
-    public ResponseEntity<List<SaleItemV2Dto.SaleItemV2Response.SaleItemImageDto>> listImagesView(@PathVariable Integer id) {
-        var pics = saleItemService.findByItemOrdered(id);
-        var out = pics.stream().map(p -> {
-            var dto = new SaleItemV2Dto.SaleItemV2Response.SaleItemImageDto();
-            dto.setPictureId(p.getId());
-
-            String originalFileName = p.getFileName();
-            String extension = originalFileName != null && originalFileName.contains(".")
-                    ? originalFileName.substring(originalFileName.lastIndexOf('.'))
-                    : ".jpg";
-            String newFileName = id + "." + (p.getPosition() + 1) + extension;
-            dto.setFileName(newFileName);
-
-            dto.setImageViewOrder(p.getPosition() + 1);
-            dto.setImageUrl("/v2/sale-items/images/" + p.getId());
-            return dto;
-        }).toList();
-        return ResponseEntity.ok(out);
-    }
 
     @PostMapping(value = "/v2/sale-items", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SaleItemV2Dto.SaleItemV2Response> createSaleItemV2(
@@ -160,17 +144,17 @@ public class SaleItemController {
         return ResponseEntity.ok(result);
     }
 
+    @DeleteMapping("/v2/sale-items/{id}")
+    public ResponseEntity<Void> deleteSaleItemV2(@PathVariable Integer id) {
+        saleItemService.deleteSaleItem(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @DeleteMapping("/v2/sale-items/{id}/images")
     public ResponseEntity<SaleItemV2Dto.SaleItemV2Response> deleteImages(
             @PathVariable Integer id,
             @RequestBody SaleItemV2Dto.DeletePicturesRequest req) {
         return ResponseEntity.ok(saleItemService.deleteSaleItemWithImages(id, req));
-    }
-
-    @DeleteMapping("/v2/sale-items/{id}")
-    public ResponseEntity<Void> deleteSaleItemV2(@PathVariable Integer id) {
-        saleItemService.deleteSaleItem(id);
-        return ResponseEntity.noContent().build();
     }
 
 }

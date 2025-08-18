@@ -30,7 +30,7 @@ public class SaleItemV2Dto {
         private String description;
         private Integer price;
         private Integer ramGb;
-        private Double screenSizeInch;
+        private BigDecimal screenSizeInch;
         private Integer quantity;
         private Integer storageGb;
         private String color;
@@ -47,16 +47,15 @@ public class SaleItemV2Dto {
             private Integer pictureId;
             private String fileName;
             private Integer imageViewOrder;
-            private String imageUrl;
         }
     }
 
     @Data
     @NoArgsConstructor
     public static class SaleItemImageRequest {
-        private Integer order;
         private Integer pictureId;
         private String fileName;
+        private Integer order;
         private ImageStatus status;
         private MultipartFile imageFile;
     }
@@ -64,11 +63,6 @@ public class SaleItemV2Dto {
     public record DeletePicturesRequest(List<Integer> pictureIds) {
     }
 
-    @Data
-    @NoArgsConstructor
-    public static class UpdatePicturesRequest {
-        private List<SaleItemImageRequest> imageInfos;
-    }
 
 }
 
