@@ -26,6 +26,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.example.backend.dtos.ImageStatus.NEW;
+import static com.example.backend.utils.PictureNameUtill.canonicalName;
+import static com.example.backend.utils.PictureNameUtill.getExt;
 
 @Service
 public class SaleItemService {
@@ -45,10 +47,6 @@ public class SaleItemService {
     public List<SaleItem> allSaleItems() {
         return saleItemRepository.findAllWithBrandOrderByCreatedOnAscIdAsc();
     }
-
-    //public SaleItem findSaleItemById(Integer id) {
-    //    return saleItemRepository.findById(id).orElseThrow(() -> new ItemNotFoundException("SaleItem not found for this id :: " + id));
-    //}
 
     public void deleteSaleItem(Integer id) {
         if (saleItemRepository.existsById(id)) {
@@ -165,36 +163,43 @@ public class SaleItemService {
                 .sorted(Comparator.comparing(i -> Optional.ofNullable(i.getOrder()).orElse(999)))
                 .toList()) {
 
-            if (info.getStatus() != NEW)
-                continue;
+            if (info.getStatus() != ImageStatus.NEW) continue;
 
             var file = info.getImageFile();
             if (file == null || file.isEmpty())
                 throw new IllegalArgumentException("imageInfos.imageFile is required for NEW");
 
             var stored = storage.storeSaleItemFile(item.getId(), file);
+            var ext = getExt(file.getOriginalFilename());
+
+            int order1based = position + 1;
+
+            String newFileName = canonicalName(item.getId(), order1based, ext);
+            String newPath = storage.renameSaleItemFile(item.getId(), stored.getFileName(), newFileName);
 
             var pic = new SaleItemPicture();
             pic.setSaleItem(item);
-            pic.setFileName(stored.getFileName());
-            pic.setFilePath(stored.getPath());
-            pic.setPosition(position++);
+            pic.setFileName(newFileName);
+            pic.setFilePath(newPath);
+            pic.setPosition(position); // 0..3
             picRepo.save(pic);
+
+            position++;
         }
 
         return sendV2Response(item.getId());
     }
 
-    @Transactional
+    @org.springframework.transaction.annotation.Transactional
     public SaleItemV2Dto.SaleItemV2Response updateSaleItemWithImages(
             Integer itemId,
             SaleItemV2Dto.SaleItemWithImageInfo req
     ) throws IOException {
 
         var infos = Optional.ofNullable(req.getImageInfos()).orElse(List.of());
-
         var existingPics = picRepo.findBySaleItemIdOrderByPositionAsc(itemId);
 
+        // --- DELETE ---
         var deleteIds = infos.stream()
                 .filter(i -> i.getStatus() == ImageStatus.DELETE)
                 .map(SaleItemV2Dto.SaleItemImageRequest::getPictureId)
@@ -209,23 +214,26 @@ public class SaleItemService {
                 .filter(p -> deleteIds.contains(p.getId()))
                 .forEach(p -> storage.deleteIfExists(p.getFilePath()));
 
-        if (!existingPics.isEmpty()) {
-            picRepo.deleteAll(existingPics);
-            picRepo.flush(); // Force delete
+        if (!deleteIds.isEmpty()) {
+            picRepo.deleteAll(
+                    existingPics.stream().filter(p -> deleteIds.contains(p.getId())).toList()
+            );
+            picRepo.flush();
         }
 
+        // --- ORDER (MOVE/ONLINE) ---
         Map<Integer, Integer> desiredOrder = new HashMap<>();
         for (var i : infos) {
             if ((i.getStatus() == ImageStatus.MOVE || i.getStatus() == ImageStatus.ONLINE)
                     && i.getPictureId() != null && i.getOrder() != null) {
                 int order = Math.max(1, Math.min(4, i.getOrder()));
-                desiredOrder.put(i.getPictureId(), order);
+                desiredOrder.put(i.getPictureId(), order); // 1-based
             }
         }
 
         var withOrder = remainingPics.stream()
                 .filter(p -> desiredOrder.containsKey(p.getId()))
-                .sorted(Comparator.comparingInt(p -> desiredOrder.get(p.getId())))
+                .sorted(Comparator.comparingInt(p -> desiredOrder.get(p.getId()))) // 1..4
                 .collect(Collectors.toList());
 
         var withoutOrder = remainingPics.stream()
@@ -236,11 +244,16 @@ public class SaleItemService {
         finalPictures.addAll(withOrder);
         finalPictures.addAll(withoutOrder);
 
-        int position = 0;
+        if (!remainingPics.isEmpty()) {
+            picRepo.deleteAll(remainingPics);
+            picRepo.flush();
+        }
+
+        int position = 0; // 0-based
         for (var pic : finalPictures) {
             var newPic = new SaleItemPicture();
             newPic.setSaleItem(saleItemRepository.getReferenceById(itemId));
-            newPic.setFileName(pic.getFileName());
+            newPic.setFileName(pic.getFileName());    // เดี๋ยวไปรีเนมท้าย ๆ
             newPic.setFilePath(pic.getFilePath());
             newPic.setPosition(position++);
             picRepo.save(newPic);
@@ -255,19 +268,45 @@ public class SaleItemService {
                     throw new IllegalStateException("Maximum 4 pictures are allowed.");
 
                 var saved = storage.storeSaleItemFile(itemId, f);
+
+                int order1based = position + 1;
+                String ext = getExt(f.getOriginalFilename());
+                String newName = canonicalName(itemId, order1based, ext);
+
+                String newPath = storage.renameSaleItemFile(itemId, saved.getFileName(), newName);
+
                 var newPic = new SaleItemPicture();
                 newPic.setSaleItem(saleItemRepository.getReferenceById(itemId));
-                newPic.setFileName(saved.getFileName());
-                newPic.setFilePath(saved.getPath());
+                newPic.setFileName(newName);
+                newPic.setFilePath(newPath);
                 newPic.setPosition(position++);
                 picRepo.save(newPic);
             }
         }
 
-        picRepo.flush(); // Force save all changes
+        picRepo.flush();
+
+        var normalized = picRepo.findBySaleItemIdOrderByPositionAsc(itemId);
+        for (int idx = 0; idx < normalized.size(); idx++) {
+            normalized.get(idx).setPosition(idx);
+        }
+        picRepo.flush();
+
+        for (var p : normalized) {
+            int order1based = p.getPosition() + 1;
+            String ext = getExtFromFileName(p.getFileName());
+            String desired = canonicalName(itemId, order1based, ext);
+            if (!desired.equals(p.getFileName())) {
+                String newPath = storage.renameSaleItemFile(itemId, p.getFileName(), desired);
+                p.setFileName(desired);
+                p.setFilePath(newPath);
+            }
+        }
+        picRepo.flush();
 
         return sendV2Response(itemId);
     }
+
 
     @Transactional
     public SaleItemV2Dto.SaleItemV2Response deleteSaleItemWithImages(Integer itemId, SaleItemV2Dto.DeletePicturesRequest req) {
@@ -292,55 +331,43 @@ public class SaleItemService {
         return sendV2Response(itemId);
     }
 
-    @Transactional
-    public SaleItemV2Dto.SaleItemV2Response sendV2Response(Integer id) {
-        var s = saleItemRepository.findByIdWithBrand(id)
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public SaleItemV2Dto.SaleItemV2Response sendV2Response(Integer saleItemId) {
+        var saleItem = saleItemRepository.findByIdWithBrand(saleItemId)
                 .orElseThrow(() -> new ItemNotFoundException("SaleItem not found"));
 
-        var dto = new SaleItemV2Dto.SaleItemV2Response();
-        dto.setId(s.getId());
-        dto.setModel(s.getModel());
-        dto.setBrandName(s.getBrand().getName());
-        dto.setDescription(s.getDescription());
-        dto.setPrice(s.getPrice());
-        dto.setRamGb(s.getRamGb());
-        dto.setScreenSizeInch(s.getScreenSizeInch());
-        dto.setQuantity(s.getQuantity());
-        dto.setStorageGb(s.getStorageGb());
-        dto.setColor(s.getColor());
-        dto.setCreatedOn(s.getCreatedOn());
-        dto.setUpdatedOn(s.getUpdatedOn());
+        var response = new SaleItemV2Dto.SaleItemV2Response();
+        response.setId(saleItem.getId());
+        response.setModel(saleItem.getModel());
+        response.setBrandName(saleItem.getBrand().getName());
+        response.setDescription(saleItem.getDescription());
+        response.setPrice(saleItem.getPrice());
+        response.setRamGb(saleItem.getRamGb());
+        response.setScreenSizeInch(saleItem.getScreenSizeInch());
+        response.setQuantity(saleItem.getQuantity());
+        response.setStorageGb(saleItem.getStorageGb());
+        response.setColor(saleItem.getColor());
+        var imageResponses = saleItem.getPictures().stream()
+                .sorted(Comparator.comparingInt(SaleItemPicture::getPosition))
+                .map(pic -> {
+                    var dto = new SaleItemV2Dto.SaleItemV2Response.SaleItemImageDto();
+                    dto.setPictureId(pic.getId());
+                    dto.setFileName(pic.getFileName());
+                    dto.setImageViewOrder(pic.getPosition() + 1);
+                    return dto;
+                })
+                .toList();
 
-        var pics = picRepo.findBySaleItemIdOrderByPositionAsc(id);
-        var images = pics.stream().map(p -> {
-            var i = new SaleItemV2Dto.SaleItemV2Response.SaleItemImageDto();
-            i.setPictureId(p.getId());
-
-            String originalFileName = p.getFileName();
-            String extension = getFileExtension(originalFileName);
-            String newFileName = id + "." + (p.getPosition() + 1) + extension;
-            i.setFileName(newFileName);
-
-            i.setImageViewOrder(p.getPosition() + 1);
-            i.setImageUrl("/v2/sale-items/images/" + p.getId());
-            return i;
-        }).toList();
-        dto.setSaleItemImages(images);
-        return dto;
+        response.setSaleItemImages(imageResponses);
+        response.setCreatedOn(saleItem.getCreatedOn());
+        response.setUpdatedOn(saleItem.getUpdatedOn());
+        return response;
     }
 
-    private String getFileExtension(String fileName) {
-        if (fileName == null || !fileName.contains(".")) {
-            return ".jpg";
-        }
-        return fileName.substring(fileName.lastIndexOf('.'));
+    private static String getExtFromFileName(String fileName) {
+        if (fileName == null) return "jpg";
+        int dot = fileName.lastIndexOf('.');
+        return (dot >= 0) ? fileName.substring(dot + 1).toLowerCase() : "jpg";
     }
 
-    public List<SaleItemPicture> findByItemOrdered(Integer itemId) {
-        return picRepo.findBySaleItemIdOrderByPositionAsc(itemId);
-    }
-
-    public SaleItemPicture findImageById(Integer imageId) {
-        return picRepo.findById(imageId).orElse(null);
-    }
 }

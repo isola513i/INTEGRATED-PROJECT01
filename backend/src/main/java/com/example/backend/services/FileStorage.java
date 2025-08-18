@@ -52,27 +52,6 @@ public class FileStorage {
         return new StoredFile(safe, "sale-items/" + saleItemId + "/" + safe);
     }
 
-    public byte[] readFile(String relativePath) throws IOException {
-        try {
-            Path root = Paths.get(baseDir).toAbsolutePath().normalize();
-            Path target = root.resolve(relativePath).normalize();
-
-            if (!target.startsWith(root)) {
-                throw new IOException("Invalid file path");
-            }
-
-            if (!Files.exists(target)) {
-                throw new IOException("File not found: " + relativePath);
-            }
-
-            return Files.readAllBytes(target);
-
-        } catch (Exception ex) {
-            log.error("Failed to read file: {}", relativePath, ex);
-            throw new IOException("Cannot read file: " + relativePath, ex);
-        }
-    }
-
     public void deleteIfExists(String relativePath) {
         try {
             Path root = Paths.get(baseDir).toAbsolutePath().normalize();
@@ -89,6 +68,19 @@ public class FileStorage {
         } catch (Exception ex) {
             log.error("Failed to delete file: {}", relativePath, ex);
         }
+    }
+
+    public String renameSaleItemFile(Integer saleItemId, String oldFileName, String newFileName) throws IOException {
+        Path dir = Paths.get(baseDir).resolve(String.valueOf(saleItemId));
+        Files.createDirectories(dir);
+
+        Path from = dir.resolve(oldFileName);
+        Path to   = dir.resolve(newFileName);
+
+        if (Files.exists(from)) {
+            Files.move(from, to, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+        }
+        return "sale-items/" + saleItemId + "/" + newFileName;
     }
 }
 
