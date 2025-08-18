@@ -250,11 +250,11 @@ public class SaleItemService {
         var withOrder = remainingPics.stream()
                 .filter(p -> desiredOrder.containsKey(p.getId()))
                 .sorted(Comparator.comparingInt(p -> desiredOrder.get(p.getId()))) // 1..4
-                .collect(Collectors.toList());
+                .toList();
 
         var withoutOrder = remainingPics.stream()
                 .filter(p -> !desiredOrder.containsKey(p.getId()))
-                .collect(Collectors.toList());
+                .toList();
 
         var finalPictures = new ArrayList<SaleItemPicture>();
         finalPictures.addAll(withOrder);

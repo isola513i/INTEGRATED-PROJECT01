@@ -32,12 +32,10 @@ public class FileStorage {
         private String path;     // relative path ที่เก็บใน DB: "{itemId}/{fileName}"
     }
 
-    /** root จริงบนดิสก์ อ้างอิงจาก baseDir เสมอ */
     private Path getRoot() {
         return Paths.get(baseDir).toAbsolutePath().normalize();
     }
 
-    /** จัดเก็บไฟล์อัปโหลดเข้าโฟลเดอร์ของ item และคืน relative path แบบสั้น "{id}/{file}" */
     public StoredFile storeSaleItemFile(Integer saleItemId, MultipartFile file) throws IOException {
         String ext = Optional.ofNullable(file.getOriginalFilename())
                 .filter(n -> n.contains("."))
@@ -57,11 +55,9 @@ public class FileStorage {
 
         file.transferTo(target);
 
-        // ⬅️ เก็บแบบสั้น: "{id}/{file}"
         return new StoredFile(safe, saleItemId + "/" + safe);
     }
 
-    /** ลบไฟล์จาก relativePath; รองรับ path แบบเก่าที่ขึ้นต้นด้วย "sale-items/" */
     public void deleteIfExists(String relativePath) {
         try {
             String normalizedRel = normalizeRelative(relativePath);
@@ -81,7 +77,6 @@ public class FileStorage {
         }
     }
 
-    /** รีเนมไฟล์ในโฟลเดอร์ของ item และคืน relative path แบบสั้น "{id}/{newName}" */
     public String renameSaleItemFile(Integer saleItemId, String oldFileName, String newFileName) throws IOException {
         Path root = getRoot();
         Path dir = root.resolve(String.valueOf(saleItemId)).normalize();
@@ -101,22 +96,18 @@ public class FileStorage {
         } else {
             log.warn("Source file to rename not found: {}", from);
         }
-        // ⬅️ คืนแบบสั้น: "{id}/{file}"
         return saleItemId + "/" + newFileName;
     }
 
-    /** โหลดไฟล์ของ item เป็น Resource (ใช้ใน Controller) */
     public FileSystemResource loadSaleItemFile(Integer saleItemId, String fileName) {
         Path root = getRoot();
         Path path = root.resolve(String.valueOf(saleItemId)).resolve(fileName).normalize();
         if (!path.startsWith(root)) {
-            // ป้องกัน path traversal
-            return new FileSystemResource(new File("/dev/null")); // จะ exists=false
+            return new FileSystemResource(new File("/dev/null"));
         }
         return new FileSystemResource(path.toFile());
     }
 
-    /** โหลดจาก relativePath (เช่น "{id}/{file}") */
     public FileSystemResource loadByRelativePath(String relativePath) {
         String normalizedRel = normalizeRelative(relativePath);
         Path root = getRoot();
@@ -124,13 +115,11 @@ public class FileStorage {
         return new FileSystemResource(path.toFile());
     }
 
-    /** 🔧 helper: รองรับทั้ง path รุ่นเก่า "sale-items/{id}/{file}" และแบบใหม่ "{id}/{file}" */
     private String normalizeRelative(String relativePath) {
         String rel = Optional.ofNullable(relativePath).orElse("").replace("\\", "/");
         if (rel.startsWith("sale-items/")) {
             rel = rel.substring("sale-items/".length());
         }
-        // รูปแบบเป้าหมาย: "{id}/{file}"
         return rel;
     }
 }
