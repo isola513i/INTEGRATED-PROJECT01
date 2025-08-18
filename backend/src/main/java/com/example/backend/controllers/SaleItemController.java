@@ -171,7 +171,7 @@ public class SaleItemController {
 
     @DeleteMapping("/v2/sale-items/{id}")
     public ResponseEntity<Void> deleteSaleItemV2(@PathVariable Integer id) {
-        saleItemService.deleteSaleItem(id);
+        saleItemService.deleteSaleItemAndImages(id);
         return ResponseEntity.noContent().build();
     }
 
