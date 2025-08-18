@@ -5,13 +5,16 @@ import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,8 +28,12 @@ public class FileStorage {
 
     @Getter @AllArgsConstructor
     public static class StoredFile {
-        private String fileName;
-        private String path;
+        private String fileName; // ชื่อไฟล์จริงในโฟลเดอร์ของ item
+        private String path;     // relative path ที่เก็บใน DB: "{itemId}/{fileName}"
+    }
+
+    private Path getRoot() {
+        return Paths.get(baseDir).toAbsolutePath().normalize();
     }
 
     public StoredFile storeSaleItemFile(Integer saleItemId, MultipartFile file) throws IOException {
@@ -36,29 +43,29 @@ public class FileStorage {
                 .orElse("");
 
         String safe = UUID.randomUUID().toString().replace("-", "") + ext;
-        Path root = Paths.get(baseDir).toAbsolutePath().normalize();
+
+        Path root = getRoot();
         Path dir = root.resolve(String.valueOf(saleItemId)).normalize();
+        if (!dir.startsWith(root)) throw new IOException("Invalid path resolution");
 
-        if (!dir.startsWith(root)) {
-            throw new IOException("Invalid path resolution");
-        }
         Files.createDirectories(dir);
-        Path target = dir.resolve(safe).normalize();
 
-        if (!target.startsWith(root)) {
-            throw new IOException("Invalid target path");
-        }
+        Path target = dir.resolve(safe).normalize();
+        if (!target.startsWith(root)) throw new IOException("Invalid target path");
+
         file.transferTo(target);
-        return new StoredFile(safe, "sale-items/" + saleItemId + "/" + safe);
+
+        return new StoredFile(safe, saleItemId + "/" + safe);
     }
 
     public void deleteIfExists(String relativePath) {
         try {
-            Path root = Paths.get(baseDir).toAbsolutePath().normalize();
-            Path target = root.resolve(relativePath).normalize();
-            if (!target.startsWith(root)) {
-                throw new IOException("Invalid delete path");
-            }
+            String normalizedRel = normalizeRelative(relativePath);
+
+            Path root = getRoot();
+            Path target = root.resolve(normalizedRel).normalize();
+            if (!target.startsWith(root)) throw new IOException("Invalid delete path");
+
             boolean deleted = Files.deleteIfExists(target);
             if (!deleted) {
                 log.warn("File not found to delete: {}", target);
@@ -71,16 +78,50 @@ public class FileStorage {
     }
 
     public String renameSaleItemFile(Integer saleItemId, String oldFileName, String newFileName) throws IOException {
-        Path dir = Paths.get(baseDir).resolve(String.valueOf(saleItemId));
+        Path root = getRoot();
+        Path dir = root.resolve(String.valueOf(saleItemId)).normalize();
+        if (!dir.startsWith(root)) throw new IOException("Invalid dir");
+
         Files.createDirectories(dir);
 
-        Path from = dir.resolve(oldFileName);
-        Path to   = dir.resolve(newFileName);
+        Path from = dir.resolve(oldFileName).normalize();
+        Path to   = dir.resolve(newFileName).normalize();
+
+        if (!from.startsWith(root) || !to.startsWith(root)) {
+            throw new IOException("Invalid move path");
+        }
 
         if (Files.exists(from)) {
-            Files.move(from, to, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            Files.move(from, to, StandardCopyOption.REPLACE_EXISTING);
+        } else {
+            log.warn("Source file to rename not found: {}", from);
         }
-        return "sale-items/" + saleItemId + "/" + newFileName;
+        return saleItemId + "/" + newFileName;
+    }
+
+    public FileSystemResource loadSaleItemFile(Integer saleItemId, String fileName) {
+        Path root = getRoot();
+        Path path = root.resolve(String.valueOf(saleItemId)).resolve(fileName).normalize();
+        if (!path.startsWith(root)) {
+            return new FileSystemResource(new File("/dev/null"));
+        }
+        return new FileSystemResource(path.toFile());
+    }
+
+    public FileSystemResource loadByRelativePath(String relativePath) {
+        String normalizedRel = normalizeRelative(relativePath);
+        Path root = getRoot();
+        Path path = root.resolve(normalizedRel).normalize();
+        return new FileSystemResource(path.toFile());
+    }
+
+    private String normalizeRelative(String relativePath) {
+        String rel = Optional.ofNullable(relativePath).orElse("").replace("\\", "/");
+        if (rel.startsWith("sale-items/")) {
+            rel = rel.substring("sale-items/".length());
+        }
+        return rel;
     }
 }
+
 

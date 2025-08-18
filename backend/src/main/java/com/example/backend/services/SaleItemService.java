@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.example.backend.dtos.ImageStatus.NEW;
 import static com.example.backend.utils.PictureNameUtill.canonicalName;
 import static com.example.backend.utils.PictureNameUtill.getExt;
 
@@ -133,6 +132,23 @@ public class SaleItemService {
         return d;
     }
 
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public List<SaleItemV2Dto.SaleItemV2Response.SaleItemImageDto> getSaleItemImages(Integer saleItemId) {
+        var saleItem = saleItemRepository.findByIdWithBrand(saleItemId)
+                .orElseThrow(() -> new ItemNotFoundException("SaleItem not found"));
+
+        return saleItem.getPictures().stream()
+                .sorted(Comparator.comparingInt(SaleItemPicture::getPosition))
+                .map(pic -> {
+                    var dto = new SaleItemV2Dto.SaleItemV2Response.SaleItemImageDto();
+                    dto.setFileName(pic.getFileName());
+                    dto.setImageViewOrder(pic.getPosition() + 1);
+                    return dto;
+                })
+                .toList();
+    }
+
+
     @Transactional
     public SaleItemV2Dto.SaleItemV2Response createSaleItemWithImages(SaleItemV2Dto.SaleItemWithImageInfo req) throws IOException {
         var s = req.getSaleItem();
@@ -234,11 +250,11 @@ public class SaleItemService {
         var withOrder = remainingPics.stream()
                 .filter(p -> desiredOrder.containsKey(p.getId()))
                 .sorted(Comparator.comparingInt(p -> desiredOrder.get(p.getId()))) // 1..4
-                .collect(Collectors.toList());
+                .toList();
 
         var withoutOrder = remainingPics.stream()
                 .filter(p -> !desiredOrder.containsKey(p.getId()))
-                .collect(Collectors.toList());
+                .toList();
 
         var finalPictures = new ArrayList<SaleItemPicture>();
         finalPictures.addAll(withOrder);
@@ -306,7 +322,6 @@ public class SaleItemService {
 
         return sendV2Response(itemId);
     }
-
 
     @Transactional
     public SaleItemV2Dto.SaleItemV2Response deleteSaleItemWithImages(Integer itemId, SaleItemV2Dto.DeletePicturesRequest req) {
