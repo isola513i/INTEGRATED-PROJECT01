@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Comparator;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -122,6 +123,28 @@ public class FileStorage {
         }
         return rel;
     }
+
+    public void deleteItemDirectory(Integer saleItemId) {
+        try {
+            Path root = Paths.get(baseDir).toAbsolutePath().normalize();
+            Path dir = root.resolve(String.valueOf(saleItemId)).normalize();
+            if (!dir.startsWith(root)) throw new IOException("Invalid dir path");
+
+            if (Files.exists(dir)) {
+                // ลบ recursive
+                Files.walk(dir)
+                        .sorted(Comparator.reverseOrder())
+                        .forEach(p -> {
+                            try { Files.deleteIfExists(p); }
+                            catch (IOException e) { log.warn("Failed to delete: {}", p, e); }
+                        });
+                log.info("Deleted directory for item {}: {}", saleItemId, dir);
+            }
+        } catch (Exception ex) {
+            log.error("Failed to delete item directory: {}", saleItemId, ex);
+        }
+    }
+
 }
 
 

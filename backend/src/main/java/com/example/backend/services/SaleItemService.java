@@ -148,7 +148,6 @@ public class SaleItemService {
                 .toList();
     }
 
-
     @Transactional
     public SaleItemV2Dto.SaleItemV2Response createSaleItemWithImages(SaleItemV2Dto.SaleItemWithImageInfo req) throws IOException {
         var s = req.getSaleItem();
@@ -237,7 +236,6 @@ public class SaleItemService {
             picRepo.flush();
         }
 
-        // --- ORDER (MOVE/ONLINE) ---
         Map<Integer, Integer> desiredOrder = new HashMap<>();
         for (var i : infos) {
             if ((i.getStatus() == ImageStatus.MOVE || i.getStatus() == ImageStatus.ONLINE)
@@ -269,7 +267,7 @@ public class SaleItemService {
         for (var pic : finalPictures) {
             var newPic = new SaleItemPicture();
             newPic.setSaleItem(saleItemRepository.getReferenceById(itemId));
-            newPic.setFileName(pic.getFileName());    // เดี๋ยวไปรีเนมท้าย ๆ
+            newPic.setFileName(pic.getFileName());
             newPic.setFilePath(pic.getFilePath());
             newPic.setPosition(position++);
             picRepo.save(newPic);
@@ -382,6 +380,28 @@ public class SaleItemService {
         if (fileName == null) return "jpg";
         int dot = fileName.lastIndexOf('.');
         return (dot >= 0) ? fileName.substring(dot + 1).toLowerCase() : "jpg";
+    }
+
+    @Transactional
+    public void deleteSaleItemAndImages(Integer itemId) {
+        var pics = picRepo.findBySaleItemIdOrderByPositionAsc(itemId);
+
+        for (var p : pics) {
+            storage.deleteIfExists(p.getFilePath());
+        }
+
+        if (!pics.isEmpty()) {
+            picRepo.deleteAllInBatch(pics);
+            picRepo.flush();
+        }
+
+        if (saleItemRepository.existsById(itemId)) {
+            saleItemRepository.deleteById(itemId);
+        } else {
+            throw new ItemNotFoundException("SaleItem not found for this id :: " + itemId);
+        }
+
+        storage.deleteItemDirectory(itemId);
     }
 
 }
