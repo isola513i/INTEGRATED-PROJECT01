@@ -2,11 +2,13 @@ package com.example.backend.controllers;
 
 import com.example.backend.dtos.*;
 import com.example.backend.entities.SaleItem;
+import com.example.backend.services.FileStorage;
 import com.example.backend.services.SaleItemService;
 import com.example.backend.utils.ListMapper;
 import lombok.Getter;
 import lombok.Setter;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +27,8 @@ public class SaleItemController {
     private final SaleItemService saleItemService;
     private final ModelMapper modelMapper;
     private final ListMapper listMapper;
+    @Autowired
+    private FileStorage storage;
 
     public SaleItemController(SaleItemService saleItemService, ModelMapper modelMapper, ListMapper listMapper) {
         this.saleItemService = saleItemService;
@@ -125,9 +129,16 @@ public class SaleItemController {
         var out = pics.stream().map(p -> {
             var dto = new SaleItemV2Dto.SaleItemV2Response.SaleItemImageDto();
             dto.setPictureId(p.getId());
-            dto.setFileName(p.getFileName());
-            dto.setOrder(p.getPosition() + 1);
-            dto.setImageUrl("/api/images/" + p.getId());
+
+            String originalFileName = p.getFileName();
+            String extension = originalFileName != null && originalFileName.contains(".")
+                    ? originalFileName.substring(originalFileName.lastIndexOf('.'))
+                    : ".jpg";
+            String newFileName = id + "." + (p.getPosition() + 1) + extension;
+            dto.setFileName(newFileName);
+
+            dto.setImageViewOrder(p.getPosition() + 1);
+            dto.setImageUrl("/v2/sale-items/images/" + p.getId());
             return dto;
         }).toList();
         return ResponseEntity.ok(out);
@@ -135,16 +146,18 @@ public class SaleItemController {
 
     @PostMapping(value = "/v2/sale-items", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SaleItemV2Dto.SaleItemV2Response> createSaleItemV2(
-            @ModelAttribute SaleItemV2Dto.SaleItemV2Request req) throws IOException {
+            @ModelAttribute SaleItemV2Dto.SaleItemWithImageInfo req) throws IOException {
         var res = saleItemService.createSaleItemWithImages(req);
         return ResponseEntity.status(HttpStatus.CREATED).body(res);
     }
 
-    @PutMapping(value = "/v2/sale-items/{id}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<SaleItemV2Dto.SaleItemV2Response> updateImages(
-            @PathVariable Integer id,
-            @ModelAttribute SaleItemV2Dto.UpdatePicturesRequest req) throws IOException {
-        return ResponseEntity.ok(saleItemService.updateSaleItemWithImages(id, req));
+    @PutMapping(value = "/v2/sale-items/{id}" ,consumes =  MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<SaleItemV2Dto.SaleItemV2Response> updateSaleItemWithImages(
+            @PathVariable("id") Integer itemId,
+            @ModelAttribute SaleItemV2Dto.SaleItemWithImageInfo request
+    ) throws IOException {
+        var result = saleItemService.updateSaleItemWithImages(itemId, request);
+        return ResponseEntity.ok(result);
     }
 
     @DeleteMapping("/v2/sale-items/{id}/images")
@@ -152,6 +165,12 @@ public class SaleItemController {
             @PathVariable Integer id,
             @RequestBody SaleItemV2Dto.DeletePicturesRequest req) {
         return ResponseEntity.ok(saleItemService.deleteSaleItemWithImages(id, req));
+    }
+
+    @DeleteMapping("/v2/sale-items/{id}")
+    public ResponseEntity<Void> deleteSaleItemV2(@PathVariable Integer id) {
+        saleItemService.deleteSaleItem(id);
+        return ResponseEntity.noContent().build();
     }
 
 }

@@ -136,7 +136,7 @@ public class SaleItemService {
     }
 
     @Transactional
-    public SaleItemV2Dto.SaleItemV2Response createSaleItemWithImages(SaleItemV2Dto.SaleItemV2Request req) throws IOException {
+    public SaleItemV2Dto.SaleItemV2Response createSaleItemWithImages(SaleItemV2Dto.SaleItemWithImageInfo req) throws IOException {
         var s = req.getSaleItem();
         if (s == null) throw new IllegalArgumentException("saleItem is required");
         if (s.getBrand() == null || s.getBrand().getId() == null)
@@ -188,7 +188,7 @@ public class SaleItemService {
     @Transactional
     public SaleItemV2Dto.SaleItemV2Response updateSaleItemWithImages(
             Integer itemId,
-            SaleItemV2Dto.UpdatePicturesRequest req
+            SaleItemV2Dto.SaleItemWithImageInfo req
     ) throws IOException {
 
         var infos = Optional.ofNullable(req.getImageInfos()).orElse(List.of());
@@ -197,7 +197,7 @@ public class SaleItemService {
 
         var deleteIds = infos.stream()
                 .filter(i -> i.getStatus() == ImageStatus.DELETE)
-                .map(SaleItemV2Dto.ImageInfoDto::getPictureId)
+                .map(SaleItemV2Dto.SaleItemImageRequest::getPictureId)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
 
@@ -345,17 +345,32 @@ public class SaleItemService {
         var images = pics.stream().map(p -> {
             var i = new SaleItemV2Dto.SaleItemV2Response.SaleItemImageDto();
             i.setPictureId(p.getId());
-            i.setFileName(p.getFileName());
-            i.setOrder(p.getPosition() + 1);
+
+            String originalFileName = p.getFileName();
+            String extension = getFileExtension(originalFileName);
+            String newFileName = id + "." + (p.getPosition() + 1) + extension;
+            i.setFileName(newFileName);
+
+            i.setImageViewOrder(p.getPosition() + 1);
+            i.setImageUrl("/v2/sale-items/images/" + p.getId());
             return i;
         }).toList();
         dto.setSaleItemImages(images);
         return dto;
     }
 
+    private String getFileExtension(String fileName) {
+        if (fileName == null || !fileName.contains(".")) {
+            return ".jpg";
+        }
+        return fileName.substring(fileName.lastIndexOf('.'));
+    }
 
     public List<SaleItemPicture> findByItemOrdered(Integer itemId) {
         return picRepo.findBySaleItemIdOrderByPositionAsc(itemId);
     }
 
+    public SaleItemPicture findImageById(Integer imageId) {
+        return picRepo.findById(imageId).orElse(null);
+    }
 }

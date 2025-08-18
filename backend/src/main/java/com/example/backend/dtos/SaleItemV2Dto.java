@@ -15,27 +15,9 @@ public class SaleItemV2Dto {
     // ---------- REQUEST ----------
     @Data
     @NoArgsConstructor
-    public static class SaleItemV2Request {
+    public static class SaleItemWithImageInfo {
         private SaleItemDto.GetCreateSaleItemDto saleItem;
-        private List<ImageInfoDto> imageInfos;
-    }
-
-    public record DeletePicturesRequest(List<Integer> pictureIds) {}
-
-    @Data
-    @NoArgsConstructor
-    public static class UpdatePicturesRequest {
-        private List<ImageInfoDto> imageInfos;
-    }
-
-    @Data
-    @NoArgsConstructor
-    public static class ImageInfoDto {
-        private Integer order;
-        private Integer pictureId;
-        private String fileName;
-        private ImageStatus status;
-        private MultipartFile imageFile;
+        private List<SaleItemImageRequest> imageInfos;
     }
 
     // ---------- RESPONSE ----------
@@ -64,9 +46,29 @@ public class SaleItemV2Dto {
         public static class SaleItemImageDto {
             private Integer pictureId;
             private String fileName;
-            private Integer order;
+            private Integer imageViewOrder;
             private String imageUrl;
         }
     }
+
+    @Data
+    @NoArgsConstructor
+    public static class SaleItemImageRequest {
+        private Integer order;
+        private Integer pictureId;
+        private String fileName;
+        private ImageStatus status;
+        private MultipartFile imageFile;
+    }
+
+    public record DeletePicturesRequest(List<Integer> pictureIds) {
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class UpdatePicturesRequest {
+        private List<SaleItemImageRequest> imageInfos;
+    }
+
 }
 
