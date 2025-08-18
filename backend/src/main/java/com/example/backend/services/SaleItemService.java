@@ -292,7 +292,37 @@ public class SaleItemService {
         return sendV2Response(itemId);
     }
 
-    @Transactional
+  //  @Transactional
+//    public SaleItemV2Dto.SaleItemV2Response sendV2Response(Integer id) {
+//        var s = saleItemRepository.findByIdWithBrand(id)
+//                .orElseThrow(() -> new ItemNotFoundException("SaleItem not found"));
+//
+//        var dto = new SaleItemV2Dto.SaleItemV2Response();
+//        dto.setId(s.getId());
+//        dto.setModel(s.getModel());
+//        dto.setBrandName(s.getBrand().getName());
+//        dto.setDescription(s.getDescription());
+//        dto.setPrice(s.getPrice());
+//        dto.setRamGb(s.getRamGb());
+//        dto.setScreenSizeInch(s.getScreenSizeInch());
+//        dto.setQuantity(s.getQuantity());
+//        dto.setStorageGb(s.getStorageGb());
+//        dto.setColor(s.getColor());
+//        dto.setCreatedOn(s.getCreatedOn());
+//        dto.setUpdatedOn(s.getUpdatedOn());
+//
+//        var pics = picRepo.findBySaleItemIdOrderByPositionAsc(id);
+//        var images = pics.stream().map(p -> {
+//            var i = new SaleItemV2Dto.SaleItemV2Response.SaleItemImageDto();
+//            i.setPictureId(p.getId());
+//            i.setFileName(p.getFileName());
+//            i.setImageViewOrder(p.getPosition() + 1);
+//            return i;
+//        }).toList();
+//        dto.setSaleItemImages(images);
+//        return dto;
+//    }
+  @Transactional
     public SaleItemV2Dto.SaleItemV2Response sendV2Response(Integer id) {
         var s = saleItemRepository.findByIdWithBrand(id)
                 .orElseThrow(() -> new ItemNotFoundException("SaleItem not found"));
@@ -316,12 +346,13 @@ public class SaleItemService {
             var i = new SaleItemV2Dto.SaleItemV2Response.SaleItemImageDto();
             i.setPictureId(p.getId());
             i.setFileName(p.getFileName());
-            i.setImageViewOrder(p.getPosition() + 1);
+            i.setOrder(p.getPosition() + 1);
             return i;
         }).toList();
         dto.setSaleItemImages(images);
         return dto;
     }
+
 
     public List<SaleItemPicture> findByItemOrdered(Integer itemId) {
         return picRepo.findBySaleItemIdOrderByPositionAsc(itemId);
