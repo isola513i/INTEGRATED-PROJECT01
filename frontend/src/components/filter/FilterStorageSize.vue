@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, onMounted } from "vue";
 
 const emit = defineEmits(["update:storage"]);
 
@@ -15,19 +15,31 @@ const storageOptions = ref([
   { label: "128 GB", value: 128 },
   { label: "256 GB", value: 256 },
   { label: "512 GB", value: 512 },
-  { label: "1 TB", value: 1000 },
+  { label: "Not specified", value: -1 },
 ]);
+
+// โหลดค่า sessionStorage เมื่อ mounted
+onMounted(() => {
+  const stored = JSON.parse(sessionStorage.getItem("filterStorage") || "[]");
+  selectedStorage.value = stored;
+  emit("update:storage", selectedStorage.value);
+});
+
+watch(
+  () => props.clearAllTrigger,
+  (val) => {
+    if (val) {
+      selectedStorage.value = [];
+      emit("update:storage", []);
+      sessionStorage.removeItem("filterStorage");
+    }
+  }
+);
 
 function isStorageChecked(value) {
   return selectedStorage.value.includes(value);
 }
-watch(
-  () => props.clearAllTrigger,
-  (val) => {
-    if (val) selectedStorage.value = [];
-    emit("update:storage", []); // แจ้ง parent ด้วย
-  }
-);
+
 function toggleStorage(option) {
   if (selectedStorage.value.includes(option.value)) {
     selectedStorage.value = selectedStorage.value.filter(
@@ -37,14 +49,23 @@ function toggleStorage(option) {
     selectedStorage.value = [...selectedStorage.value, option.value];
   }
   emit("update:storage", selectedStorage.value);
+  sessionStorage.setItem(
+    "filterStorage",
+    JSON.stringify(selectedStorage.value)
+  );
 }
 
 function removeStorage(index) {
   selectedStorage.value.splice(index, 1);
   emit("update:storage", selectedStorage.value);
+  sessionStorage.setItem(
+    "filterStorage",
+    JSON.stringify(selectedStorage.value)
+  );
 }
 
 function formatStorage(size) {
+  if (size === -1) return "Not specified";
   if (size >= 1000) {
     const tb = size / 1000;
     return Number.isInteger(tb) ? `${tb} TB` : `${tb.toFixed(1)} TB`;
@@ -64,7 +85,6 @@ function toggleDropdown() {
   >
     <p class="text-sm font-semibold text-black">Storage</p>
 
-    <!-- แถว tag เลื่อนได้ -->
     <div
       class="flex flex-nowrap gap-1 mt-1 overflow-x-auto min-h-[28px] scrollbar-thin scrollbar-thumb-gray-300"
     >
@@ -86,12 +106,12 @@ function toggleDropdown() {
       <template v-else>
         <span
           class="text-gray-500 text-xs flex items-center justify-center w-full"
-          >Select storage</span
         >
+          Select storage
+        </span>
       </template>
     </div>
 
-    <!-- dropdown เลือก storage -->
     <div
       v-show="showStorageDropdown"
       class="absolute mt-2 bg-white border border-gray-300 rounded-lg shadow-lg z-50 w-full sm:w-64 max-h-60 overflow-auto"

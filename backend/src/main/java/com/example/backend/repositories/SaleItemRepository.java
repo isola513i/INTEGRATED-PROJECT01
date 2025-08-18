@@ -44,5 +44,25 @@ public interface SaleItemRepository extends JpaRepository<SaleItem,Integer> {
     );
     @Query("select s from SaleItem s join fetch s.brand where s.id = :id")
     Optional<SaleItem> findByIdWithBrand(@Param("id") Integer id);
+
+    @Query("""
+    SELECT m FROM SaleItem m
+    WHERE (:brands IS NULL OR m.brand.name IN :brands)
+      AND (:lowerPrice IS NULL OR m.price >= :lowerPrice)
+      AND (:upperPrice IS NULL OR m.price <= :upperPrice)
+      AND (
+            (:searchNullStorage = true AND m.storageGb IS NULL)
+            OR (:storageSizes IS NOT NULL AND m.storageGb IN :storageSizes)
+            OR (:storageSizes IS NULL AND :searchNullStorage = false)
+          )
+""")
+    Page<SaleItem> findByAdvancedFilters(
+            @Param("brands") List<String> brands,
+            @Param("lowerPrice") Double minPrice,
+            @Param("upperPrice") Double maxPrice,
+            @Param("storageSizes") List<Integer> storages,
+            @Param("searchNullStorage") boolean searchNullStorage,
+            Pageable pageable
+    );
 }
 

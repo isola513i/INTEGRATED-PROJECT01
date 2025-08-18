@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from "vue";
+import { onMounted, ref, watch } from "vue";
 
 const props = defineProps({
   clearAllTrigger: { type: Boolean, default: false },
@@ -7,7 +7,7 @@ const props = defineProps({
 
 const emit = defineEmits(["update:price"]);
 
-const selectedPrice = ref(null);
+const selectedPrice = ref();
 const showPriceDropdown = ref(false);
 const priceOptions = ref([
   { label: "0 - 5,000 Baht", min: 0, max: 5000 },
@@ -19,6 +19,20 @@ const priceOptions = ref([
   { label: "50,001+ Baht", min: 50001, max: null },
 ]);
 
+function selectPrice(option) {
+  selectedPrice.value = { min: option.min, max: option.max };
+  emit("update:price", selectedPrice.value);
+  showPriceDropdown.value = false;
+  sessionStorage.setItem("selectedPrice", JSON.stringify(selectedPrice.value));
+}
+onMounted(() => {
+  const stored = sessionStorage.getItem("selectedPrice");
+  if (stored) {
+    selectedPrice.value = JSON.parse(stored);
+    emit("update:price", selectedPrice.value);
+  }
+});
+
 // watch clearAllTrigger เพื่อรีเซ็ต
 watch(
   () => props.clearAllTrigger,
@@ -29,13 +43,6 @@ watch(
 
 function togglePriceDropdown() {
   showPriceDropdown.value = !showPriceDropdown.value;
-}
-
-function selectPrice(option) {
-  selectedPrice.value = { min: option.min, max: option.max };
-  emit("update:price", selectedPrice.value);
-  showPriceDropdown.value = false;
-  sessionStorage.setItem("selectedPrice", JSON.stringify(selectedPrice.value));
 }
 
 function removePrice() {
