@@ -26,12 +26,11 @@ onMounted(async () => {
     router.replace({ query: {} });
   }
   try {
-    const data = await fetchItemById(route.params.id);
-    const fetchImage = await getItem(`v2/sale-items/${route.params.id}/images`)
+    const data = await getItem(`v2/sale-items/${route.params.id}`)
+  //const fetchImage = await getItem(`v2/sale-items/${route.params.id}/images`)
     if (!data) throw new Error("Not found");
-    if(!fetchImage) throw Error("Not found");
     product.value = data;
-    images.value = fetchImage;
+  // images.value = fetchImage;
     console.log(images.value)
   } catch {
     // window.alert("The requested sale item does not exist.");
