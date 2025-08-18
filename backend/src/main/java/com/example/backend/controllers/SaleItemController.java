@@ -134,16 +134,18 @@ public class SaleItemController {
 
     @PostMapping(value = "/v2/sale-items", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SaleItemV2Dto.SaleItemV2Response> createSaleItemV2(
-            @ModelAttribute SaleItemV2Dto.SaleItemV2Request req) throws IOException {
+            @ModelAttribute SaleItemV2Dto.SaleItemWithImageInfo req) throws IOException {
         var res = saleItemService.createSaleItemWithImages(req);
         return ResponseEntity.status(HttpStatus.CREATED).body(res);
     }
 
-    @PutMapping(value = "/v2/sale-items/{id}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<SaleItemV2Dto.SaleItemV2Response> updateImages(
-            @PathVariable Integer id,
-            @ModelAttribute SaleItemV2Dto.UpdatePicturesRequest req) throws IOException {
-        return ResponseEntity.ok(saleItemService.updateSaleItemWithImages(id, req));
+    @PutMapping(value = "/v2/sale-items/{id}" ,consumes =  MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<SaleItemV2Dto.SaleItemV2Response> updateSaleItemWithImages(
+            @PathVariable("id") Integer itemId,
+            @ModelAttribute SaleItemV2Dto.SaleItemWithImageInfo request
+    ) throws IOException {
+        var result = saleItemService.updateSaleItemWithImages(itemId, request);
+        return ResponseEntity.ok(result);
     }
 
     @DeleteMapping("/v2/sale-items/{id}/images")
@@ -151,6 +153,12 @@ public class SaleItemController {
             @PathVariable Integer id,
             @RequestBody SaleItemV2Dto.DeletePicturesRequest req) {
         return ResponseEntity.ok(saleItemService.deleteSaleItemWithImages(id, req));
+    }
+
+    @DeleteMapping("/v2/sale-items/{id}")
+    public ResponseEntity<Void> deleteSaleItemV2(@PathVariable Integer id) {
+        saleItemService.deleteSaleItem(id);
+        return ResponseEntity.noContent().build();
     }
 
 }
