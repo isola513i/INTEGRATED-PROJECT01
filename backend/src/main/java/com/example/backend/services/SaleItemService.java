@@ -316,7 +316,7 @@ public class SaleItemService {
             var i = new SaleItemV2Dto.SaleItemV2Response.SaleItemImageDto();
             i.setPictureId(p.getId());
             i.setFileName(p.getFileName());
-            i.setImageViewOrder(p.getPosition() + 1);
+            i.setOrder(p.getPosition() + 1);
             return i;
         }).toList();
         dto.setSaleItemImages(images);
