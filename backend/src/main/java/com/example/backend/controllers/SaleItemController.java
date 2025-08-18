@@ -126,7 +126,8 @@ public class SaleItemController {
             var dto = new SaleItemV2Dto.SaleItemV2Response.SaleItemImageDto();
             dto.setPictureId(p.getId());
             dto.setFileName(p.getFileName());
-            dto.setImageViewOrder(p.getPosition() + 1);
+            dto.setOrder(p.getPosition() + 1);
+            dto.setImageUrl("/api/images/" + p.getId());
             return dto;
         }).toList();
         return ResponseEntity.ok(out);

@@ -46,7 +46,8 @@ public class SaleItemV2Dto {
         public static class SaleItemImageDto {
             private Integer pictureId;
             private String fileName;
-            private Integer imageViewOrder;
+            private Integer order;
+            private String imageUrl;
         }
     }
 
