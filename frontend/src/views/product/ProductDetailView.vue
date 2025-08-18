@@ -2,8 +2,8 @@
 import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { fetchItemById, deleteItemById , getItem} from "@/services/saleItemService";
-import phoneImg from "@/assets/phone.jpg";
 import { useFlashStore } from "@/store/useFlashStore";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const route = useRoute();
 const router = useRouter();
@@ -15,6 +15,31 @@ const successMessage = ref("");
 const successMessageStyle = ref("");
 const flash = useFlashStore();
 
+// onMounted(async () => {
+//   if (route.query.successMessage) {
+//     successMessage.value = String(route.query.successMessage);
+//     successMessageStyle.value = String(route.query.successMessageStyle);
+//     setTimeout(() => {
+//       successMessage.value = "";
+//       successMessageStyle.value = "";
+//     }, 4000);
+//     router.replace({ query: {} });
+//   }
+//   try {
+//     const data = await getItem(`v2/sale-items/${route.params.id}`)
+//   //const fetchImage = await getItem(`v2/sale-items/${route.params.id}/images`)
+//     if (!data) throw new Error("Not found");
+//     product.value = data;
+//     product.value.saleItemImages.forEach(image => {
+//       const pic = getItem(`v2/sale-items/${route.params.id}/images/${image.fileName}`)
+//       if(pic) images.value.push(pic)
+//     });
+//     console.log(images.value)
+//   } catch {
+//     // window.alert("The requested sale item does not exist.");
+//     router.push("/sale-items");
+//   }
+// });
 onMounted(async () => {
   if (route.query.successMessage) {
     successMessage.value = String(route.query.successMessage);
@@ -25,22 +50,45 @@ onMounted(async () => {
     }, 4000);
     router.replace({ query: {} });
   }
+
   try {
-    const data = await getItem(`v2/sale-items/${route.params.id}`)
-  //const fetchImage = await getItem(`v2/sale-items/${route.params.id}/images`)
+    const data = await getItem(`v2/sale-items/${route.params.id}`);
     if (!data) throw new Error("Not found");
+
     product.value = data;
-  // images.value = fetchImage;
-    console.log(images.value)
-  } catch {
-    // window.alert("The requested sale item does not exist.");
+
+    // Load images
+    const imagePromises = product.value.saleItemImages.map(async (image) => {
+      const res = await fetch(
+        `${API_BASE_URL}/v2/sale-items/${route.params.id}/images/${image.fileName}`
+      );
+
+      if (!res.ok) return null;
+
+      const blob = await res.blob();
+      return URL.createObjectURL(blob); // browser-safe URL
+    });
+
+    // Wait for all images
+    const results = await Promise.all(imagePromises);
+
+    // Filter out nulls and assign to images
+    images.value = results.filter(Boolean);
+
+    console.log(images.value); // contains blob URLs you can bind to <img>
+  } catch(err) {
+    console.log("error :" , err)
     router.push("/sale-items");
   }
 });
 
 const images = ref('');
 const selectedIndex = ref(0);
-const selectedImage = computed(() => images[selectedIndex.value]);
+
+
+const handleSelectedIndex = (index) =>{
+  selectedIndex.value = index
+}
 
 const prev = () => {
   selectedIndex.value =
@@ -110,7 +158,7 @@ const deleteItem = async () => {
           class="relative bg-gray-100 rounded-xl flex justify-center items-center overflow-hidden h-[500px]"
         >
           <img
-            :src="selectedImage"
+            :src="images[selectedIndex]"
             alt="Product image"
             class="w-full h-full object-cover"
           />
@@ -141,7 +189,8 @@ const deleteItem = async () => {
             "
           >
             <img
-              :src="img.imageUrl"
+              @click="handleSelectedIndex(index)"
+              :src="img"
               alt="Thumbnail"
               class="w-full h-full object-contain"
             />
