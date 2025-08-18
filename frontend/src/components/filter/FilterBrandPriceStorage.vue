@@ -174,6 +174,10 @@ function formatStorage(size) {
 function clearAll() {
   selectedBrands.value = [];
   selectedStorage.value = [];
+  selectedPrice.value = null;
+  sessionStorage.removeItem("selectedPrice");
+  sessionStorage.removeItem("selectedStorage");
+  sessionStorage.removeItem("filterBrands");
 }
 </script>
 
@@ -184,14 +188,14 @@ function clearAll() {
         class="flex items-center bg-gray-100 rounded-full shadow px-4 py-2 w-full max-w-4xl mt-6 mx-auto"
         ref="dropdownRef"
       >
-        <!-- Brand -->
+        
         <!-- Brand -->
         <div
           class="text-center border-r border-gray-300 cursor-pointer relative w-[220px]"
           @click="toggleBrandDropdown"
         >
           <p class="text-sm font-semibold text-gray-800">Brand</p>
-          <div class="flex overflow-x-auto gap-1 mt-1 max-w-full">
+          <div class="flex flex-nowrap overflow-x-auto gap-1 mt-1 max-w-full whitespace-nowrap items-center min-h-[28px]">
             <template v-if="selectedBrands.length">
               <span
                 v-for="(brand, index) in selectedBrands"

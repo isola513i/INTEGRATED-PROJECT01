@@ -1,9 +1,14 @@
-<!-- <script setup>
-import { ref, watch, onMounted } from "vue";
+<script setup>
+import { ref, watch } from "vue";
+
+const props = defineProps({
+  clearAllTrigger: { type: Boolean, default: false },
+});
 
 const emit = defineEmits(["update:price"]);
 
 const selectedPrice = ref(null);
+const showPriceDropdown = ref(false);
 const priceOptions = ref([
   { label: "0 - 5,000 Baht", min: 0, max: 5000 },
   { label: "5,001 - 10,000 Baht", min: 5001, max: 10000 },
@@ -13,32 +18,37 @@ const priceOptions = ref([
   { label: "40,001 - 50,000 Baht", min: 40001, max: 50000 },
   { label: "50,001+ Baht", min: 50001, max: null },
 ]);
-const showPriceDropdown = ref(false);
+
+// watch clearAllTrigger เพื่อรีเซ็ต
+watch(
+  () => props.clearAllTrigger,
+  (val) => {
+    if (val) removePrice();
+  }
+);
+
+function togglePriceDropdown() {
+  showPriceDropdown.value = !showPriceDropdown.value;
+}
 
 function selectPrice(option) {
   selectedPrice.value = { min: option.min, max: option.max };
+  emit("update:price", selectedPrice.value);
   showPriceDropdown.value = false;
+  sessionStorage.setItem("selectedPrice", JSON.stringify(selectedPrice.value));
 }
+
 function removePrice() {
   selectedPrice.value = null;
+  emit("update:price", { min: null, max: null });
+  sessionStorage.removeItem("selectedPrice");
 }
-
-onMounted(() => {
-  const savedPrice = JSON.parse(sessionStorage.getItem("selectedPrice"));
-  if (savedPrice) selectedPrice.value = savedPrice;
-});
-
-watch(selectedPrice, (newVal) => {
-  emit("update:price", newVal);
-  if (newVal) sessionStorage.setItem("selectedPrice", JSON.stringify(newVal));
-  else sessionStorage.removeItem("selectedPrice");
-});
 </script>
 
 <template>
   <div
-    class="flex-1 text-center border-r text-black border-gray-300 cursor-pointer relative"
-    @click="showPriceDropdown = !showPriceDropdown"
+    @click="togglePriceDropdown"
+    class="flex-1 text-center border-r border-gray-300 w-full max-w-[25%] cursor-pointer relative"
   >
     <p class="text-sm font-semibold text-gray-800">Price</p>
     <div class="flex justify-center mt-1">
@@ -48,8 +58,7 @@ watch(selectedPrice, (newVal) => {
         >
           {{
             priceOptions.find(
-              (p) =>
-                p.min === selectedPrice.min && p.max === selectedPrice.max
+              (p) => p.min === selectedPrice.min && p.max === selectedPrice.max
             )?.label
           }}
           <button
@@ -79,4 +88,4 @@ watch(selectedPrice, (newVal) => {
       </div>
     </div>
   </div>
-</template> -->
+</template>

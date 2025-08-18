@@ -1,23 +1,33 @@
-<!-- <script setup>
-import { ref, watch, onMounted } from "vue";
+<script setup>
+import { ref, watch } from "vue";
 
 const emit = defineEmits(["update:storage"]);
 
+const props = defineProps({
+  clearAllTrigger: { type: Boolean, default: false },
+});
+
 const selectedStorage = ref([]);
-const storageOptions = ref([
-  { label: "32 GB", value: "32" },
-  { label: "64 GB", value: "64" },
-  { label: "128 GB", value: "128" },
-  { label: "256 GB", value: "256" },
-  { label: "512 GB", value: "512" },
-  { label: "1 TB", value: "1000" },
-]);
 const showStorageDropdown = ref(false);
+const storageOptions = ref([
+  { label: "32 GB", value: 32 },
+  { label: "64 GB", value: 64 },
+  { label: "128 GB", value: 128 },
+  { label: "256 GB", value: 256 },
+  { label: "512 GB", value: 512 },
+  { label: "1 TB", value: 1000 },
+]);
 
 function isStorageChecked(value) {
   return selectedStorage.value.includes(value);
 }
-
+watch(
+  () => props.clearAllTrigger,
+  (val) => {
+    if (val) selectedStorage.value = [];
+    emit("update:storage", []); // แจ้ง parent ด้วย
+  }
+);
 function toggleStorage(option) {
   if (selectedStorage.value.includes(option.value)) {
     selectedStorage.value = selectedStorage.value.filter(
@@ -26,10 +36,12 @@ function toggleStorage(option) {
   } else {
     selectedStorage.value = [...selectedStorage.value, option.value];
   }
+  emit("update:storage", selectedStorage.value);
 }
 
 function removeStorage(index) {
   selectedStorage.value.splice(index, 1);
+  emit("update:storage", selectedStorage.value);
 }
 
 function formatStorage(size) {
@@ -40,31 +52,27 @@ function formatStorage(size) {
   return `${size} GB`;
 }
 
-onMounted(() => {
-  const savedStorage = JSON.parse(
-    sessionStorage.getItem("selectedStorage") || "[]"
-  );
-  selectedStorage.value = savedStorage;
-});
-
-watch(selectedStorage, (newVal) => {
-  emit("update:storage", newVal);
-  sessionStorage.setItem("selectedStorage", JSON.stringify(newVal));
-});
+function toggleDropdown() {
+  showStorageDropdown.value = !showStorageDropdown.value;
+}
 </script>
 
 <template>
   <div
-    class="flex-1 text-center cursor-pointer relative"
-    @click="showStorageDropdown = !showStorageDropdown"
+    class="text-center cursor-pointer relative w-full max-w-[25%]"
+    @click.stop="toggleDropdown"
   >
-    <p class="text-sm font-semibold text-black">Storage Size</p>
-    <div class="flex flex-wrap justify-center gap-1 mt-1">
+    <p class="text-sm font-semibold text-black">Storage</p>
+
+    <!-- แถว tag เลื่อนได้ -->
+    <div
+      class="flex flex-nowrap gap-1 mt-1 overflow-x-auto min-h-[28px] scrollbar-thin scrollbar-thumb-gray-300"
+    >
       <template v-if="selectedStorage.length">
         <span
           v-for="(s, index) in selectedStorage"
           :key="s"
-          class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-xs flex items-center gap-1"
+          class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-xs flex items-center gap-1 flex-shrink-0"
         >
           {{ formatStorage(s) }}
           <button
@@ -75,14 +83,18 @@ watch(selectedStorage, (newVal) => {
           </button>
         </span>
       </template>
-
       <template v-else>
-        <span class="text-gray-500 text-xs">Storage Range</span>
+        <span
+          class="text-gray-500 text-xs flex items-center justify-center w-full"
+          >Select storage</span
+        >
       </template>
     </div>
+
+    <!-- dropdown เลือก storage -->
     <div
-      v-if="showStorageDropdown"
-      class="absolute mt-2 bg-white border border-gray-300 rounded-lg shadow-lg z-50 w-64"
+      v-show="showStorageDropdown"
+      class="absolute mt-2 bg-white border border-gray-300 rounded-lg shadow-lg z-50 w-full sm:w-64 max-h-60 overflow-auto"
     >
       <div
         v-for="option in storageOptions"
@@ -99,4 +111,4 @@ watch(selectedStorage, (newVal) => {
       </div>
     </div>
   </div>
-</template> -->
+</template>

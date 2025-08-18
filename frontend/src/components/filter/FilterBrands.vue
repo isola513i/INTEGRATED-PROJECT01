@@ -2,60 +2,108 @@
 import { ref, onMounted, watch } from "vue";
 import { fetchBrands } from "@/services/brandService";
 
-const emit = defineEmits(["update:brands"]);
+// Props เพิ่ม clearAllTrigger
+const props = defineProps({
+  modelValue: { type: Array, default: () => [] },
+  clearAllTrigger: { type: Boolean, default: false },
+});
 
-const selectedBrands = ref([]);
+// watch clearAllTrigger
+watch(
+  () => props.clearAllTrigger,
+  (val) => {
+    if (val) {
+      selectedBrands.value = [];
+    }
+  }
+);
+
+// Emits สำหรับ v-model
+const emit = defineEmits(["update:modelValue"]);
+
+const selectedBrands = ref([...props.modelValue]);
 const brandOptions = ref([]);
 const showBrandDropdown = ref(false);
+const dropdownRef = ref(null);
 
+// watch เพื่อ sync ค่าเมื่อ parent reset
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    selectedBrands.value = [...newVal];
+  }
+);
+
+// Toggle dropdown
+function toggleBrandDropdown() {
+  showBrandDropdown.value = !showBrandDropdown.value;
+}
+
+// ตรวจสอบว่าแบรนด์ถูกเลือกหรือไม่
 function isBrandChecked(brandId) {
   return selectedBrands.value.some((b) => b.brandId === brandId);
 }
 
 function toggleBrand(brand) {
   const exists = selectedBrands.value.find((b) => b.brandId === brand.brandId);
-  if (exists)
+  if (exists) {
     selectedBrands.value = selectedBrands.value.filter(
       (b) => b.brandId !== brand.brandId
     );
-  else
+  } else {
     selectedBrands.value = [
       ...selectedBrands.value,
       { brandId: brand.brandId, name: brand.name },
     ];
-}
+  }
 
-function removeBrand(index) {
-  selectedBrands.value.splice(index, 1);
-}
-
-onMounted(async () => {
-  const brands = await fetchBrands();
-  brandOptions.value = brands.filter(
-    (b) => b.name.toLowerCase() !== "filter by brand"
-  );
-});
-
-watch(selectedBrands, () => {
+  // ส่งข้อมูล brand ที่เลือกไป parent component
   emit(
     "update:brands",
     selectedBrands.value.map((b) => b.name)
   );
-});
+}
+
+// ลบแบรนด์ออก
+function removeBrand(index) {
+  selectedBrands.value.splice(index, 1);
+  emit("update:modelValue", selectedBrands.value);
+}
+
+// ดึงข้อมูลแบรนด์เมื่อ mounted
+onMounted(async () => {
+  const brands = await fetchBrands();
+  brandOptions.value = brands.filter(
+    (b) => b.name.toLowerCase() !== "filter by brand"
+  )
+})
+
+function handleClickOutside(event) {
+  if (dropdownRef.value && !dropdownRef.value.contains(event.target)) {
+    showBrandDropdown.value = false;
+    showPriceDropdown.value = false;
+    showStorageDropdown.value = false;
+  }
+}
 </script>
 
 <template>
   <div
-    class="flex-1 text-center border-r border-gray-300 cursor-pointer relative"
-    @click="showBrandDropdown = !showBrandDropdown"
+    class="text-center border-r border-gray-300 cursor-pointer relative w-full max-w-[25%]"
+    ref="dropdownRef"
+    @click="toggleBrandDropdown"
   >
     <p class="text-sm font-semibold text-gray-800">Brand</p>
-    <div class="flex flex-wrap justify-center gap-1 mt-1">
+
+    <!-- แสดงแบรนด์ที่เลือก หรือ placeholder -->
+    <div
+      class="flex flex-nowrap overflow-x-auto gap-1 mt-1 max-w-full whitespace-nowrap items-center min-h-[28px]"
+    >
       <template v-if="selectedBrands.length">
         <span
           v-for="(brand, index) in selectedBrands"
           :key="brand.brandId"
-          class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs flex items-center gap-1"
+          class="bg-blue-100 text-blue-800 px-2 py-0.5 justify-center rounded-full text-xs flex items-center gap-1 flex-shrink-0"
         >
           {{ brand.name }}
           <button
@@ -67,13 +115,16 @@ watch(selectedBrands, () => {
         </span>
       </template>
       <template v-else>
-        <span class="text-gray-500 text-xs">Filter by brand(s)</span>
+        <span class="flex-1 text-center text-gray-500 text-xs">
+          Filter by brand(s)
+        </span>
       </template>
     </div>
 
+    <!-- Dropdown แสดงแบรนด์ทั้งหมด -->
     <div
       v-if="showBrandDropdown"
-      class="absolute mt-2 bg-white border border-gray-300 rounded-lg max-h-60 overflow-auto shadow-lg z-50 w-64"
+      class="absolute mt-2 bg-white border text-black border-gray-300 rounded-lg max-h-60 overflow-auto shadow-lg z-50 w-full sm:w-64"
     >
       <div
         v-for="brand in brandOptions
