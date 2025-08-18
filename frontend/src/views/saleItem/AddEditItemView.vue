@@ -34,6 +34,8 @@ const form = reactive({
   quantity: null,
 });
 
+const formData = new FormData();
+
 const requiredFields = ["brandId", "model", "price", "quantity", "description"];
 
 const { errors, validateAll, isFormValid, validateField } =
@@ -43,7 +45,7 @@ const initialForm = reactive(JSON.parse(JSON.stringify(form)));
 
 const isDirty = computed(() => {
   const allRequiredChanged = requiredFields.every(
-    (field) => form[field] !== initialForm[field],
+    (field) => form[field] !== initialForm[field]
   );
 
   const allRequiredValid = requiredFields.every((field) => {
@@ -66,8 +68,8 @@ const isReadyToSubmit = computed(() => {
 
 const sortedBrands = computed(() =>
   [...brands.value].sort((a, b) =>
-    a.name.localeCompare(b.name, "en", { sensitivity: "base" }),
-  ),
+    a.name.localeCompare(b.name, "en", { sensitivity: "base" })
+  )
 );
 
 onMounted(async () => {
@@ -98,7 +100,7 @@ const watchFields = () => {
         if (isEditMode.value) {
           checkFormUpdate();
         }
-      },
+      }
     );
   });
 };
@@ -126,7 +128,7 @@ const updateForm = (updatedForm) => {
   Object.assign(form, updatedForm);
 };
 
-const handleSubmit = async () => {
+const handleSubmit = async (imageFiles) => {
   validateAll();
 
   if (!isFormValid.value) {
@@ -140,34 +142,79 @@ const handleSubmit = async () => {
   try {
     const brandId = Number(form.brandId);
     const selectedBrand = brands.value.find(
-      (b) => Number(b.brandId) === brandId,
+      (b) => Number(b.brandId) === brandId
     );
     if (!selectedBrand) throw new Error("Selected brand not found");
 
-    const payload = {
-      model: form.model.trim(),
-      brand: { id: brandId, name: selectedBrand.name },
-      description: form.description.trim(),
-      price: Number(form.price),
-      ramGb: form.ramGb !== null ? Number(form.ramGb) : null,
-      screenSizeInch:
-        form.screenSizeInch !== null ? Number(form.screenSizeInch) : null,
-      quantity: Number(form.quantity),
-      storageGb: form.storageGb !== null ? Number(form.storageGb) : null,
-      color: form.color?.trim() || null,
-    };
+    /*
+    // const payload = {
+    //   model: form.model.trim(),
+    //   brand: { id: brandId, name: selectedBrand.name },
+    //   description: form.description.trim(),
+    //   price: Number(form.price),
+    //   ramGb: form.ramGb !== null ? Number(form.ramGb) : null,
+    //   screenSizeInch:
+    //     form.screenSizeInch !== null ? Number(form.screenSizeInch) : null,
+    //   quantity: Number(form.quantity),
+    //   storageGb: form.storageGb !== null ? Number(form.storageGb) : null,
+    //   color: form.color?.trim() || null,
+    // };
+    formData.append('model',form.model.trim())
+    formData.append('brand' , JSON.stringify({ id: brandId, name: selectedBrand.name }))
+    formData.append('description', String(form.description.trim()))
+    formData.append('price', String(form.price))
+    formData.append('ramGb', String(form.ramGb !== null ? Number(form.ramGb) : null))
+    formData.append('screenSizeInch', String(form.screenSizeInch !== null ? Number(form.screenSizeInch) : null))
+    formData.append('quantity', String(form.quantity))
+    formData.append('storageGb', String(form.storageGb !== null ? Number(form.storageGb) : null))
+    formData.append('color', String(form.color?.trim() || null))
+
+    imageFiles.forEach((image) => {
+      formData.append('files' , image)
+    });
+    
+    console.log(formData)
+    */
+    // const saleItem = {
+    //   model: form.model.trim(),
+    //   brand: { id: brandId, name: selectedBrand.name },
+    //   description: form.description.trim(),
+    //   price: form.price ? Number(form.price) : null,
+    //   ramGb: form.ramGb ? Number(form.ramGb) : null,
+    //   screenSizeInch: form.screenSizeInch ? Number(form.screenSizeInch) : null,
+    //   quantity: form.quantity ? Number(form.quantity) : null,
+    //   storageGb: form.storageGb ? Number(form.storageGb) : null,
+    //   color: form.color?.trim() || null,
+    // };
+
+    formData.append("saleItem.model", form.model.trim());
+    formData.append("saleItem.brand.id", brandId); // required
+    formData.append("saleItem.description", form.description.trim());
+    formData.append("saleItem.price", String(form.price || 0));
+    formData.append("saleItem.quantity", String(form.quantity || 1));
+    formData.append("saleItem.storageGb", String(form.storageGb || 0));
+    formData.append("saleItem.color", form.color?.trim() || "");
+
+    // === Image files ===
+    imageFiles.forEach((file, index) => {
+      formData.append(`imageInfos[${index}].status`, "NEW");
+      formData.append(`imageInfos[${index}].order`, String(index + 1)); // backend expects 1,2,...
+      formData.append(`imageInfos[${index}].imageFile`, file.file); // file = File/Blob
+    });
+    console.log(imageFiles)
+    console.log(formData);
 
     if (isEditMode.value) {
       await updateSaleItem(route.params.id, payload);
       flash.setMessage(
         "✅ The sale item has been successfully updated.",
-        "m-4 p-4 bg-green-100 text-green-800 shadow itbms-message",
+        "m-4 p-4 bg-green-100 text-green-800 shadow itbms-message"
       );
     } else {
-      await addSaleItem(payload);
+      await addSaleItem(formData);
       flash.setMessage(
         "✅ The sale item has been successfully added.",
-        "m-4 p-4 bg-green-100 text-green-800 shadow itbms-message",
+        "m-4 p-4 bg-green-100 text-green-800 shadow itbms-message"
       );
     }
 
