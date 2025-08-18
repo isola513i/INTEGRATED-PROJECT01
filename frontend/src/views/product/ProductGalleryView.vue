@@ -8,6 +8,7 @@ import SortButtons from "@/components/sort/SortButtons.vue";
 // import BrandFilters from "@/components/filter/FilterBrands.vue";
 import FilterBrandPriceStorage from "@/components/filter/FilterBrandPriceStorage.vue";
 import Pagination from "@/components/Pagination/Pagination.vue";
+import FilterBar from "@/components/filter/FilterBar.vue";
 
 const saleItems = ref([]);
 const flash = useFlashStore();
@@ -82,10 +83,12 @@ const handleBrandFilterChange = (brands) => {
   filteredBrands.value = brands;
   loadItems(0);
 };
+
 const handleStorageFilterChange = (storage) => {
   storages.value = storage;
   loadItems(0);
 };
+
 const handlePriceFilterChange = (price) => {
   if (!price) {
     min.value = null;
@@ -96,7 +99,6 @@ const handlePriceFilterChange = (price) => {
   }
   loadItems(0);
 };
-
 </script>
 
 <template>
@@ -107,16 +109,13 @@ const handlePriceFilterChange = (price) => {
     <div
       class="flex flex-col md:flex-row gap-4 items-center w-full max-w-7xl mx-auto px-4"
     >
-      <!-- ปุ่ม Add -->
-
       <!-- Filter -->
       <div class="flex-grow">
-        <FilterBrandPriceStorage
-          class="w-full"
-          @update:pageSize="handlePageSizeChange"
+        <FilterBar
           @update:brands="handleBrandFilterChange"
-          @update:storage="handleStorageFilterChange"
           @update:price="handlePriceFilterChange"
+          @update:storage="handleStorageFilterChange"
+          @update:pageSize="handlePageSizeChange"
         />
       </div>
 
