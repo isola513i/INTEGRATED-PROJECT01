@@ -2,20 +2,24 @@ package com.example.backend.controllers;
 
 import com.example.backend.dtos.*;
 import com.example.backend.entities.SaleItem;
+import com.example.backend.exceptions.ItemNotFoundException;
+import com.example.backend.repositories.SaleItemPictureRepository;
 import com.example.backend.services.FileStorage;
 import com.example.backend.services.SaleItemService;
 import com.example.backend.utils.ListMapper;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.FileSystemResource;
 import lombok.Getter;
 import lombok.Setter;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.List;
 
 @RestController
@@ -28,13 +32,15 @@ public class SaleItemController {
     private final SaleItemService saleItemService;
     private final ModelMapper modelMapper;
     private final ListMapper listMapper;
-    @Autowired
-    private FileStorage storage;
+    private final SaleItemPictureRepository picRepo;
+    private final FileStorage storage;
 
-    public SaleItemController(SaleItemService saleItemService, ModelMapper modelMapper, ListMapper listMapper) {
+    public SaleItemController(SaleItemService saleItemService, ModelMapper modelMapper, ListMapper listMapper, SaleItemPictureRepository picRepo, FileStorage storage) {
         this.saleItemService = saleItemService;
         this.modelMapper = modelMapper;
         this.listMapper = listMapper;
+        this.picRepo = picRepo;
+        this.storage = storage;
     }
 
     // ========== V1 Endpoints ==========
@@ -68,28 +74,7 @@ public class SaleItemController {
         return ResponseEntity.noContent().build();
     }
 
-    //@GetMapping("/v2/sale-items")
-    //public ResponseEntity<PageDto<SaleItemDto.GetSaleItemDto>> getSaleItems(
-    //        @RequestParam(required = false) List<String> filterBrands,
-    //        @RequestParam(defaultValue = "0") Integer page,
-    //        @RequestParam(defaultValue = "10") Integer size,
-    //        @RequestParam(required = false) String sortField,
-    //        @RequestParam(defaultValue = "asc") String sortDirection,
-    //        @RequestParam(required = false) Double lowerPrice,
-    //       @RequestParam(required = false) Double upperPrice,
-    //       @RequestParam(required = false) List<Integer> storageSizes
-    //       ) {
-    //   if(lowerPrice != null && upperPrice != null && lowerPrice > upperPrice){
-    //        Double tempPrice = lowerPrice;
-    //        lowerPrice = upperPrice;
-    //         upperPrice = tempPrice;
-    //    }
-    //    return ResponseEntity.ok(listMapper.toPageDTO(saleItemService
-    //                    .findAllSaleItemsPage(filterBrands, page, size, sortField, sortDirection, lowerPrice, upperPrice, storageSizes)
-    //            , SaleItemDto.GetSaleItemDto.class, modelMapper));
-    // }
-
-    // ========== V2 ==========
+    // ========== V2 Endpoints ==========
     @GetMapping("/v2/sale-items")
     public ResponseEntity<PageDto<SaleItemV2Dto.SaleItemV2Response>> getAllSaleItemsV2(
             @RequestParam(required = false) List<String> filterBrands,
@@ -127,6 +112,47 @@ public class SaleItemController {
         return ResponseEntity.ok(saleItemResponse);
     }
 
+    @GetMapping("/v2/sale-items/{saleItemId}/images/{fileName:.+}")
+    public ResponseEntity<Resource> downloadImage(
+            @PathVariable Integer saleItemId,
+            @PathVariable String fileName,
+            @RequestHeader(value = "If-None-Match", required = false) String ifNoneMatch
+    ) throws IOException {
+
+        var pic = picRepo.findBySaleItemIdAndFileName(saleItemId, fileName)
+                .orElseThrow(() -> new ItemNotFoundException("Image not found"));
+
+        Resource res = storage.loadSaleItemFile(saleItemId, fileName);
+        if (!res.exists() || !res.isReadable()) throw new ItemNotFoundException("Image file missing");
+        Path filePath = res.getFile().toPath();
+
+        if (!Files.exists(filePath) || !Files.isReadable(filePath)) {
+            throw new ItemNotFoundException("Image file missing");
+        }
+
+        var resource = new FileSystemResource(filePath);
+
+        // Content-Type
+        String contentType = Files.probeContentType(filePath);
+        if (contentType == null) contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+
+        long size = Files.size(filePath);
+        long lastMod = Files.getLastModifiedTime(filePath).toMillis();
+        String eTag = "\"" + size + "-" + lastMod + "\"";
+
+        if (eTag.equals(ifNoneMatch)) {
+            return ResponseEntity.status(HttpStatus.NOT_MODIFIED).eTag(eTag).build();
+        }
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .contentLength(size)
+                .lastModified(lastMod)
+                .eTag(eTag)
+                .cacheControl(CacheControl.maxAge(Duration.ofDays(30)).cachePublic())
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileName + "\"")
+                .body(resource);
+    }
 
     @PostMapping(value = "/v2/sale-items", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SaleItemV2Dto.SaleItemV2Response> createSaleItemV2(
