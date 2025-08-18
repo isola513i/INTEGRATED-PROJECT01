@@ -21,7 +21,7 @@ watch(
 // Emits สำหรับ v-model
 const emit = defineEmits(["update:modelValue"]);
 
-const selectedBrands = ref([...props.modelValue]);
+const selectedBrands = ref([]);
 const brandOptions = ref([]);
 const showBrandDropdown = ref(false);
 const dropdownRef = ref(null);
@@ -40,8 +40,10 @@ function toggleBrandDropdown() {
 }
 
 // ตรวจสอบว่าแบรนด์ถูกเลือกหรือไม่
-function isBrandChecked(brandId) {
-  return selectedBrands.value.some((b) => b.brandId === brandId);
+function isBrandChecked(brand) {
+  return selectedBrands.value.some((b) =>
+    b.brandId !== null ? b.brandId === brand.brandId : b.name === brand.name
+  );
 }
 
 function toggleBrand(brand) {
@@ -72,19 +74,17 @@ function removeBrand(index) {
 
 // ดึงข้อมูลแบรนด์เมื่อ mounted
 onMounted(async () => {
+  const stored = JSON.parse(sessionStorage.getItem("filterBrands") || "[]");
+
+  selectedBrands.value = stored.map((b) =>
+    typeof b === "string" ? { brandId: null, name: b } : b
+  );
+
   const brands = await fetchBrands();
   brandOptions.value = brands.filter(
     (b) => b.name.toLowerCase() !== "filter by brand"
-  )
-})
-
-function handleClickOutside(event) {
-  if (dropdownRef.value && !dropdownRef.value.contains(event.target)) {
-    showBrandDropdown.value = false;
-    showPriceDropdown.value = false;
-    showStorageDropdown.value = false;
-  }
-}
+  );
+});
 </script>
 
 <template>
@@ -102,10 +102,10 @@ function handleClickOutside(event) {
       <template v-if="selectedBrands.length">
         <span
           v-for="(brand, index) in selectedBrands"
-          :key="brand.brandId"
+          :key="brand?.brandId"
           class="bg-blue-100 text-blue-800 px-2 py-0.5 justify-center rounded-full text-xs flex items-center gap-1 flex-shrink-0"
         >
-          {{ brand.name }}
+          {{ brand?.name ?? brand }}
           <button
             @click.stop="removeBrand(index)"
             class="text-blue-500 hover:text-red-500 font-bold"

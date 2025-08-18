@@ -105,10 +105,26 @@ public class SaleItemService {
        if(CollectionUtils.isEmpty(filterBrands)){
            filterBrands = null;
        }
-       if(CollectionUtils.isEmpty(storageSizes)){
-           storageSizes = null;
-       }
-        return saleItemRepository.findByFiltersWithBrand(filterBrands, lowerPrice, upperPrice, storageSizes,pageable);
+        boolean searchNullStorage = storageSizes != null && storageSizes.contains(-1);
+
+        if (searchNullStorage) {
+            storageSizes.remove(Integer.valueOf(-1));
+        }
+
+        if (CollectionUtils.isEmpty(storageSizes)) {
+            storageSizes = null;
+        }
+
+        return saleItemRepository.findByAdvancedFilters(
+                filterBrands,
+                lowerPrice,
+                upperPrice,
+                storageSizes,
+                searchNullStorage,
+                pageable
+        );
+
+//        return saleItemRepository.findByFiltersWithBrand(filterBrands, lowerPrice, upperPrice, storageSizes,pageable);
     }
 
     @Transactional
