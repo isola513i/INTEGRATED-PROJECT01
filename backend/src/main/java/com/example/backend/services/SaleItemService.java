@@ -351,7 +351,6 @@ public class SaleItemService {
                 .sorted(Comparator.comparingInt(SaleItemPicture::getPosition))
                 .map(pic -> {
                     var dto = new SaleItemV2Dto.SaleItemV2Response.SaleItemImageDto();
-                    dto.setPictureId(pic.getId());
                     dto.setFileName(pic.getFileName());
                     dto.setImageViewOrder(pic.getPosition() + 1);
                     return dto;
