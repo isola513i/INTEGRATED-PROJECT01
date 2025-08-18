@@ -8,7 +8,7 @@ import ManageBrandView from "@/views/brand/ManageBrandView.vue";
 import AddEditBrandView from "@/views/brand/AddEditBrandView.vue";
 import ProductGalleryView from "@/views/product/ProductGalleryView.vue";
 import AddEditItemView from "@/views/saleItem/AddEditItemView.vue";
-import addFileTest from "@/components/form/addFileTest.vue";
+
 const routes = [
 	{
 		path: "/",
@@ -54,11 +54,6 @@ const routes = [
 		path: "/brands/:brandId/edit",
 		name: "EditBrandView",
 		component: AddEditBrandView,
-	},
-	{
-		path: "/test",
-		name: "addFileTest",
-		component: addFileTest,
 	},
 	{
 		path: "/not-found",

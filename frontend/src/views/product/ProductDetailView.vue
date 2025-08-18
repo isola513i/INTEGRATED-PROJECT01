@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { fetchItemById, deleteItemById } from "@/services/saleItemService";
+import { fetchItemById, deleteItemById , getItem} from "@/services/saleItemService";
 import phoneImg from "@/assets/phone.jpg";
 import { useFlashStore } from "@/store/useFlashStore";
 
@@ -27,15 +27,19 @@ onMounted(async () => {
   }
   try {
     const data = await fetchItemById(route.params.id);
+    const fetchImage = await getItem(`v2/sale-items/${route.params.id}/images`)
     if (!data) throw new Error("Not found");
+    if(!fetchImage) throw Error("Not found");
     product.value = data;
+    images.value = fetchImage;
+    console.log(images.value)
   } catch {
-    window.alert("The requested sale item does not exist.");
+    // window.alert("The requested sale item does not exist.");
     router.push("/sale-items");
   }
 });
 
-const images = [phoneImg, phoneImg, phoneImg, phoneImg, phoneImg];
+const images = ref('');
 const selectedIndex = ref(0);
 const selectedImage = computed(() => images[selectedIndex.value]);
 
@@ -138,7 +142,7 @@ const deleteItem = async () => {
             "
           >
             <img
-              :src="img"
+              :src="img.imageUrl"
               alt="Thumbnail"
               class="w-full h-full object-contain"
             />

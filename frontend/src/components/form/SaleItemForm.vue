@@ -1,5 +1,4 @@
 <script setup>
-import ConfirmationModal from "../actions/ConfirmationModal.vue";
 import Alert from "../actions/Alert.vue";
 const props = defineProps({
   updatePage: {
@@ -34,9 +33,7 @@ import { ref, watch } from "vue";
 import { previewBinaryFile } from "../../services/previewBinary.js";
 const imageFiles = ref([]);
 const selectedPreviewImage = ref(0);
-const isShowDeleteModal = ref(false);
-const deleteIndex = ref()
-const isUploadImageError = ref(false)
+const isUploadImageError = ref(false);
 const chooseBinaryFiles = (event) => {
   for (const file of event.target.files) {
     if (
@@ -46,56 +43,62 @@ const chooseBinaryFiles = (event) => {
     ) {
       // duplicateName = imageFiles.value.filter((image) => image.name === file.name)
       // file.name = `file.name`
-      imageFiles.value.push({ name: file.name, url: previewBinaryFile(file) , file });
+      imageFiles.value.push({
+        name: file.name,
+        url: previewBinaryFile(file),
+        file,
+      });
     }
   }
+  event.target.value = "";
 };
-//handle user add image more than four
-watch(imageFiles.value, (newVal) => {
-  if (newVal.length > 4) {
-    isUploadImageError.value = true
-    imageFiles.value.splice(4);
-    //imageFiles.value = newVal.slice(0, 4)
-  }else  isUploadImageError.value = false
-}, { deep: true });
 
+//handle user add image more than four
+watch(
+  imageFiles,
+  (newVal) => {
+    if (newVal.length > 4) {
+      isUploadImageError.value = true;
+      setTimeout(() => {
+        isUploadImageError.value = false;
+      }, 3000);
+
+      imageFiles.value.splice(4);
+    }
+  },
+  { deep: true }
+);
+
+// select image to show a big picture
 const choosePreview = (index) => {
   selectedPreviewImage.value = index;
 };
 const switchImageUp = (index) => {
-  const image = imageFiles.value.splice(index, 1)[0]; // remove item
+  const image = imageFiles.value.splice(index, 1)[0]; // move image up
   imageFiles.value.splice(index - 1, 0, image);
 };
 const switchImageDown = (index) => {
-  const image = imageFiles.value.splice(index, 1)[0]; // remove item
+  const image = imageFiles.value.splice(index, 1)[0]; // move image down
   imageFiles.value.splice(index + 1, 0, image);
 };
-const handleShowDeleteModal = (index) => {
-	deleteIndex.value = index
-  isShowDeleteModal.value = !isShowDeleteModal.value;
-};
-const handleConfirmDeletePicture = () => {
-  imageFiles.value.splice(deleteIndex.value, 1);
-  isShowDeleteModal.value = !isShowDeleteModal.value
-};
-const handleCancelDeletePicture = () => {
-  isShowDeleteModal.value = !isShowDeleteModal.value;
+
+const handleDeleteImage = (index) => {
+  imageFiles.value.splice(index, 1);
 };
 </script>
 
 <template>
-   <Alert
-    v-if="isUploadImageError"
+  <Alert
+    v-if="isUploadImageError == true"
     type="error"
     message="Maximum 4 pictures are allowed."
     class="itbms-message"
     icon="⚠️"
-    />
+  />
   <form
     @submit.prevent="$emit('submit', imageFiles)"
     class="grid gap-6 md:grid-cols-12 md:gap-8 bg-white p-4 md:p-10 rounded-xl shadow-lg"
   >
-
     <!-- LEFT: Picture Upload Area -->
     <div class="md:col-span-4">
       <div
@@ -118,16 +121,8 @@ const handleCancelDeletePicture = () => {
           <img
             :src="image.url"
             class="w-full h-full object-cover"
-            :class="`itbms-picture-file${index+1}`"
+            :class="`itbms-picture-file${index + 1}`"
             @click="choosePreview(index)"
-          />
-         
-          <ConfirmationModal
-            v-show="isShowDeleteModal"
-            title="Delete picture"
-            message="Do you want to delete this picture?"
-            @confirm="handleConfirmDeletePicture"
-            @cancel="handleCancelDeletePicture"
           />
         </div>
       </div>
@@ -154,9 +149,9 @@ const handleCancelDeletePicture = () => {
           <p :key="index" class="bg-blue-200 rounded-md text-gray-500 mb-2">
             {{ image.name }}
           </p>
-           <button
+          <button
             type="button"
-            @click="handleShowDeleteModal(index)"
+            @click="handleDeleteImage(index)"
             class="px-3 m-2 text-center bg-red-300 rounded-xl"
           >
             x
@@ -166,7 +161,7 @@ const handleCancelDeletePicture = () => {
               type="button"
               v-show="index != 0"
               @click="switchImageUp(index)"
-              :class="`itbms-picture-file${index+1}-up`"
+              :class="`itbms-picture-file${index + 1}-up`"
             >
               ▲
             </button>
@@ -174,7 +169,7 @@ const handleCancelDeletePicture = () => {
               type="button"
               v-show="index != imageFiles.length - 1"
               @click="switchImageDown(index)"
-              :class="`itbms-picture-file${index+1}-down`"
+              :class="`itbms-picture-file${index + 1}-down`"
             >
               ▼
             </button>

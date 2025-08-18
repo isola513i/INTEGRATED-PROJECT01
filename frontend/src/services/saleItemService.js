@@ -1,5 +1,11 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+export const getItem = async (path) => {
+  const response = await fetch(`${API_BASE_URL}/${path}`);
+  if (!response.ok) throw new Error("Failed to fetch sale items");
+  return await response.json();
+};
+
 export const fetchSaleItems = async () => {
   const response = await fetch(`${API_BASE_URL}/v1/sale-items`);
   if (!response.ok) throw new Error("Failed to fetch sale items");
@@ -14,11 +20,8 @@ export const fetchItemById = async (saleItemId) => {
 
 export const addSaleItem = async (formData) => {
   try {
-    const res = await fetch(`${API_BASE_URL}/v1/sale-items`, {
+    const res = await fetch(`${API_BASE_URL}/v2/sale-items`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       body: formData
     });
 
