@@ -16,7 +16,7 @@ const clearAllFlag = ref(false);
 const pageSize = ref(parseInt(sessionStorage.getItem("pageSize")) || 10);
 function clearAll() {
   sessionStorage.removeItem("selectedPrice");
-  sessionStorage.removeItem("selectedStorage");
+  sessionStorage.removeItem("filterStorage");
   sessionStorage.removeItem("filterBrands");
   pageSize.value = 10;
   clearAllFlag.value = true;
