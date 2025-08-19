@@ -48,11 +48,11 @@ const chooseBinaryFiles = (event) => {
         url: previewBinaryFile(file),
         file,
       });
-      }
-     isFileSizeOver.value = true;
+      }else{
+      isFileSizeOver.value = true;
         setTimeout(() => {
           isFileSizeOver.value = false;
-        }, 3000);
+        }, 3000);}
     }
   }
   event.target.value = "";
@@ -157,7 +157,7 @@ const handleDeleteImage = (index) => {
       </div>
       <div class="mt-5">
         <div v-for="(image, index) in imageFiles" :key="index" class="flex">
-          <p :key="index" class="bg-blue-200 rounded-md text-gray-500 mb-2">
+          <p :key="index" class="bg-blue-200 px-1 rounded-md text-gray-500 mb-2">
             {{ image.name }}
           </p>
           <button
@@ -167,20 +167,22 @@ const handleDeleteImage = (index) => {
           >
             x
           </button>
-          <div>
+          <div class="flex flex-col">
             <button
               type="button"
-              v-show="index != 0"
+              :disabled="index == 0"
               @click="switchImageUp(index)"
               :class="`itbms-picture-file${index + 1}-up`"
+               class="disabled:opacity-50 disabled:cursor-not-allowed"
             >
               ▲
             </button>
             <button
               type="button"
-              v-show="index != imageFiles.length - 1"
+              :disabled="index == imageFiles.length - 1"
               @click="switchImageDown(index)"
               :class="`itbms-picture-file${index + 1}-down`"
+               class="disabled:opacity-50 disabled:cursor-not-allowed"
             >
               ▼
             </button>
