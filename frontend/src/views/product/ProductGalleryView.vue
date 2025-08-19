@@ -29,6 +29,7 @@ const syncSessionToRefs = () => {
   filteredBrands.value = JSON.parse(
     sessionStorage.getItem("filterBrands") || "[]"
   );
+  storages.value = JSON.parse(sessionStorage.getItem("filterStorage") || "[]");
 };
 
 const loadItems = async (page) => {
@@ -37,7 +38,7 @@ const loadItems = async (page) => {
   sessionStorage.setItem("sortField", sortField.value);
   sessionStorage.setItem("sortDirection", sortDirection.value);
   sessionStorage.setItem("filterBrands", JSON.stringify(filteredBrands.value));
-  sessionStorage.setItem("filterStorage", JSON.stringify(storages.value));
+  // sessionStorage.setItem("filterStorage", JSON.stringify(storages.value));
   sessionStorage.setItem("minPrice", min.value);
   sessionStorage.setItem("maxPrice", max.value);
 
@@ -86,6 +87,8 @@ const handleBrandFilterChange = (brands) => {
 
 const handleStorageFilterChange = (storage) => {
   storages.value = storage;
+  sessionStorage.setItem("filterStorage", JSON.stringify(storages.value));
+
   loadItems(0);
 };
 

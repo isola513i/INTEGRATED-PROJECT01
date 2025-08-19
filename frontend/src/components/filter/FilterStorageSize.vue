@@ -31,7 +31,6 @@ watch(
     if (val) {
       selectedStorage.value = [];
       emit("update:storage", []);
-      sessionStorage.removeItem("filterStorage");
     }
   }
 );
