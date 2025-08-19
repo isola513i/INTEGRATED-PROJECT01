@@ -420,4 +420,10 @@ public class SaleItemService {
         storage.deleteItemDirectory(itemId);
     }
 
+    @Transactional
+    public void ensureItemExists(Integer id) {
+        saleItemRepository.findById(id)
+                .orElseThrow(() -> new ItemNotFoundException("SaleItem not found"));
+    }
+
 }
