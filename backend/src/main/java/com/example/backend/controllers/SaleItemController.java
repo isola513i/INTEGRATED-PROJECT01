@@ -74,6 +74,15 @@ public class SaleItemController {
     }
 
     // ========== V2 Endpoints ==========
+    // Create saleItem with images
+    @PostMapping(value = "/v2/sale-items", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<SaleItemV2Dto.SaleItemV2Response> createSaleItemV2(
+            @ModelAttribute SaleItemV2Dto.SaleItemWithImageInfo req) throws IOException {
+        var res = saleItemService.createSaleItemWithImages(req);
+        return ResponseEntity.status(HttpStatus.CREATED).body(res);
+    }
+
+    // GET all saleItems
     @GetMapping("/v2/sale-items")
     public ResponseEntity<PageDto<SaleItemV2Dto.SaleItemV2Response>> getAllSaleItemsV2(
             @RequestParam(required = false) List<String> filterBrands,
@@ -103,14 +112,35 @@ public class SaleItemController {
         return ResponseEntity.ok(dto);
     }
 
-    @GetMapping("/v2/sale-items/{id}")
+    // GET saleItem by Id
+    @GetMapping("/v2/sale-items/{saleItemId}")
     public ResponseEntity<SaleItemV2Dto.SaleItemV2Response> getSaleItemV2ById(
-            @PathVariable("id") Integer saleItemIdPath) {
+            @PathVariable("saleItemId") Integer saleItemIdPath) {
 
         var saleItemResponse = saleItemService.sendV2Response(saleItemIdPath);
         return ResponseEntity.ok(saleItemResponse);
     }
 
+    // GET all images for a saleItem
+    @GetMapping("/v2/sale-items/{id}/images")
+    public ResponseEntity<List<SaleItemV2Dto.SaleItemV2Response.SaleItemImageDto>> listSaleItemImages(
+            @PathVariable Integer id
+    ) {
+        saleItemService.ensureItemExists(id);
+
+        var pics = picRepo.findBySaleItemIdOrderByPositionAsc(id);
+
+        var list = pics.stream().map(p -> {
+            var dto = new SaleItemV2Dto.SaleItemV2Response.SaleItemImageDto();
+            dto.setFileName(p.getFileName());
+            dto.setImageViewOrder(p.getPosition() + 1);
+            return dto;
+        }).toList();
+
+        return ResponseEntity.ok(list);
+    }
+
+    // GET single image
     @GetMapping("/v2/sale-items/{saleItemId}/images/{fileName:.+}")
     public ResponseEntity<Resource> downloadImage(
             @PathVariable Integer saleItemId,
@@ -153,33 +183,29 @@ public class SaleItemController {
                 .body(resource);
     }
 
-    @PostMapping(value = "/v2/sale-items", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<SaleItemV2Dto.SaleItemV2Response> createSaleItemV2(
-            @ModelAttribute SaleItemV2Dto.SaleItemWithImageInfo req) throws IOException {
-        var res = saleItemService.createSaleItemWithImages(req);
-        return ResponseEntity.status(HttpStatus.CREATED).body(res);
-    }
-
-    @PutMapping(value = "/v2/sale-items/{id}" ,consumes =  MediaType.MULTIPART_FORM_DATA_VALUE)
+    // UPDATE saleItem
+    @PutMapping(value = "/v2/sale-items/{saleItemId}" ,consumes =  MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SaleItemV2Dto.SaleItemV2Response> updateSaleItemWithImages(
-            @PathVariable("id") Integer itemId,
+            @PathVariable("saleItemId") Integer itemId,
             @ModelAttribute SaleItemV2Dto.SaleItemWithImageInfo request
     ) throws IOException {
         var result = saleItemService.updateSaleItemWithImages(itemId, request);
         return ResponseEntity.ok(result);
     }
 
-    @DeleteMapping("/v2/sale-items/{id}")
-    public ResponseEntity<Void> deleteSaleItemV2(@PathVariable Integer id) {
-        saleItemService.deleteSaleItemAndImages(id);
+    // DELETE saleItem
+    @DeleteMapping("/v2/sale-items/{saleItemId}")
+    public ResponseEntity<Void> deleteSaleItemV2(@PathVariable Integer saleItemId) {
+        saleItemService.deleteSaleItemAndImages(saleItemId);
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/v2/sale-items/{id}/images")
+    // DELETE images from a saleItem
+    @DeleteMapping("/v2/sale-items/{saleItemId}/images")
     public ResponseEntity<SaleItemV2Dto.SaleItemV2Response> deleteImages(
-            @PathVariable Integer id,
+            @PathVariable Integer saleItemId,
             @RequestBody SaleItemV2Dto.DeletePicturesRequest req) {
-        return ResponseEntity.ok(saleItemService.deleteSaleItemWithImages(id, req));
+        return ResponseEntity.ok(saleItemService.deleteSaleItemWithImages(saleItemId, req));
     }
 
 }
