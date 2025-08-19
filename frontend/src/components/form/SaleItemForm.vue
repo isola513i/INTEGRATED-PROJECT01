@@ -34,6 +34,7 @@ import { previewBinaryFile } from "../../services/previewBinary.js";
 const imageFiles = ref([]);
 const selectedPreviewImage = ref(0);
 const isUploadImageError = ref(false);
+const isFileSizeOver = ref(false);
 const chooseBinaryFiles = (event) => {
   for (const file of event.target.files) {
     if (
@@ -41,13 +42,17 @@ const chooseBinaryFiles = (event) => {
       file.name.toLowerCase().endsWith(".jpg") ||
       file.name.toLowerCase().endsWith(".png")
     ) {
-      // duplicateName = imageFiles.value.filter((image) => image.name === file.name)
-      // file.name = `file.name`
-      imageFiles.value.push({
+      if (file.size <= 2 * 1024 * 1024) {
+         imageFiles.value.push({
         name: file.name,
         url: previewBinaryFile(file),
         file,
       });
+      }
+     isFileSizeOver.value = true;
+        setTimeout(() => {
+          isFileSizeOver.value = false;
+        }, 3000);
     }
   }
   event.target.value = "";
@@ -93,6 +98,12 @@ const handleDeleteImage = (index) => {
     type="error"
     message="Maximum 4 pictures are allowed."
     class="itbms-message"
+    icon="⚠️"
+  />
+  <Alert
+    v-if="isFileSizeOver"
+    type="error"
+    message="The picture file size cannot be larger than 2MB."
     icon="⚠️"
   />
   <form
