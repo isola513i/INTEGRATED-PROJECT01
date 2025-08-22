@@ -11,6 +11,10 @@ const props = defineProps({
   isSubmitting: Boolean,
   isReadyToSubmit: Boolean,
   errors: Object,
+  retriveImageFiles: {
+    type: Array,
+    required: false,
+  },
 });
 
 const emit = defineEmits(["update:form", "submit", "cancel", "blur"]);
@@ -31,10 +35,18 @@ const focusNext = (nextIndex) => {
 
 import { ref, watch } from "vue";
 import { previewBinaryFile } from "../../services/previewBinary.js";
+
 const imageFiles = ref([]);
 const selectedPreviewImage = ref(0);
 const isUploadImageError = ref(false);
 const isFileSizeOver = ref(false);
+
+if (props.retriveImageFiles) imageFiles.value = props.retriveImageFiles;
+console.log(props.retriveImageFiles);
+imageFiles.value = imageFiles.value.map((image) => {
+  return { fileName: image.fileName, url: image.file, file: image.file };
+});
+
 const chooseBinaryFiles = (event) => {
   for (const file of event.target.files) {
     if (
@@ -43,16 +55,18 @@ const chooseBinaryFiles = (event) => {
       file.name.toLowerCase().endsWith(".png")
     ) {
       if (file.size <= 2 * 1024 * 1024) {
-         imageFiles.value.push({
-        name: file.name,
-        url: previewBinaryFile(file),
-        file,
-      });
-      }else{
-      isFileSizeOver.value = true;
+        imageFiles.value.push({
+          fileName: file.name,
+          url: previewBinaryFile(file),
+          file,
+          status: "NEW",
+        });
+      } else {
+        isFileSizeOver.value = true;
         setTimeout(() => {
           isFileSizeOver.value = false;
-        }, 3000);}
+        }, 3000);
+      }
     }
   }
   event.target.value = "";
@@ -78,17 +92,32 @@ watch(
 const choosePreview = (index) => {
   selectedPreviewImage.value = index;
 };
-const switchImageUp = (index) => {
-  const image = imageFiles.value.splice(index, 1)[0]; // move image up
-  imageFiles.value.splice(index - 1, 0, image);
-};
-const switchImageDown = (index) => {
-  const image = imageFiles.value.splice(index, 1)[0]; // move image down
-  imageFiles.value.splice(index + 1, 0, image);
+const moveImage = (index, action) => {
+  const originalIndex = index;
+  if (action === "up") {
+    const image = imageFiles.value.splice(index, 1)[0]; // move image up
+    imageFiles.value.splice(index - 1, 0, image);
+    if (props.retriveImageFiles) {
+      imageFiles.value[index - 1].status = "MOVE";
+      if(index-1 === originalIndex) {imageFiles.value[index - 1].status = "ONLINE"}
+    }
+    
+  }else{
+    const image = imageFiles.value.splice(index, 1)[0]; // move image down
+    imageFiles.value.splice(index + 1, 0, image);
+    if (props.retriveImageFiles) {
+      imageFiles.value[index + 1].status = "MOVE"
+      if(index + 1 === originalIndex){imageFiles.value[index + 1].status = "ONLINE"}
+    }
+    
+  }
+  console.log(imageFiles.value)
 };
 
+
 const handleDeleteImage = (index) => {
-  imageFiles.value.splice(index, 1);
+  imageFiles.value[index].status = "DELETE";
+  console.log(imageFiles.value);
 };
 </script>
 
@@ -130,7 +159,7 @@ const handleDeleteImage = (index) => {
           class="w-20 h-20 bg-gray-50 border-2 border-gray-200 p-0.5 relative"
         >
           <img
-            :src="image.url"
+            :src="image.status != 'DELETE' ? image.url : ''"
             class="w-full h-full object-cover"
             :class="`itbms-picture-file${index + 1}`"
             @click="choosePreview(index)"
@@ -155,34 +184,37 @@ const handleDeleteImage = (index) => {
           Upload Pictures
         </label>
       </div>
-      <div class="mt-5">
+      <div class="mt-5 w-full">
         <div v-for="(image, index) in imageFiles" :key="index" class="flex">
-          <p :key="index" class="bg-blue-200 px-1 rounded-md text-gray-500 mb-2">
-            {{ image.name }}
+          <p class="bg-blue-200 px-1 rounded-md text-gray-500 mb-2" :class="image.status === 'DELETE' ?'line-through text-red-400':'' "  >
+            {{ image.fileName }}
           </p>
-          <button
-            type="button"
-            @click="handleDeleteImage(index)"
-            class="px-3 m-2 text-center bg-red-300 rounded-xl"
-          >
-            x
-          </button>
+          <div>
+            <button
+              v-show="image.status != 'DELETE'"
+              type="button"
+              @click="handleDeleteImage(index)"
+              class="px-3 m-2 text-center bg-red-300 rounded-full"
+            >
+              x
+            </button>
+          </div>
           <div class="flex flex-col">
             <button
               type="button"
               :disabled="index == 0"
-              @click="switchImageUp(index)"
+              @click="moveImage(index,'up' )"
               :class="`itbms-picture-file${index + 1}-up`"
-               class="disabled:opacity-50 disabled:cursor-not-allowed"
+              class="disabled:opacity-50 disabled:cursor-not-allowed"
             >
               ▲
             </button>
             <button
               type="button"
               :disabled="index == imageFiles.length - 1"
-              @click="switchImageDown(index)"
+              @click="moveImage(index , 'down')"
               :class="`itbms-picture-file${index + 1}-down`"
-               class="disabled:opacity-50 disabled:cursor-not-allowed"
+              class="disabled:opacity-50 disabled:cursor-not-allowed"
             >
               ▼
             </button>
