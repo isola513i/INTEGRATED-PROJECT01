@@ -59,11 +59,9 @@ public class SaleItem {
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
-    @CreationTimestamp
     @Column(name = "createdOn", nullable = false, insertable = false, updatable = false)
     private Instant createdOn;
 
-    @UpdateTimestamp
     @Column(name = "updatedOn", nullable = false, insertable = false,updatable = false)
     private Instant updatedOn;
 
