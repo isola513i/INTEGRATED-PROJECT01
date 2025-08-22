@@ -9,6 +9,12 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.ImageOutputStream;
+import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -16,6 +22,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -38,26 +45,58 @@ public class FileStorage {
     }
 
     public StoredFile storeSaleItemFile(Integer saleItemId, MultipartFile file) throws IOException {
-        String ext = Optional.ofNullable(file.getOriginalFilename())
-                .filter(n -> n.contains("."))
-                .map(n -> n.substring(n.lastIndexOf('.')))
-                .orElse("");
-
-        String safe = UUID.randomUUID().toString().replace("-", "") + ext;
-
         Path root = getRoot();
         Path dir = root.resolve(String.valueOf(saleItemId)).normalize();
         if (!dir.startsWith(root)) throw new IOException("Invalid path resolution");
-
         Files.createDirectories(dir);
 
+        // บันทึกเป็น .jpg เสมอ
+        String safe = UUID.randomUUID().toString().replace("-", "") + ".jpg";
         Path target = dir.resolve(safe).normalize();
         if (!target.startsWith(root)) throw new IOException("Invalid target path");
 
-        file.transferTo(target);
+        // 1) อ่านรูปจาก MultipartFile
+        BufferedImage src;
+        try (var in = file.getInputStream()) {
+            src = ImageIO.read(in);
+        }
+        if (src == null) {
+            throw new IOException("Unsupported image format: " + file.getOriginalFilename());
+        }
+
+        // 2) แปลงให้เป็น RGB (ถ้ามี alpha เช่น PNG ให้ลงพื้นหลังขาว)
+        BufferedImage rgb = new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = rgb.createGraphics();
+        try {
+            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g.setColor(Color.WHITE);           // พื้นหลังขาว
+            g.fillRect(0, 0, rgb.getWidth(), rgb.getHeight());
+            g.drawImage(src, 0, 0, null);
+        } finally {
+            g.dispose();
+        }
+
+        // 3) เขียนออกเป็น JPEG (กำหนดคุณภาพได้)
+        Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpg");
+        if (!writers.hasNext()) {
+            throw new IOException("No JPEG writer available");
+        }
+        ImageWriter writer = writers.next();
+        try (ImageOutputStream ios = ImageIO.createImageOutputStream(target.toFile())) {
+            writer.setOutput(ios);
+            ImageWriteParam param = writer.getDefaultWriteParam();
+            if (param.canWriteCompressed()) {
+                param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+                param.setCompressionQuality(0.9f); // ปรับคุณภาพ 0..1 ตามต้องการ
+            }
+            writer.write(null, new javax.imageio.IIOImage(rgb, null, null), param);
+        } finally {
+            writer.dispose();
+        }
 
         return new StoredFile(safe, saleItemId + "/" + safe);
     }
+
 
     public void deleteIfExists(String relativePath) {
         try {
@@ -109,13 +148,6 @@ public class FileStorage {
         return new FileSystemResource(path.toFile());
     }
 
-    public FileSystemResource loadByRelativePath(String relativePath) {
-        String normalizedRel = normalizeRelative(relativePath);
-        Path root = getRoot();
-        Path path = root.resolve(normalizedRel).normalize();
-        return new FileSystemResource(path.toFile());
-    }
-
     private String normalizeRelative(String relativePath) {
         String rel = Optional.ofNullable(relativePath).orElse("").replace("\\", "/");
         if (rel.startsWith("sale-items/")) {
@@ -131,7 +163,6 @@ public class FileStorage {
             if (!dir.startsWith(root)) throw new IOException("Invalid dir path");
 
             if (Files.exists(dir)) {
-                // ลบ recursive
                 Files.walk(dir)
                         .sorted(Comparator.reverseOrder())
                         .forEach(p -> {
