@@ -231,7 +231,6 @@ public class SaleItemService {
             SaleItemV2Dto.SaleItemWithImageInfo req
     ) throws IOException {
 
-        // 0) อัปเดตรายละเอียดสินค้า (partial update)
         var s = req.getSaleItem();
         if (s != null) {
             var item = saleItemRepository.findById(itemId)
@@ -252,15 +251,12 @@ public class SaleItemService {
             saleItemRepository.save(item);
         }
 
-        // ✅ ใช้ slots algorithm จัดการลบ/เรียง/เพิ่มให้จบในที่เดียว
         var infos = Optional.ofNullable(req.getImageInfos()).orElse(List.of());
         applyReorderAndNewWithSlots(itemId, infos);
 
-        // ปิดท้าย normalize+rename
         normalizeAndRenameFiles(itemId);
 
-        // ส่ง response
-        return getSaleItemDetailV2(itemId); // หรือชื่อใหม่ที่คุณตั้ง
+        return getSaleItemDetailV2(itemId);
     }
 
     @Transactional
@@ -296,10 +292,8 @@ public class SaleItemService {
             List<SaleItemV2Dto.SaleItemImageRequest> infos
     ) throws IOException {
 
-        // 1) โหลดรูปเดิม
         var existing = picRepo.findBySaleItemIdOrderByPositionAsc(itemId);
 
-        // 2) ลบ (DELETE) — อ้าง fileName และ "เก็บตำแหน่งที่ลบ" ก่อนลบจริง
         var deleteNames = infos.stream()
                 .filter(i -> i.getStatus() == ImageStatus.DELETE)
                 .map(SaleItemV2Dto.SaleItemImageRequest::getFileName)
@@ -324,10 +318,8 @@ public class SaleItemService {
             }
         }
 
-        // 3) โหลดใหม่หลังลบ
         existing = picRepo.findBySaleItemIdOrderByPositionAsc(itemId);
 
-        // 4) แยกคำสั่งจาก FE
         Map<String, Integer> orderExisting = new HashMap<>(); // fileName -> order(1..4)
         record NewReq(MultipartFile file, Integer order) {}
         List<NewReq> newReqs = new ArrayList<>();
@@ -344,18 +336,15 @@ public class SaleItemService {
             }
         }
 
-        // 5) ตรวจเพดาน 4 รูป (หลังลบแล้ว + ที่จะเพิ่ม)
         if (existing.size() + newReqs.size() > 4) {
             throw new org.springframework.web.server.ResponseStatusException(
                     org.springframework.http.HttpStatus.BAD_REQUEST,
                     "Maximum 4 pictures are allowed.");
         }
 
-        // 6) slots 0..3 — คำนวณตำแหน่งสุดท้าย
         SaleItemPicture[] slots = new SaleItemPicture[4];
         boolean[] used = new boolean[4];
 
-        // 6.1 รูปเดิมที่มี order มาก่อน
         var existingWithOrder = existing.stream()
                 .filter(p -> orderExisting.containsKey(p.getFileName()))
                 .sorted(Comparator.comparingInt(p -> orderExisting.get(p.getFileName())))
@@ -366,7 +355,6 @@ public class SaleItemService {
             slots[pos] = p; used[pos] = true;
         }
 
-        // 6.2 จองช่องสำหรับ NEW ที่มี order
         record PendingNew(MultipartFile file, int pos) {}
         List<PendingNew> pendingNew = new ArrayList<>();
         var newWithOrder = newReqs.stream().filter(n -> n.order() != null).toList();
@@ -376,7 +364,6 @@ public class SaleItemService {
             used[pos] = true;
         }
 
-        // 6.3 รูปเดิมที่เหลือ (ไม่มี order) — วางคืน "ตำแหน่งเดิม"
         var existingNoOrder = existing.stream()
                 .filter(p -> !orderExisting.containsKey(p.getFileName()))
                 .sorted(Comparator.comparingInt(SaleItemPicture::getPosition))
@@ -394,7 +381,6 @@ public class SaleItemService {
             }
         }
 
-        // 6.4 NEW (no-order) — ใส่ช่องที่ลบก่อน แล้วค่อยช่องว่างทั่วไป
         var freed = new ArrayDeque<>(deletedPositions);
         var newNoOrder = newReqs.stream().filter(n -> n.order() == null).toList();
         for (var n : newNoOrder) {
@@ -407,9 +393,6 @@ public class SaleItemService {
             used[pos] = true;
         }
 
-        // ========== 7) เขียนจริง ==========
-
-        // 7.1 map: pictureId -> targetPosition จาก slots (อย่าใช้ index ลิสต์)
         Map<Integer, Integer> idToPos = new LinkedHashMap<>();
         for (int pos = 0; pos < 4; pos++) {
             var slot = slots[pos];
@@ -421,25 +404,21 @@ public class SaleItemService {
             throw new IllegalStateException("Reorder mismatch: existing ids not complete.");
         }
 
-        // 7.2 กัน auto-flush ใด ๆ ที่ค้าง
         em.flush();
         em.clear();
 
-        // 7.3 bump ทุกตำแหน่งไปโซนปลอดภัย (+10)
         em.createNativeQuery("UPDATE sale_item_pictures SET position = position + 10 WHERE saleItemId = :id")
                 .setParameter("id", itemId)
                 .setFlushMode(jakarta.persistence.FlushModeType.COMMIT)
                 .executeUpdate();
 
-        // 7.4 เซ็ตตำแหน่งสุดท้ายแบบอะตอมมิกตาม idToPos
         updatePicturePositionsAtomic(itemId, idToPos);
 
-        // 7.5 แทรกรูปใหม่ตามช่องที่จองไว้
         for (var n : pendingNew) {
-            var saved = storage.storeSaleItemFile(itemId, n.file()); // เซฟเป็น .jpg เสมอ (แก้ใน FileStorage แล้ว)
+            var saved = storage.storeSaleItemFile(itemId, n.file());
             var pic = new SaleItemPicture();
             pic.setSaleItem(saleItemRepository.getReferenceById(itemId));
-            pic.setFileName(saved.getFileName()); // เดี๋ยวค่อยรีเนม canonical ช่วง normalize
+            pic.setFileName(saved.getFileName());
             pic.setFilePath(saved.getPath());
             pic.setPosition(n.pos());
             picRepo.save(pic);
@@ -487,25 +466,19 @@ public class SaleItemService {
     private void normalizeAndRenameFiles(Integer itemId) throws IOException {
         var allPics = picRepo.findBySaleItemIdOrderByPositionAsc(itemId);
 
-        // 1) เตรียมชื่อ canonical (.jpg เสมอ) ตามตำแหน่งปัจจุบัน
         record Plan(SaleItemPicture pic, String from, String tmp, String to) {}
         List<Plan> plans = new ArrayList<>();
 
         for (var pic : allPics) {
-            int displayOrder = pic.getPosition() + 1; // 1-based
-            String target = canonicalName(itemId, displayOrder, "jpg"); // บังคับ jpg
+            int displayOrder = pic.getPosition() + 1;
+            String target = canonicalName(itemId, displayOrder, "jpg");
             String current = pic.getFileName();
-
-            if (target.equals(current)) continue; // ไม่ต้องรีเนม
-
-            // ใช้ชื่อชั่วคราวที่ไม่ชนแน่
+            if (target.equals(current)) continue;
             String tmp = current + "." + UUID.randomUUID().toString().replace("-", "") + ".swap";
             plans.add(new Plan(pic, current, tmp, target));
         }
 
         if (plans.isEmpty()) return;
-
-        // 2) เฟสแรก: รีเนมเป็นชื่อชั่วคราวทั้งหมด (กันการชน/ทับกันเอง)
         for (var p : plans) {
             String newPath = storage.renameSaleItemFile(itemId, p.from(), p.tmp());
             p.pic().setFileName(p.tmp());
@@ -514,7 +487,6 @@ public class SaleItemService {
         picRepo.saveAll(allPics);
         picRepo.flush();
 
-        // 3) เฟสสอง: รีเนมจากชื่อชั่วคราวเป็นชื่อปลายทางที่ต้องการ
         for (var p : plans) {
             String newPath = storage.renameSaleItemFile(itemId, p.tmp(), p.to());
             p.pic().setFileName(p.to());
@@ -526,12 +498,6 @@ public class SaleItemService {
 
     private String canonicalName(Integer itemId, int order, String extension) {
         return itemId + "." + order + "." + extension;
-    }
-
-    private static String getExtFromFileName(String fileName) {
-        if (fileName == null) return "jpg";
-        int dot = fileName.lastIndexOf('.');
-        return (dot >= 0) ? fileName.substring(dot + 1).toLowerCase() : "jpg";
     }
 
 }
