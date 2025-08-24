@@ -109,7 +109,6 @@ onMounted(async () => {
       retriveImageFiles.value = results;
       imageFiles.value = [...retriveImageFiles.value];
       isAlreadyFetchData.value = true; // use for delayed to load form component
-      console.log(retriveImageFiles.value);
     } else {
       isAlreadyFetchData.value = true;
       Object.assign(initialForm, JSON.parse(JSON.stringify(form)));
@@ -177,7 +176,6 @@ const handleSubmit = async (imageFiles) => {
       (b) => Number(b.brandId) === brandId
     );
     if (!selectedBrand) throw new Error("Selected brand not found");
-    console.log(form);
     formData.append("saleItem.model", form.model.trim());
     formData.append("saleItem.brand.id", brandId); // required
     formData.append("saleItem.description", form.description.trim());
@@ -259,7 +257,6 @@ const checkImageUpdate = (images) => {
   isImageChange.value = !(
     JSON.stringify(updatedImages) === JSON.stringify(retriveImageFiles.value)
   );
-  console.log("is image change : " + isImageChange.value);
 };
 </script>
 

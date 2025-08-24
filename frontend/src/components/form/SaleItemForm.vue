@@ -98,7 +98,6 @@ watch(
   imageFiles,
   (newVal) => {
     const undeleteImage = newVal.filter((image) => image.status !== "DELETE");
-    console.log(undeleteImage);
     if (undeleteImage.length > 4) {
       isUploadImageError.value = true;
       setTimeout(() => {
