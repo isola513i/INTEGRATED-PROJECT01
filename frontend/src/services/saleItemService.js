@@ -1,5 +1,11 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+export const getItem = async (path) => {
+  const response = await fetch(`${API_BASE_URL}/${path}`);
+  if (!response.ok) throw new Error("Failed to fetch sale items");
+  return await response.json();
+};
+
 export const fetchSaleItems = async () => {
   const response = await fetch(`${API_BASE_URL}/v1/sale-items`);
   if (!response.ok) throw new Error("Failed to fetch sale items");
@@ -12,14 +18,11 @@ export const fetchItemById = async (saleItemId) => {
   return await response.json();
 };
 
-export const addSaleItem = async (payload) => {
+export const addSaleItem = async (formData) => {
   try {
-    const res = await fetch(`${API_BASE_URL}/v1/sale-items`, {
+    const res = await fetch(`${API_BASE_URL}/v2/sale-items`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
+      body: formData
     });
 
     if (!res.ok) throw new Error("Failed to create new sale item");
@@ -72,7 +75,8 @@ export const fetchSaleItemsV2 = async (
   sortDirection = "asc",
   storageSizes = [],
   minPrice,
-  maxPrice
+  maxPrice,
+  search 
 ) => {
   if (page === undefined || page === null) {
     throw new Error('Parameter "page" is required and cannot be undefined');
@@ -83,6 +87,7 @@ export const fetchSaleItemsV2 = async (
   if (sortDirection) searchParams += `&sortDirection=${sortDirection}`;
   if (minPrice) searchParams += `&lowerPrice=${minPrice}`;
   if (maxPrice) searchParams += `&upperPrice=${maxPrice}`;
+  if (search) searchParams += `&search=${search}`;
 
   filterBrands.forEach((brand) => (searchParams += `&filterBrands=${brand}`));
   storageSizes.forEach((size) => (searchParams += `&storageSizes=${size}`));

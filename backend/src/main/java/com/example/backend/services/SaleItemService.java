@@ -113,7 +113,9 @@ public class SaleItemService {
             String sortDirection,
             Double lowerPrice,
             Double upperPrice,
-            List<Integer> storageSizes) {
+            List<Integer> storageSizes,
+            String search
+    ) {
 
         Sort sort = Sort.by(Sort.Direction.fromString(sortDirection),
                         sortField != null ? sortField : "createdOn")
@@ -126,6 +128,28 @@ public class SaleItemService {
            storageSizes = null;
        }
         return saleItemRepo.findByFiltersWithBrand(filterBrands, lowerPrice, upperPrice, storageSizes,pageable);
+      
+        boolean searchNullStorage = storageSizes != null && storageSizes.contains(-1);
+      
+        if (searchNullStorage) {
+            storageSizes.remove(Integer.valueOf(-1));
+        }
+      
+        if (CollectionUtils.isEmpty(storageSizes)) {
+            storageSizes = null;
+        }
+
+        return saleItemRepository.findByAdvancedFilters(
+                filterBrands,
+                lowerPrice,
+                upperPrice,
+                storageSizes,
+                searchNullStorage,
+                search,
+                pageable
+        );
+
+// return saleItemRepository.findByFiltersWithBrand(filterBrands, lowerPrice, upperPrice, storageSizes,pageable);
     }
 
     @Transactional(readOnly = true)
@@ -553,6 +577,14 @@ public class SaleItemService {
 
     private String buildCanonicalName(Integer itemId, int order1Based, String ext) {
         return itemId + "." + order1Based + "." + ext;
+    }
+
+    public List<Integer> getAllStorageSizes() {
+        return saleItemRepository.findDistinctStorageSizes()
+                .stream()
+                .map(s -> s == null ? -1 : s)
+                .sorted()
+                .toList();
     }
 
 }

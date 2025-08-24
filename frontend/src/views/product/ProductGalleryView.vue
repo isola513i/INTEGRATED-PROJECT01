@@ -1,13 +1,13 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { fetchSaleItemsV2 } from "@/services/saleItemService";
 import SaleItemCard from "@/components/product/SaleItemCard.vue";
 import PromoBar from "@/components/promo/PromoBar.vue";
 import { useFlashStore } from "@/store/useFlashStore";
 import SortButtons from "@/components/sort/SortButtons.vue";
-// import BrandFilters from "@/components/filter/FilterBrands.vue";
-import FilterBrandPriceStorage from "@/components/filter/FilterBrandPriceStorage.vue";
 import Pagination from "@/components/Pagination/Pagination.vue";
+import FilterBar from "@/components/filter/FilterBar.vue";
+import { useSearchStore } from "@/store/useSearchStore";
 
 const saleItems = ref([]);
 const flash = useFlashStore();
@@ -20,7 +20,9 @@ const sortField = ref("id");
 const sortDirection = ref("asc");
 const sortType = ref("");
 const paginate = ref({});
+const searchStore = useSearchStore();
 
+// sync ค่า sessionStorage
 const syncSessionToRefs = () => {
   pageSize.value = parseInt(sessionStorage.getItem("pageSize")) || 10;
   sortField.value = sessionStorage.getItem("sortField") || "id";
@@ -28,6 +30,7 @@ const syncSessionToRefs = () => {
   filteredBrands.value = JSON.parse(
     sessionStorage.getItem("filterBrands") || "[]"
   );
+  storages.value = JSON.parse(sessionStorage.getItem("filterStorage") || "[]");
 };
 
 const loadItems = async (page) => {
@@ -36,19 +39,19 @@ const loadItems = async (page) => {
   sessionStorage.setItem("sortField", sortField.value);
   sessionStorage.setItem("sortDirection", sortDirection.value);
   sessionStorage.setItem("filterBrands", JSON.stringify(filteredBrands.value));
-  sessionStorage.setItem("filterStorage", JSON.stringify(storages.value));
   sessionStorage.setItem("minPrice", min.value);
   sessionStorage.setItem("maxPrice", max.value);
 
   paginate.value = await fetchSaleItemsV2(
-    JSON.parse(sessionStorage.getItem("filterBrands")),
-    parseInt(sessionStorage.getItem("page")),
-    parseInt(sessionStorage.getItem("pageSize")),
-    sessionStorage.getItem("sortField"),
-    sessionStorage.getItem("sortDirection"),
-    JSON.parse(sessionStorage.getItem("filterStorage")),
-    parseInt(sessionStorage.getItem("minPrice")),
-    parseInt(sessionStorage.getItem("maxPrice"))
+    filteredBrands.value,
+    page,
+    pageSize.value,
+    sortField.value,
+    sortDirection.value,
+    storages.value,
+    min.value ? parseInt(min.value) : null,
+    max.value ? parseInt(max.value) : null,
+    searchStore.search
   );
 
   saleItems.value = paginate.value.content;
@@ -58,6 +61,8 @@ onMounted(() => {
   syncSessionToRefs();
   loadItems(parseInt(sessionStorage.getItem("page")) || 0);
 });
+
+// --- filter อื่น ๆ ---
 async function handleGoToLast() {
   await loadItems(0);
   const totalPages = paginate.value.totalPages;
@@ -84,6 +89,7 @@ const handleBrandFilterChange = (brands) => {
 };
 const handleStorageFilterChange = (storage) => {
   storages.value = storage;
+  sessionStorage.setItem("filterStorage", JSON.stringify(storages.value));
   loadItems(0);
 };
 const handlePriceFilterChange = (price) => {
@@ -96,7 +102,12 @@ const handlePriceFilterChange = (price) => {
   }
   loadItems(0);
 };
-
+watch(
+  () => searchStore.search,
+  () => {
+    loadItems(0);
+  }
+);
 </script>
 
 <template>
@@ -107,16 +118,14 @@ const handlePriceFilterChange = (price) => {
     <div
       class="flex flex-col md:flex-row gap-4 items-center w-full max-w-7xl mx-auto px-4"
     >
-      <!-- ปุ่ม Add -->
-
       <!-- Filter -->
       <div class="flex-grow">
-        <FilterBrandPriceStorage
-          class="w-full"
-          @update:pageSize="handlePageSizeChange"
+        <FilterBar
           @update:brands="handleBrandFilterChange"
-          @update:storage="handleStorageFilterChange"
           @update:price="handlePriceFilterChange"
+          @update:storage="handleStorageFilterChange"
+          @update:pageSize="handlePageSizeChange"
+          @update:search="handleSearchChange"
         />
       </div>
 

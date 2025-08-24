@@ -4,7 +4,6 @@ import { useFlashFormStore } from "@/store/useFlashFormStore";
 import { useRouter } from "vue-router";
 import { brandValidations } from "@/validators/useBrandValidation.js";
 const {
-  correctBrandFormat,
   numberOfNameChar,
   numberOfCountryOfOriginChar,
   validWebsiteUrl,

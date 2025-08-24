@@ -13,10 +13,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 
-
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/itb-mshop/v1")
-@CrossOrigin("*")
 public class BrandController {
     @Autowired
     private ModelMapper modelMapper;

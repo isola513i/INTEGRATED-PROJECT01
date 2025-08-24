@@ -1,4 +1,5 @@
 <script setup>
+import Alert from "../actions/Alert.vue";
 const props = defineProps({
   updatePage: {
     type: Boolean,
@@ -27,27 +28,165 @@ const focusNext = (nextIndex) => {
   const nextInputField = document.getElementById(nextIndex);
   if (nextInputField) nextInputField.focus();
 };
+
+import { ref, watch } from "vue";
+import { previewBinaryFile } from "../../services/previewBinary.js";
+const imageFiles = ref([]);
+const selectedPreviewImage = ref(0);
+const isUploadImageError = ref(false);
+const isFileSizeOver = ref(false);
+const chooseBinaryFiles = (event) => {
+  for (const file of event.target.files) {
+    if (
+      file.name.toLowerCase().endsWith(".jpeg") ||
+      file.name.toLowerCase().endsWith(".jpg") ||
+      file.name.toLowerCase().endsWith(".png")
+    ) {
+      if (file.size <= 2 * 1024 * 1024) {
+         imageFiles.value.push({
+        name: file.name,
+        url: previewBinaryFile(file),
+        file,
+      });
+      }else{
+      isFileSizeOver.value = true;
+        setTimeout(() => {
+          isFileSizeOver.value = false;
+        }, 3000);}
+    }
+  }
+  event.target.value = "";
+};
+
+//handle user add image more than four
+watch(
+  imageFiles,
+  (newVal) => {
+    if (newVal.length > 4) {
+      isUploadImageError.value = true;
+      setTimeout(() => {
+        isUploadImageError.value = false;
+      }, 3000);
+
+      imageFiles.value.splice(4);
+    }
+  },
+  { deep: true }
+);
+
+// select image to show a big picture
+const choosePreview = (index) => {
+  selectedPreviewImage.value = index;
+};
+const switchImageUp = (index) => {
+  const image = imageFiles.value.splice(index, 1)[0]; // move image up
+  imageFiles.value.splice(index - 1, 0, image);
+};
+const switchImageDown = (index) => {
+  const image = imageFiles.value.splice(index, 1)[0]; // move image down
+  imageFiles.value.splice(index + 1, 0, image);
+};
+
+const handleDeleteImage = (index) => {
+  imageFiles.value.splice(index, 1);
+};
 </script>
 
 <template>
+  <Alert
+    v-if="isUploadImageError == true"
+    type="error"
+    message="Maximum 4 pictures are allowed."
+    class="itbms-message"
+    icon="⚠️"
+  />
+  <Alert
+    v-if="isFileSizeOver"
+    type="error"
+    message="The picture file size cannot be larger than 2MB."
+    icon="⚠️"
+  />
   <form
-    @submit.prevent="$emit('submit')"
+    @submit.prevent="$emit('submit', imageFiles)"
     class="grid gap-6 md:grid-cols-12 md:gap-8 bg-white p-4 md:p-10 rounded-xl shadow-lg"
   >
     <!-- LEFT: Picture Upload Area -->
     <div class="md:col-span-4">
       <div
-        class="w-full aspect-[4/3] bg-gray-100 flex items-center justify-center text-lg text-gray-400 rounded-lg mb-4 md:mb-6 border border-dashed"
+        class="w-full aspect-[4/3] bg-gray-100 flex items-center justify-center rounded-lg mb-4 md:mb-6 border border-dashed"
       >
-        No Picture
+        <span v-show="!imageFiles.length">No picture</span>
+        <img
+          v-if="imageFiles.length >= 1"
+          :src="imageFiles[selectedPreviewImage].url"
+          class="w-full h-full object-cover"
+        />
       </div>
-      <div class="grid grid-cols-4 gap-2 md:gap-4">
+
+      <div class="grid grid-cols-4 gap-2">
         <div
-          v-for="n in 4"
-          :key="n"
-          class="w-12 h-12 md:w-16 md:h-16 bg-gray-50 text-xs text-gray-400 border flex justify-center items-center rounded-lg"
+          v-for="(image, index) in imageFiles"
+          :key="index"
+          class="w-20 h-20 bg-gray-50 border-2 border-gray-200 p-0.5 relative"
         >
-          +
+          <img
+            :src="image.url"
+            class="w-full h-full object-cover"
+            :class="`itbms-picture-file${index + 1}`"
+            @click="choosePreview(index)"
+          />
+        </div>
+      </div>
+      <div class="mt-10">
+        <input
+          id="fileInput"
+          type="file"
+          accept=".jpg,.jpeg,.png"
+          multiple
+          @change="chooseBinaryFiles"
+          class="hidden"
+        />
+
+        <!-- Styled label as + button -->
+        <label
+          for="fileInput"
+          class="itbms-upload-button font-md p-2 border-2 border-amber-600 rounded-md text-sm text-white bg-amber-500"
+        >
+          Upload Pictures
+        </label>
+      </div>
+      <div class="mt-5">
+        <div v-for="(image, index) in imageFiles" :key="index" class="flex">
+          <p :key="index" class="bg-blue-200 px-1 rounded-md text-gray-500 mb-2">
+            {{ image.name }}
+          </p>
+          <button
+            type="button"
+            @click="handleDeleteImage(index)"
+            class="px-3 m-2 text-center bg-red-300 rounded-xl"
+          >
+            x
+          </button>
+          <div class="flex flex-col">
+            <button
+              type="button"
+              :disabled="index == 0"
+              @click="switchImageUp(index)"
+              :class="`itbms-picture-file${index + 1}-up`"
+               class="disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              ▲
+            </button>
+            <button
+              type="button"
+              :disabled="index == imageFiles.length - 1"
+              @click="switchImageDown(index)"
+              :class="`itbms-picture-file${index + 1}-down`"
+               class="disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              ▼
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -118,7 +257,7 @@ const focusNext = (nextIndex) => {
               'price',
               updatePage
                 ? $event.target.value
-                : Math.max(Number($event.target.value)),
+                : Math.max(Number($event.target.value))
             )
           "
           class="itbms-price w-full border px-4 py-2 rounded"
@@ -250,15 +389,6 @@ const focusNext = (nextIndex) => {
     >
       <button
         v-if="!updatePage"
-        type="submit"
-        :disabled="!isReadyToSubmit || isSubmitting"
-        class="itbms-save-button bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
-      >
-        {{ isSubmitting ? "Saving..." : "Save" }}
-      </button>
-
-      <button
-        v-if="updatePage"
         type="submit"
         :disabled="!isReadyToSubmit || isSubmitting"
         class="itbms-save-button bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
