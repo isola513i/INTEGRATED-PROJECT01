@@ -1,12 +1,11 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
+import { useRoute } from "vue-router";
 import { fetchSaleItemsV2 } from "@/services/saleItemService";
 import SaleItemCard from "@/components/product/SaleItemCard.vue";
 import PromoBar from "@/components/promo/PromoBar.vue";
 import { useFlashStore } from "@/store/useFlashStore";
 import SortButtons from "@/components/sort/SortButtons.vue";
-// import BrandFilters from "@/components/filter/FilterBrands.vue";
-import FilterBrandPriceStorage from "@/components/filter/FilterBrandPriceStorage.vue";
 import Pagination from "@/components/Pagination/Pagination.vue";
 import FilterBar from "@/components/filter/FilterBar.vue";
 
@@ -21,7 +20,11 @@ const sortField = ref("id");
 const sortDirection = ref("asc");
 const sortType = ref("");
 const paginate = ref({});
+const search = ref(sessionStorage.getItem("search") || "");
 
+const route = useRoute(); // 👉 ใช้ดึง query param
+
+// sync ค่า sessionStorage
 const syncSessionToRefs = () => {
   pageSize.value = parseInt(sessionStorage.getItem("pageSize")) || 10;
   sortField.value = sessionStorage.getItem("sortField") || "id";
@@ -30,6 +33,7 @@ const syncSessionToRefs = () => {
     sessionStorage.getItem("filterBrands") || "[]"
   );
   storages.value = JSON.parse(sessionStorage.getItem("filterStorage") || "[]");
+  search.value = sessionStorage.getItem("search") || "";
 };
 
 const loadItems = async (page) => {
@@ -38,9 +42,9 @@ const loadItems = async (page) => {
   sessionStorage.setItem("sortField", sortField.value);
   sessionStorage.setItem("sortDirection", sortDirection.value);
   sessionStorage.setItem("filterBrands", JSON.stringify(filteredBrands.value));
-  // sessionStorage.setItem("filterStorage", JSON.stringify(storages.value));
   sessionStorage.setItem("minPrice", min.value);
   sessionStorage.setItem("maxPrice", max.value);
+  sessionStorage.setItem("search", search.value);
 
   paginate.value = await fetchSaleItemsV2(
     JSON.parse(sessionStorage.getItem("filterBrands")),
@@ -50,16 +54,31 @@ const loadItems = async (page) => {
     sessionStorage.getItem("sortDirection"),
     JSON.parse(sessionStorage.getItem("filterStorage")),
     parseInt(sessionStorage.getItem("minPrice")),
-    parseInt(sessionStorage.getItem("maxPrice"))
+    parseInt(sessionStorage.getItem("maxPrice")),
+    sessionStorage.getItem("search")
   );
 
   saleItems.value = paginate.value.content;
 };
 
 onMounted(() => {
+  if (route.query.q) {
+    search.value = route.query.q;
+    sessionStorage.setItem("search", search.value);
+  }
   syncSessionToRefs();
   loadItems(parseInt(sessionStorage.getItem("page")) || 0);
 });
+
+watch(
+  () => route.query.q,
+  (newQ) => {
+    search.value = newQ || "";
+    sessionStorage.setItem("search", search.value);
+    loadItems(0);
+  }
+);
+// --- filter อื่น ๆ ---
 async function handleGoToLast() {
   await loadItems(0);
   const totalPages = paginate.value.totalPages;
@@ -84,14 +103,11 @@ const handleBrandFilterChange = (brands) => {
   filteredBrands.value = brands;
   loadItems(0);
 };
-
 const handleStorageFilterChange = (storage) => {
   storages.value = storage;
   sessionStorage.setItem("filterStorage", JSON.stringify(storages.value));
-
   loadItems(0);
 };
-
 const handlePriceFilterChange = (price) => {
   if (!price) {
     min.value = null;
@@ -100,6 +116,11 @@ const handlePriceFilterChange = (price) => {
     min.value = price.min;
     max.value = price.max;
   }
+  loadItems(0);
+};
+const handleSearchChange = (s) => {
+  search.value = s;
+  sessionStorage.setItem("search", search.value);
   loadItems(0);
 };
 </script>
@@ -119,6 +140,7 @@ const handlePriceFilterChange = (price) => {
           @update:price="handlePriceFilterChange"
           @update:storage="handleStorageFilterChange"
           @update:pageSize="handlePageSizeChange"
+          @update:search="handleSearchChange"
         />
       </div>
 

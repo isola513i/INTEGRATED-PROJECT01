@@ -52,6 +52,11 @@ public class SaleItemController {
     public ResponseEntity<SaleItemDto.GetSaleItemDto> getSaleItemById(@PathVariable Integer saleItemId){
         return ResponseEntity.ok(saleItemService.getSaleItemDetail(saleItemId));
     }
+    @GetMapping("/v1/storage")
+    public List<Integer> getStorageSizes() {
+        return saleItemService.getAllStorageSizes();
+    }
+
 
     @PutMapping("/v1/sale-items/{saleItemId}")
     public ResponseEntity<SaleItemDto.GetSaleItemDto> updateSaleItem(@PathVariable Integer saleItemId ,@RequestBody SaleItemDto.GetCreateSaleItemDto saleItemDto){

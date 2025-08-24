@@ -516,4 +516,12 @@ public class SaleItemService {
         return itemId + "." + order + "." + extension;
     }
 
+    public List<Integer> getAllStorageSizes() {
+        return saleItemRepository.findDistinctStorageSizes()
+                .stream()
+                .map(s -> s == null ? -1 : s)
+                .sorted()
+                .toList();
+    }
+
 }

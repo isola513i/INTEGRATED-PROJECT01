@@ -75,7 +75,8 @@ export const fetchSaleItemsV2 = async (
   sortDirection = "asc",
   storageSizes = [],
   minPrice,
-  maxPrice
+  maxPrice,
+  search 
 ) => {
   if (page === undefined || page === null) {
     throw new Error('Parameter "page" is required and cannot be undefined');
@@ -86,6 +87,7 @@ export const fetchSaleItemsV2 = async (
   if (sortDirection) searchParams += `&sortDirection=${sortDirection}`;
   if (minPrice) searchParams += `&lowerPrice=${minPrice}`;
   if (maxPrice) searchParams += `&upperPrice=${maxPrice}`;
+  if (search) searchParams += `&search=${search}`;
 
   filterBrands.forEach((brand) => (searchParams += `&filterBrands=${brand}`));
   storageSizes.forEach((size) => (searchParams += `&storageSizes=${size}`));
