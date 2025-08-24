@@ -50,12 +50,10 @@ public class FileStorage {
         if (!dir.startsWith(root)) throw new IOException("Invalid path resolution");
         Files.createDirectories(dir);
 
-        // บันทึกเป็น .jpg เสมอ
         String safe = UUID.randomUUID().toString().replace("-", "") + ".jpg";
         Path target = dir.resolve(safe).normalize();
         if (!target.startsWith(root)) throw new IOException("Invalid target path");
 
-        // 1) อ่านรูปจาก MultipartFile
         BufferedImage src;
         try (var in = file.getInputStream()) {
             src = ImageIO.read(in);
@@ -64,19 +62,17 @@ public class FileStorage {
             throw new IOException("Unsupported image format: " + file.getOriginalFilename());
         }
 
-        // 2) แปลงให้เป็น RGB (ถ้ามี alpha เช่น PNG ให้ลงพื้นหลังขาว)
         BufferedImage rgb = new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_INT_RGB);
         Graphics2D g = rgb.createGraphics();
         try {
             g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            g.setColor(Color.WHITE);           // พื้นหลังขาว
+            g.setColor(Color.WHITE);
             g.fillRect(0, 0, rgb.getWidth(), rgb.getHeight());
             g.drawImage(src, 0, 0, null);
         } finally {
             g.dispose();
         }
 
-        // 3) เขียนออกเป็น JPEG (กำหนดคุณภาพได้)
         Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpg");
         if (!writers.hasNext()) {
             throw new IOException("No JPEG writer available");
@@ -87,7 +83,7 @@ public class FileStorage {
             ImageWriteParam param = writer.getDefaultWriteParam();
             if (param.canWriteCompressed()) {
                 param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-                param.setCompressionQuality(0.9f); // ปรับคุณภาพ 0..1 ตามต้องการ
+                param.setCompressionQuality(0.9f);
             }
             writer.write(null, new javax.imageio.IIOImage(rgb, null, null), param);
         } finally {
@@ -96,7 +92,6 @@ public class FileStorage {
 
         return new StoredFile(safe, saleItemId + "/" + safe);
     }
-
 
     public void deleteIfExists(String relativePath) {
         try {

@@ -12,6 +12,11 @@ import com.example.backend.repositories.SaleItemPictureRepository;
 import com.example.backend.repositories.SaleItemRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,47 +27,56 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class SaleItemService {
-    private final SaleItemRepository saleItemRepository;
 
-    private final BrandRepository brandRepository;
+    private static final int MAX_IMAGES = 4;
+    private static final String CANON_EXT = "jpg";
 
-    private final EntityManager entityManager;
+    private final SaleItemRepository saleItemRepo;
+    private final BrandRepository brandRepo;
+    private final SaleItemPictureRepository pictureRepo;
+    private final FileStorage fileStorage;
 
-    private final SaleItemPictureRepository picRepo;
 
-    private final FileStorage storage;
 
-    public SaleItemService(SaleItemRepository saleItemRepository, BrandRepository brandRepository, EntityManager entityManager, SaleItemPictureRepository picRepo, FileStorage storage) {
-        this.saleItemRepository = saleItemRepository;
-        this.brandRepository = brandRepository;
-        this.entityManager = entityManager;
-        this.picRepo = picRepo;
-        this.storage = storage;
-    }
 
     @PersistenceContext
     private EntityManager em;
 
+    public SaleItemService(
+            SaleItemRepository saleItemRepo,
+            BrandRepository brandRepo,
+            SaleItemPictureRepository pictureRepo,
+            FileStorage fileStorage
+    ) {
+        this.saleItemRepo = saleItemRepo;
+        this.brandRepo = brandRepo;
+        this.pictureRepo = pictureRepo;
+        this.fileStorage = fileStorage;
+    }
+
     @Transactional(readOnly = true)
     public List<SaleItem> allSaleItems() {
-        return saleItemRepository.findAllWithBrandOrderByCreatedOnAscIdAsc();
+        return saleItemRepo.findAllWithBrandOrderByCreatedOnAscIdAsc();
     }
 
     public void deleteSaleItem(Integer id) {
-        if (saleItemRepository.existsById(id)) {
-            saleItemRepository.deleteById(id);
+        if (saleItemRepo.existsById(id)) {
+            saleItemRepo.deleteById(id);
         } else throw new ItemNotFoundException("SaleItem not found for this id :: " + id);
     }
 
     @Transactional
     public SaleItem updateSaleItem(Integer id, SaleItemDto.GetCreateSaleItemDto saleItemDto) {
-        SaleItem saleItem = saleItemRepository.findById(id).orElseThrow(() -> new ItemNotFoundException("SaleItem not found for this id :: " + id));
-        Brand brand = brandRepository.findById(saleItemDto.getBrand().getId()).orElseThrow(
+        SaleItem saleItem = saleItemRepo.findById(id).orElseThrow(() -> new ItemNotFoundException("SaleItem not found for this id :: " + id));
+        Brand brand = brandRepo.findById(saleItemDto.getBrand().getId()).orElseThrow(
                 () -> new ItemNotFoundException("Brand not found for this id :: " + saleItemDto.getBrand().getId()));
         saleItem.setModel(saleItemDto.getModel());
         saleItem.setBrand(brand);
@@ -74,9 +88,9 @@ public class SaleItemService {
         saleItem.setStorageGb(saleItemDto.getStorageGb());
         saleItem.setColor(saleItemDto.getColor());
 
-        SaleItem updateItem = saleItemRepository.saveAndFlush(saleItem);
-        entityManager.refresh(updateItem);
-        return saleItemRepository.findById(updateItem.getId()).orElseThrow();
+        SaleItem updateItem = saleItemRepo.saveAndFlush(saleItem);
+        em.refresh(updateItem);
+        return saleItemRepo.findById(updateItem.getId()).orElseThrow();
     }
 
     @Transactional
@@ -84,14 +98,14 @@ public class SaleItemService {
         if (saleItem.getBrand() == null || saleItem.getBrand().getId() == null) {
             throw new IllegalArgumentException("Brand id must not be null");
         }
-        Brand brand = brandRepository.
+        Brand brand = brandRepo.
                 findById(saleItem.getBrand().getId()).orElseThrow(
                         () -> new ItemNotFoundException("Brand not found for this id :: "
                                 + saleItem.getBrand().getId()));
         saleItem.setBrand(brand);
-        SaleItem savedItem = saleItemRepository.saveAndFlush(saleItem);
-        entityManager.refresh(savedItem);
-        return saleItemRepository.findById(savedItem.getId()).orElseThrow();
+        SaleItem savedItem = saleItemRepo.saveAndFlush(saleItem);
+        em.refresh(savedItem);
+        return saleItemRepo.findById(savedItem.getId()).orElseThrow();
     }
 
     @Transactional(readOnly = true)
@@ -103,7 +117,9 @@ public class SaleItemService {
             String sortDirection,
             Double lowerPrice,
             Double upperPrice,
-            List<Integer> storageSizes) {
+            List<Integer> storageSizes,
+            String search
+    ) {
 
         Sort sort = Sort.by(Sort.Direction.fromString(sortDirection),
                         sortField != null ? sortField : "createdOn")
@@ -112,31 +128,37 @@ public class SaleItemService {
        if(CollectionUtils.isEmpty(filterBrands)){
            filterBrands = null;
        }
+       if(CollectionUtils.isEmpty(storageSizes)){
+           storageSizes = null;
+       }
+        return saleItemRepo.findByFiltersWithBrand(filterBrands, lowerPrice, upperPrice, storageSizes,pageable);
+      
         boolean searchNullStorage = storageSizes != null && storageSizes.contains(-1);
-
+      
         if (searchNullStorage) {
             storageSizes.remove(Integer.valueOf(-1));
         }
-
+      
         if (CollectionUtils.isEmpty(storageSizes)) {
             storageSizes = null;
         }
 
-        return saleItemRepository.findByAdvancedFilters(
+        return saleItemRepo.findByAdvancedFilters(
                 filterBrands,
                 lowerPrice,
                 upperPrice,
                 storageSizes,
                 searchNullStorage,
+                search,
                 pageable
         );
 
-//        return saleItemRepository.findByFiltersWithBrand(filterBrands, lowerPrice, upperPrice, storageSizes,pageable);
+// return saleItemRepository.findByFiltersWithBrand(filterBrands, lowerPrice, upperPrice, storageSizes,pageable);
     }
 
     @Transactional(readOnly = true)
     public SaleItemDto.GetSaleItemDto getSaleItemDetail(Integer id) {
-        var s = saleItemRepository.findByIdWithBrand(id)
+        var s = saleItemRepo.findByIdWithBrand(id)
                 .orElseThrow(() -> new ItemNotFoundException("SaleItem not found"));
         var d = new SaleItemDto.GetSaleItemDto();
         d.setId(s.getId());
@@ -157,7 +179,7 @@ public class SaleItemService {
 
     @Transactional(readOnly = true)
     public SaleItemV2Dto.SaleItemV2Response getSaleItemDetailV2(Integer saleItemId) {
-        var saleItem = saleItemRepository.findByIdWithBrand(saleItemId)
+        var saleItem = saleItemRepo.findByIdWithBrand(saleItemId)
                 .orElseThrow(() -> new ItemNotFoundException("SaleItem not found"));
 
         var response = new SaleItemV2Dto.SaleItemV2Response();
@@ -194,7 +216,7 @@ public class SaleItemService {
         if (s.getBrand() == null || s.getBrand().getId() == null)
             throw new IllegalArgumentException("saleItem.brand.id is required");
 
-        var brand = brandRepository.findById(s.getBrand().getId())
+        var brand = brandRepo.findById(s.getBrand().getId())
                 .orElseThrow(() -> new ItemNotFoundException("Brand not found"));
 
         var item = new SaleItem();
@@ -207,7 +229,7 @@ public class SaleItemService {
         item.setQuantity(s.getQuantity());
         item.setStorageGb(s.getStorageGb());
         item.setColor(s.getColor());
-        item = saleItemRepository.saveAndFlush(item);
+        item = saleItemRepo.saveAndFlush(item);
 
         var infos = Optional.ofNullable(req.getImageInfos()).orElse(List.of());
         if (infos.size() > 4) throw new IllegalArgumentException("Maximum 4 pictures are allowed.");
@@ -223,18 +245,17 @@ public class SaleItemService {
             if (file == null || file.isEmpty())
                 throw new IllegalArgumentException("imageInfos.imageFile is required for NEW");
 
-            var stored = storage.storeSaleItemFile(item.getId(), file);
+            var stored = fileStorage.storeSaleItemFile(item.getId(), file);
             int order1based = position + 1;
-            String newFileName = canonicalName(item.getId(), order1based, "jpg");
-            String newPath = storage.renameSaleItemFile(item.getId(), stored.getFileName(), newFileName);
+            String newFileName = buildCanonicalName(item.getId(), order1based, "jpg");
+            String newPath = fileStorage.renameSaleItemFile(item.getId(), stored.getFileName(), newFileName);
 
             var pic = new SaleItemPicture();
             pic.setSaleItem(item);
             pic.setFileName(newFileName);
             pic.setFilePath(newPath);
-            pic.setPosition(position); // 0..3
-            picRepo.save(pic);
-
+            pic.setPosition(position);
+            pictureRepo.save(pic);
             position++;
         }
 
@@ -249,10 +270,10 @@ public class SaleItemService {
 
         var s = req.getSaleItem();
         if (s != null) {
-            var item = saleItemRepository.findById(itemId)
+            var item = saleItemRepo.findById(itemId)
                     .orElseThrow(() -> new ItemNotFoundException("SaleItem not found"));
             if (s.getBrand() != null && s.getBrand().getId() != null) {
-                var brand = brandRepository.findById(s.getBrand().getId())
+                var brand = brandRepo.findById(s.getBrand().getId())
                         .orElseThrow(() -> new ItemNotFoundException("Brand not found"));
                 item.setBrand(brand);
             }
@@ -264,51 +285,91 @@ public class SaleItemService {
             if (s.getQuantity() != null) item.setQuantity(s.getQuantity());
             if (s.getStorageGb() != null) item.setStorageGb(s.getStorageGb());
             if (s.getColor() != null) item.setColor(s.getColor());
-            saleItemRepository.save(item);
+            saleItemRepo.save(item);
         }
 
         var infos = Optional.ofNullable(req.getImageInfos()).orElse(List.of());
         applyReorderAndNewWithSlots(itemId, infos);
 
-        normalizeAndRenameFiles(itemId);
+        normalizeFileNamesToCanonical(itemId);
 
         return getSaleItemDetailV2(itemId);
     }
 
+    @Transactional(readOnly = true)
+    public ImageMeta loadImage(Integer saleItemId, String fileName) throws IOException {
+        var pic = pictureRepo.findBySaleItemIdAndFileName(saleItemId, fileName)
+                .orElseThrow(() -> new ItemNotFoundException("Image not found"));
+
+        // Let FileStorage send back Resource
+        FileSystemResource fsr = fileStorage.loadSaleItemFile(saleItemId, fileName);
+        if (!fsr.exists() || !fsr.isReadable()) {
+            throw new ItemNotFoundException("Image file missing on disk");
+        }
+
+        Path path = fsr.getFile().toPath();
+        byte[] bytes = Files.readAllBytes(path);
+        Resource body = new ByteArrayResource(bytes);
+
+        // Standard lookup by extension
+        String ext = "";
+        int dot = fileName.lastIndexOf('.');
+        if (dot >= 0 && dot < fileName.length() - 1) {
+            ext = fileName.substring(dot + 1).toLowerCase(Locale.ROOT);
+        }
+
+        MediaType mediaType = switch (ext) {
+            case "jpg", "jpeg" -> MediaType.IMAGE_JPEG;
+            case "png"         -> MediaType.IMAGE_PNG;
+            case "webp"        -> MediaType.parseMediaType("image/webp");
+            default            -> MediaType.APPLICATION_OCTET_STREAM;
+        };
+
+        long size = Files.size(path);
+        FileTime mtime = Files.getLastModifiedTime(path);
+        String etag = "\"" + size + "-" + mtime.toMillis() + "\"";
+
+        return new ImageMeta(body, mediaType, etag);
+    }
+
+    // payload, mediaType, etag
+    public record ImageMeta(Resource body, MediaType mediaType, String etag) {}
+
     @Transactional
     public void deleteSaleItemAndImages(Integer itemId) {
-        var pics = picRepo.findBySaleItemIdOrderByPositionAsc(itemId);
+        var pics = pictureRepo.findBySaleItemIdOrderByPositionAsc(itemId);
 
         for (var p : pics) {
-            storage.deleteIfExists(p.getFilePath());
+            fileStorage.deleteIfExists(p.getFilePath());
         }
 
         if (!pics.isEmpty()) {
-            picRepo.deleteAllInBatch(pics);
-            picRepo.flush();
+            pictureRepo.deleteAllInBatch(pics);
+            pictureRepo.flush();
         }
 
-        if (saleItemRepository.existsById(itemId)) {
-            saleItemRepository.deleteById(itemId);
+        if (saleItemRepo.existsById(itemId)) {
+            saleItemRepo.deleteById(itemId);
         } else {
             throw new ItemNotFoundException("SaleItem not found for this id :: " + itemId);
         }
 
-        storage.deleteItemDirectory(itemId);
+        fileStorage.deleteItemDirectory(itemId);
     }
 
     @Transactional
     public void ensureItemExists(Integer id) {
-        saleItemRepository.findById(id)
+        saleItemRepo.findById(id)
                 .orElseThrow(() -> new ItemNotFoundException("SaleItem not found"));
     }
 
+    // Manage Delete, Reorder, New with slots (0..3)
     private void applyReorderAndNewWithSlots(
             Integer itemId,
             List<SaleItemV2Dto.SaleItemImageRequest> infos
     ) throws IOException {
 
-        var existing = picRepo.findBySaleItemIdOrderByPositionAsc(itemId);
+        var existing = pictureRepo.findBySaleItemIdOrderByPositionAsc(itemId);
 
         var deleteNames = infos.stream()
                 .filter(i -> i.getStatus() == ImageStatus.DELETE)
@@ -327,14 +388,14 @@ public class SaleItemService {
                     .sorted()
                     .toList();
 
-            for (var p : toDelete) storage.deleteIfExists(p.getFilePath());
+            for (var p : toDelete) fileStorage.deleteIfExists(p.getFilePath());
             if (!toDelete.isEmpty()) {
-                picRepo.deleteAll(toDelete);
-                picRepo.flush();
+                pictureRepo.deleteAll(toDelete);
+                pictureRepo.flush();
             }
         }
 
-        existing = picRepo.findBySaleItemIdOrderByPositionAsc(itemId);
+        existing = pictureRepo.findBySaleItemIdOrderByPositionAsc(itemId);
 
         Map<String, Integer> orderExisting = new HashMap<>(); // fileName -> order(1..4)
         record NewReq(MultipartFile file, Integer order) {}
@@ -428,22 +489,23 @@ public class SaleItemService {
                 .setFlushMode(jakarta.persistence.FlushModeType.COMMIT)
                 .executeUpdate();
 
-        updatePicturePositionsAtomic(itemId, idToPos);
+        updatePositionsCaseWhen(itemId, idToPos);
 
         for (var n : pendingNew) {
-            var saved = storage.storeSaleItemFile(itemId, n.file());
+            var saved = fileStorage.storeSaleItemFile(itemId, n.file());
             var pic = new SaleItemPicture();
-            pic.setSaleItem(saleItemRepository.getReferenceById(itemId));
+            pic.setSaleItem(saleItemRepo.getReferenceById(itemId));
             pic.setFileName(saved.getFileName());
             pic.setFilePath(saved.getPath());
             pic.setPosition(n.pos());
-            picRepo.save(pic);
+            pictureRepo.save(pic);
         }
-        picRepo.flush();
+        pictureRepo.flush();
     }
 
+    // UPDATE positions with SQL CASE WHEN
     @Transactional
-    protected void updatePicturePositionsAtomic(Integer itemId, Map<Integer, Integer> idToPos) {
+    protected void updatePositionsCaseWhen(Integer itemId, Map<Integer, Integer> idToPos) {
         if (idToPos == null || idToPos.isEmpty()) return;
 
         StringBuilder caseSql = new StringBuilder("UPDATE sale_item_pictures SET position = CASE pictureId ");
@@ -464,13 +526,51 @@ public class SaleItemService {
                 .executeUpdate();
     }
 
-    private int clampOrder(int order) { return Math.max(1, Math.min(4, order)); }
+    // Rename files to {itemId}.{order}.jpg
+
+    @Transactional
+    protected void normalizeFileNamesToCanonical(Integer itemId) throws IOException {
+        var all = pictureRepo.findBySaleItemIdOrderByPositionAsc(itemId);
+
+        record Plan(SaleItemPicture pic, String from, String tmp, String to) {}
+        List<Plan> plans = new ArrayList<>();
+
+        for (var pic : all) {
+            int order = pic.getPosition() + 1;
+            String target = buildCanonicalName(itemId, order, CANON_EXT);
+            if (target.equalsIgnoreCase(pic.getFileName())) continue;
+
+            String tmp = pic.getFileName() + "." + UUID.randomUUID().toString().replace("-", "") + ".swap";
+            plans.add(new Plan(pic, pic.getFileName(), tmp, target));
+        }
+        if (plans.isEmpty()) return;
+
+        // ก้าว 1: rename -> tmp
+        for (var p : plans) {
+            String newPath = fileStorage.renameSaleItemFile(itemId, p.from(), p.tmp());
+            p.pic().setFileName(p.tmp());
+            p.pic().setFilePath(newPath);
+        }
+        pictureRepo.saveAll(all);
+        pictureRepo.flush();
+
+        // ก้าว 2: tmp -> canonical
+        for (var p : plans) {
+            String newPath = fileStorage.renameSaleItemFile(itemId, p.tmp(), p.to());
+            p.pic().setFileName(p.to());
+            p.pic().setFilePath(newPath);
+        }
+        pictureRepo.saveAll(all);
+        pictureRepo.flush();
+    }
+
+    // Etc. helpers //
+
+    private int clampOrder(int order) { return Math.max(1, Math.min(MAX_IMAGES, order)); }
 
     private int placeToNearestFree(int pos, boolean[] used) {
         if (!used[pos]) return pos;
-        for (int i = 0; i < used.length; i++) {
-            if (!used[i]) return i;
-        }
+        for (int i = 0; i < used.length; i++) if (!used[i]) return i;
         return pos;
     }
 
@@ -479,41 +579,16 @@ public class SaleItemService {
         return -1;
     }
 
-    private void normalizeAndRenameFiles(Integer itemId) throws IOException {
-        var allPics = picRepo.findBySaleItemIdOrderByPositionAsc(itemId);
-
-        record Plan(SaleItemPicture pic, String from, String tmp, String to) {}
-        List<Plan> plans = new ArrayList<>();
-
-        for (var pic : allPics) {
-            int displayOrder = pic.getPosition() + 1;
-            String target = canonicalName(itemId, displayOrder, "jpg");
-            String current = pic.getFileName();
-            if (target.equals(current)) continue;
-            String tmp = current + "." + UUID.randomUUID().toString().replace("-", "") + ".swap";
-            plans.add(new Plan(pic, current, tmp, target));
-        }
-
-        if (plans.isEmpty()) return;
-        for (var p : plans) {
-            String newPath = storage.renameSaleItemFile(itemId, p.from(), p.tmp());
-            p.pic().setFileName(p.tmp());
-            p.pic().setFilePath(newPath);
-        }
-        picRepo.saveAll(allPics);
-        picRepo.flush();
-
-        for (var p : plans) {
-            String newPath = storage.renameSaleItemFile(itemId, p.tmp(), p.to());
-            p.pic().setFileName(p.to());
-            p.pic().setFilePath(newPath);
-        }
-        picRepo.saveAll(allPics);
-        picRepo.flush();
+    private String buildCanonicalName(Integer itemId, int order1Based, String ext) {
+        return itemId + "." + order1Based + "." + ext;
     }
 
-    private String canonicalName(Integer itemId, int order, String extension) {
-        return itemId + "." + order + "." + extension;
+    public List<Integer> getAllStorageSizes() {
+        return saleItemRepository.findDistinctStorageSizes()
+                .stream()
+                .map(s -> s == null ? -1 : s)
+                .sorted()
+                .toList();
     }
 
 }
