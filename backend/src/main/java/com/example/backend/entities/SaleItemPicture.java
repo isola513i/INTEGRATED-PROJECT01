@@ -41,12 +41,10 @@ public class SaleItemPicture {
     @Column(name = "position", nullable = false)
     private Integer position;
 
-    @CreationTimestamp
-    @Column(name = "createdOn", nullable = false, updatable = false)
+    @Column(name = "createdOn", nullable = false, insertable = false, updatable = false)
     private Instant createdOn;
 
-    @UpdateTimestamp
-    @Column(name = "updatedOn", nullable = false)
+    @Column(name = "updatedOn", nullable = false, insertable = false,updatable = false)
     private Instant updatedOn;
 
 }

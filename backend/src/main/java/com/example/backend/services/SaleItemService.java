@@ -11,38 +11,44 @@ import com.example.backend.repositories.BrandRepository;
 import com.example.backend.repositories.SaleItemPictureRepository;
 import com.example.backend.repositories.SaleItemRepository;
 import jakarta.persistence.EntityManager;
-import jakarta.transaction.Transactional;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.persistence.PersistenceContext;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.example.backend.utils.PictureNameUtill.canonicalName;
-import static com.example.backend.utils.PictureNameUtill.getExt;
-
 @Service
 public class SaleItemService {
-    @Autowired
-    private SaleItemRepository saleItemRepository;
-    @Autowired
-    private BrandRepository brandRepository;
-    @Autowired
-    private EntityManager entityManager;
-    @Autowired
-    private SaleItemPictureRepository picRepo;
-    @Autowired
-    private FileStorage storage;
-    @Autowired
-    private ModelMapper modelMapper;
+    private final SaleItemRepository saleItemRepository;
 
+    private final BrandRepository brandRepository;
+
+    private final EntityManager entityManager;
+
+    private final SaleItemPictureRepository picRepo;
+
+    private final FileStorage storage;
+
+    public SaleItemService(SaleItemRepository saleItemRepository, BrandRepository brandRepository, EntityManager entityManager, SaleItemPictureRepository picRepo, FileStorage storage) {
+        this.saleItemRepository = saleItemRepository;
+        this.brandRepository = brandRepository;
+        this.entityManager = entityManager;
+        this.picRepo = picRepo;
+        this.storage = storage;
+    }
+
+    @PersistenceContext
+    private EntityManager em;
+
+    @Transactional(readOnly = true)
     public List<SaleItem> allSaleItems() {
         return saleItemRepository.findAllWithBrandOrderByCreatedOnAscIdAsc();
     }
@@ -88,6 +94,7 @@ public class SaleItemService {
         return saleItemRepository.findById(savedItem.getId()).orElseThrow();
     }
 
+    @Transactional(readOnly = true)
     public Page<SaleItem> findAllSaleItemsPage(
             List<String> filterBrands,
             Integer page,
@@ -127,8 +134,8 @@ public class SaleItemService {
 //        return saleItemRepository.findByFiltersWithBrand(filterBrands, lowerPrice, upperPrice, storageSizes,pageable);
     }
 
-    @Transactional
-    public SaleItemDto.GetSaleItemDto getSaleItemDto(Integer id) {
+    @Transactional(readOnly = true)
+    public SaleItemDto.GetSaleItemDto getSaleItemDetail(Integer id) {
         var s = saleItemRepository.findByIdWithBrand(id)
                 .orElseThrow(() -> new ItemNotFoundException("SaleItem not found"));
         var d = new SaleItemDto.GetSaleItemDto();
@@ -148,12 +155,23 @@ public class SaleItemService {
         return d;
     }
 
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
-    public List<SaleItemV2Dto.SaleItemV2Response.SaleItemImageDto> getSaleItemImages(Integer saleItemId) {
+    @Transactional(readOnly = true)
+    public SaleItemV2Dto.SaleItemV2Response getSaleItemDetailV2(Integer saleItemId) {
         var saleItem = saleItemRepository.findByIdWithBrand(saleItemId)
                 .orElseThrow(() -> new ItemNotFoundException("SaleItem not found"));
 
-        return saleItem.getPictures().stream()
+        var response = new SaleItemV2Dto.SaleItemV2Response();
+        response.setId(saleItem.getId());
+        response.setModel(saleItem.getModel());
+        response.setBrandName(saleItem.getBrand().getName());
+        response.setDescription(saleItem.getDescription());
+        response.setPrice(saleItem.getPrice());
+        response.setRamGb(saleItem.getRamGb());
+        response.setScreenSizeInch(saleItem.getScreenSizeInch());
+        response.setQuantity(saleItem.getQuantity());
+        response.setStorageGb(saleItem.getStorageGb());
+        response.setColor(saleItem.getColor());
+        var imageResponses = saleItem.getPictures().stream()
                 .sorted(Comparator.comparingInt(SaleItemPicture::getPosition))
                 .map(pic -> {
                     var dto = new SaleItemV2Dto.SaleItemV2Response.SaleItemImageDto();
@@ -162,6 +180,11 @@ public class SaleItemService {
                     return dto;
                 })
                 .toList();
+
+        response.setSaleItemImages(imageResponses);
+        response.setCreatedOn(saleItem.getCreatedOn());
+        response.setUpdatedOn(saleItem.getUpdatedOn());
+        return response;
     }
 
     @Transactional
@@ -201,11 +224,8 @@ public class SaleItemService {
                 throw new IllegalArgumentException("imageInfos.imageFile is required for NEW");
 
             var stored = storage.storeSaleItemFile(item.getId(), file);
-            var ext = getExt(file.getOriginalFilename());
-
             int order1based = position + 1;
-
-            String newFileName = canonicalName(item.getId(), order1based, ext);
+            String newFileName = canonicalName(item.getId(), order1based, "jpg");
             String newPath = storage.renameSaleItemFile(item.getId(), stored.getFileName(), newFileName);
 
             var pic = new SaleItemPicture();
@@ -218,184 +238,41 @@ public class SaleItemService {
             position++;
         }
 
-        return sendV2Response(item.getId());
+        return getSaleItemDetailV2(item.getId());
     }
 
-    @org.springframework.transaction.annotation.Transactional
+    @Transactional
     public SaleItemV2Dto.SaleItemV2Response updateSaleItemWithImages(
             Integer itemId,
             SaleItemV2Dto.SaleItemWithImageInfo req
     ) throws IOException {
 
+        var s = req.getSaleItem();
+        if (s != null) {
+            var item = saleItemRepository.findById(itemId)
+                    .orElseThrow(() -> new ItemNotFoundException("SaleItem not found"));
+            if (s.getBrand() != null && s.getBrand().getId() != null) {
+                var brand = brandRepository.findById(s.getBrand().getId())
+                        .orElseThrow(() -> new ItemNotFoundException("Brand not found"));
+                item.setBrand(brand);
+            }
+            if (s.getModel() != null) item.setModel(s.getModel());
+            if (s.getDescription() != null) item.setDescription(s.getDescription());
+            if (s.getPrice() != null) item.setPrice(s.getPrice());
+            if (s.getRamGb() != null) item.setRamGb(s.getRamGb());
+            if (s.getScreenSizeInch() != null) item.setScreenSizeInch(s.getScreenSizeInch());
+            if (s.getQuantity() != null) item.setQuantity(s.getQuantity());
+            if (s.getStorageGb() != null) item.setStorageGb(s.getStorageGb());
+            if (s.getColor() != null) item.setColor(s.getColor());
+            saleItemRepository.save(item);
+        }
+
         var infos = Optional.ofNullable(req.getImageInfos()).orElse(List.of());
-        var existingPics = picRepo.findBySaleItemIdOrderByPositionAsc(itemId);
+        applyReorderAndNewWithSlots(itemId, infos);
 
-        // --- DELETE ---
-        var deleteIds = infos.stream()
-                .filter(i -> i.getStatus() == ImageStatus.DELETE)
-                .map(SaleItemV2Dto.SaleItemImageRequest::getPictureId)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
+        normalizeAndRenameFiles(itemId);
 
-        var remainingPics = existingPics.stream()
-                .filter(p -> !deleteIds.contains(p.getId()))
-                .collect(Collectors.toList());
-
-        existingPics.stream()
-                .filter(p -> deleteIds.contains(p.getId()))
-                .forEach(p -> storage.deleteIfExists(p.getFilePath()));
-
-        if (!deleteIds.isEmpty()) {
-            picRepo.deleteAll(
-                    existingPics.stream().filter(p -> deleteIds.contains(p.getId())).toList()
-            );
-            picRepo.flush();
-        }
-
-        Map<Integer, Integer> desiredOrder = new HashMap<>();
-        for (var i : infos) {
-            if ((i.getStatus() == ImageStatus.MOVE || i.getStatus() == ImageStatus.ONLINE)
-                    && i.getPictureId() != null && i.getOrder() != null) {
-                int order = Math.max(1, Math.min(4, i.getOrder()));
-                desiredOrder.put(i.getPictureId(), order); // 1-based
-            }
-        }
-
-        var withOrder = remainingPics.stream()
-                .filter(p -> desiredOrder.containsKey(p.getId()))
-                .sorted(Comparator.comparingInt(p -> desiredOrder.get(p.getId()))) // 1..4
-                .toList();
-
-        var withoutOrder = remainingPics.stream()
-                .filter(p -> !desiredOrder.containsKey(p.getId()))
-                .toList();
-
-        var finalPictures = new ArrayList<SaleItemPicture>();
-        finalPictures.addAll(withOrder);
-        finalPictures.addAll(withoutOrder);
-
-        if (!remainingPics.isEmpty()) {
-            picRepo.deleteAll(remainingPics);
-            picRepo.flush();
-        }
-
-        int position = 0; // 0-based
-        for (var pic : finalPictures) {
-            var newPic = new SaleItemPicture();
-            newPic.setSaleItem(saleItemRepository.getReferenceById(itemId));
-            newPic.setFileName(pic.getFileName());
-            newPic.setFilePath(pic.getFilePath());
-            newPic.setPosition(position++);
-            picRepo.save(newPic);
-        }
-
-        for (var i : infos) {
-            if (i.getStatus() == ImageStatus.NEW) {
-                var f = i.getImageFile();
-                if (f == null || f.isEmpty())
-                    throw new IllegalArgumentException("imageFile is required for NEW");
-                if (position >= 4)
-                    throw new IllegalStateException("Maximum 4 pictures are allowed.");
-
-                var saved = storage.storeSaleItemFile(itemId, f);
-
-                int order1based = position + 1;
-                String ext = getExt(f.getOriginalFilename());
-                String newName = canonicalName(itemId, order1based, ext);
-
-                String newPath = storage.renameSaleItemFile(itemId, saved.getFileName(), newName);
-
-                var newPic = new SaleItemPicture();
-                newPic.setSaleItem(saleItemRepository.getReferenceById(itemId));
-                newPic.setFileName(newName);
-                newPic.setFilePath(newPath);
-                newPic.setPosition(position++);
-                picRepo.save(newPic);
-            }
-        }
-
-        picRepo.flush();
-
-        var normalized = picRepo.findBySaleItemIdOrderByPositionAsc(itemId);
-        for (int idx = 0; idx < normalized.size(); idx++) {
-            normalized.get(idx).setPosition(idx);
-        }
-        picRepo.flush();
-
-        for (var p : normalized) {
-            int order1based = p.getPosition() + 1;
-            String ext = getExtFromFileName(p.getFileName());
-            String desired = canonicalName(itemId, order1based, ext);
-            if (!desired.equals(p.getFileName())) {
-                String newPath = storage.renameSaleItemFile(itemId, p.getFileName(), desired);
-                p.setFileName(desired);
-                p.setFilePath(newPath);
-            }
-        }
-        picRepo.flush();
-
-        return sendV2Response(itemId);
-    }
-
-    @Transactional
-    public SaleItemV2Dto.SaleItemV2Response deleteSaleItemWithImages(Integer itemId, SaleItemV2Dto.DeletePicturesRequest req) {
-        var ids = Optional.ofNullable(req.pictureIds()).orElse(List.of());
-        if (ids.isEmpty()) return sendV2Response(itemId);
-
-        var pics = picRepo.findBySaleItemIdOrderByPositionAsc(itemId);
-        if (pics.isEmpty()) return sendV2Response(itemId);
-
-        for (var p : pics) {
-            if (ids.contains(p.getId())) {
-                storage.deleteIfExists(p.getFilePath());
-                picRepo.delete(p);
-            }
-        }
-        picRepo.flush();
-
-        var remain = picRepo.findBySaleItemIdOrderByPositionAsc(itemId);
-        for (int i = 0; i < remain.size(); i++) remain.get(i).setPosition(i);
-        picRepo.flush();
-
-        return sendV2Response(itemId);
-    }
-
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
-    public SaleItemV2Dto.SaleItemV2Response sendV2Response(Integer saleItemId) {
-        var saleItem = saleItemRepository.findByIdWithBrand(saleItemId)
-                .orElseThrow(() -> new ItemNotFoundException("SaleItem not found"));
-
-        var response = new SaleItemV2Dto.SaleItemV2Response();
-        response.setId(saleItem.getId());
-        response.setModel(saleItem.getModel());
-        response.setBrandName(saleItem.getBrand().getName());
-        response.setDescription(saleItem.getDescription());
-        response.setPrice(saleItem.getPrice());
-        response.setRamGb(saleItem.getRamGb());
-        response.setScreenSizeInch(saleItem.getScreenSizeInch());
-        response.setQuantity(saleItem.getQuantity());
-        response.setStorageGb(saleItem.getStorageGb());
-        response.setColor(saleItem.getColor());
-        var imageResponses = saleItem.getPictures().stream()
-                .sorted(Comparator.comparingInt(SaleItemPicture::getPosition))
-                .map(pic -> {
-                    var dto = new SaleItemV2Dto.SaleItemV2Response.SaleItemImageDto();
-                    dto.setFileName(pic.getFileName());
-                    dto.setImageViewOrder(pic.getPosition() + 1);
-                    return dto;
-                })
-                .toList();
-
-        response.setSaleItemImages(imageResponses);
-        response.setCreatedOn(saleItem.getCreatedOn());
-        response.setUpdatedOn(saleItem.getUpdatedOn());
-        return response;
-    }
-
-    private static String getExtFromFileName(String fileName) {
-        if (fileName == null) return "jpg";
-        int dot = fileName.lastIndexOf('.');
-        return (dot >= 0) ? fileName.substring(dot + 1).toLowerCase() : "jpg";
+        return getSaleItemDetailV2(itemId);
     }
 
     @Transactional
@@ -424,6 +301,219 @@ public class SaleItemService {
     public void ensureItemExists(Integer id) {
         saleItemRepository.findById(id)
                 .orElseThrow(() -> new ItemNotFoundException("SaleItem not found"));
+    }
+
+    private void applyReorderAndNewWithSlots(
+            Integer itemId,
+            List<SaleItemV2Dto.SaleItemImageRequest> infos
+    ) throws IOException {
+
+        var existing = picRepo.findBySaleItemIdOrderByPositionAsc(itemId);
+
+        var deleteNames = infos.stream()
+                .filter(i -> i.getStatus() == ImageStatus.DELETE)
+                .map(SaleItemV2Dto.SaleItemImageRequest::getFileName)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        List<Integer> deletedPositions = List.of();
+        if (!deleteNames.isEmpty()) {
+            var toDelete = existing.stream()
+                    .filter(p -> deleteNames.contains(p.getFileName()))
+                    .toList();
+
+            deletedPositions = toDelete.stream()
+                    .map(SaleItemPicture::getPosition)
+                    .sorted()
+                    .toList();
+
+            for (var p : toDelete) storage.deleteIfExists(p.getFilePath());
+            if (!toDelete.isEmpty()) {
+                picRepo.deleteAll(toDelete);
+                picRepo.flush();
+            }
+        }
+
+        existing = picRepo.findBySaleItemIdOrderByPositionAsc(itemId);
+
+        Map<String, Integer> orderExisting = new HashMap<>(); // fileName -> order(1..4)
+        record NewReq(MultipartFile file, Integer order) {}
+        List<NewReq> newReqs = new ArrayList<>();
+
+        for (var info : infos) {
+            if ((info.getStatus() == ImageStatus.MOVE || info.getStatus() == ImageStatus.ONLINE)
+                    && info.getFileName() != null && info.getOrder() != null) {
+                orderExisting.put(info.getFileName(), clampOrder(info.getOrder()));
+            } else if (info.getStatus() == ImageStatus.NEW) {
+                if (info.getImageFile() == null || info.getImageFile().isEmpty())
+                    throw new IllegalArgumentException("Image file is required for NEW");
+                newReqs.add(new NewReq(info.getImageFile(),
+                        info.getOrder() == null ? null : clampOrder(info.getOrder())));
+            }
+        }
+
+        if (existing.size() + newReqs.size() > 4) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST,
+                    "Maximum 4 pictures are allowed.");
+        }
+
+        SaleItemPicture[] slots = new SaleItemPicture[4];
+        boolean[] used = new boolean[4];
+
+        var existingWithOrder = existing.stream()
+                .filter(p -> orderExisting.containsKey(p.getFileName()))
+                .sorted(Comparator.comparingInt(p -> orderExisting.get(p.getFileName())))
+                .toList();
+        for (var p : existingWithOrder) {
+            int pos = orderExisting.get(p.getFileName()) - 1;
+            pos = placeToNearestFree(pos, used);
+            slots[pos] = p; used[pos] = true;
+        }
+
+        record PendingNew(MultipartFile file, int pos) {}
+        List<PendingNew> pendingNew = new ArrayList<>();
+        var newWithOrder = newReqs.stream().filter(n -> n.order() != null).toList();
+        for (var n : newWithOrder) {
+            int pos = placeToNearestFree(n.order() - 1, used);
+            pendingNew.add(new PendingNew(n.file(), pos));
+            used[pos] = true;
+        }
+
+        var existingNoOrder = existing.stream()
+                .filter(p -> !orderExisting.containsKey(p.getFileName()))
+                .sorted(Comparator.comparingInt(SaleItemPicture::getPosition))
+                .toList();
+
+        for (var p : existingNoOrder) {
+            int pos = p.getPosition();
+            if (pos < 0 || pos > 3) continue;
+            if (!used[pos]) {
+                slots[pos] = p; used[pos] = true;
+            } else {
+                int alt = firstFree(used);
+                if (alt == -1) throw new IllegalStateException("No free slot");
+                slots[alt] = p; used[alt] = true;
+            }
+        }
+
+        var freed = new ArrayDeque<>(deletedPositions);
+        var newNoOrder = newReqs.stream().filter(n -> n.order() == null).toList();
+        for (var n : newNoOrder) {
+            Integer pos = freed.pollFirst();
+            if (pos == null) pos = firstFree(used);
+            if (pos == -1) throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST,
+                    "Maximum 4 pictures are allowed.");
+            pendingNew.add(new PendingNew(n.file(), pos));
+            used[pos] = true;
+        }
+
+        Map<Integer, Integer> idToPos = new LinkedHashMap<>();
+        for (int pos = 0; pos < 4; pos++) {
+            var slot = slots[pos];
+            if (slot != null && slot.getId() != null) {
+                idToPos.put(slot.getId(), pos);
+            }
+        }
+        if (idToPos.size() != existing.size()) {
+            throw new IllegalStateException("Reorder mismatch: existing ids not complete.");
+        }
+
+        em.flush();
+        em.clear();
+
+        em.createNativeQuery("UPDATE sale_item_pictures SET position = position + 10 WHERE saleItemId = :id")
+                .setParameter("id", itemId)
+                .setFlushMode(jakarta.persistence.FlushModeType.COMMIT)
+                .executeUpdate();
+
+        updatePicturePositionsAtomic(itemId, idToPos);
+
+        for (var n : pendingNew) {
+            var saved = storage.storeSaleItemFile(itemId, n.file());
+            var pic = new SaleItemPicture();
+            pic.setSaleItem(saleItemRepository.getReferenceById(itemId));
+            pic.setFileName(saved.getFileName());
+            pic.setFilePath(saved.getPath());
+            pic.setPosition(n.pos());
+            picRepo.save(pic);
+        }
+        picRepo.flush();
+    }
+
+    @Transactional
+    protected void updatePicturePositionsAtomic(Integer itemId, Map<Integer, Integer> idToPos) {
+        if (idToPos == null || idToPos.isEmpty()) return;
+
+        StringBuilder caseSql = new StringBuilder("UPDATE sale_item_pictures SET position = CASE pictureId ");
+        StringBuilder inList  = new StringBuilder();
+        boolean first = true;
+
+        for (var e : idToPos.entrySet()) {
+            caseSql.append(" WHEN ").append(e.getKey()).append(" THEN ").append(e.getValue());
+            if (!first) inList.append(",");
+            inList.append(e.getKey());
+            first = false;
+        }
+        caseSql.append(" END WHERE saleItemId = ").append(itemId)
+                .append(" AND pictureId IN (").append(inList).append(")");
+
+        em.createNativeQuery(caseSql.toString())
+                .setFlushMode(jakarta.persistence.FlushModeType.COMMIT)
+                .executeUpdate();
+    }
+
+    private int clampOrder(int order) { return Math.max(1, Math.min(4, order)); }
+
+    private int placeToNearestFree(int pos, boolean[] used) {
+        if (!used[pos]) return pos;
+        for (int i = 0; i < used.length; i++) {
+            if (!used[i]) return i;
+        }
+        return pos;
+    }
+
+    private int firstFree(boolean[] used) {
+        for (int i = 0; i < used.length; i++) if (!used[i]) return i;
+        return -1;
+    }
+
+    private void normalizeAndRenameFiles(Integer itemId) throws IOException {
+        var allPics = picRepo.findBySaleItemIdOrderByPositionAsc(itemId);
+
+        record Plan(SaleItemPicture pic, String from, String tmp, String to) {}
+        List<Plan> plans = new ArrayList<>();
+
+        for (var pic : allPics) {
+            int displayOrder = pic.getPosition() + 1;
+            String target = canonicalName(itemId, displayOrder, "jpg");
+            String current = pic.getFileName();
+            if (target.equals(current)) continue;
+            String tmp = current + "." + UUID.randomUUID().toString().replace("-", "") + ".swap";
+            plans.add(new Plan(pic, current, tmp, target));
+        }
+
+        if (plans.isEmpty()) return;
+        for (var p : plans) {
+            String newPath = storage.renameSaleItemFile(itemId, p.from(), p.tmp());
+            p.pic().setFileName(p.tmp());
+            p.pic().setFilePath(newPath);
+        }
+        picRepo.saveAll(allPics);
+        picRepo.flush();
+
+        for (var p : plans) {
+            String newPath = storage.renameSaleItemFile(itemId, p.tmp(), p.to());
+            p.pic().setFileName(p.to());
+            p.pic().setFilePath(newPath);
+        }
+        picRepo.saveAll(allPics);
+        picRepo.flush();
+    }
+
+    private String canonicalName(Integer itemId, int order, String extension) {
+        return itemId + "." + order + "." + extension;
     }
 
 }

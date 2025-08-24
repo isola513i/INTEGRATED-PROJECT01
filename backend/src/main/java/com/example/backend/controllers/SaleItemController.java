@@ -50,7 +50,7 @@ public class SaleItemController {
 
     @GetMapping("/v1/sale-items/{saleItemId}")
     public ResponseEntity<SaleItemDto.GetSaleItemDto> getSaleItemById(@PathVariable Integer saleItemId){
-        return ResponseEntity.ok(saleItemService.getSaleItemDto(saleItemId));
+        return ResponseEntity.ok(saleItemService.getSaleItemDetail(saleItemId));
     }
 
     @PutMapping("/v1/sale-items/{saleItemId}")
@@ -99,7 +99,7 @@ public class SaleItemController {
         }
         var pageData = saleItemService
                 .findAllSaleItemsPage(filterBrands, page, size, sortField, sortDirection, lowerPrice, upperPrice, storageSizes)
-                .map(si -> saleItemService.sendV2Response(si.getId()));
+                .map(si -> saleItemService.getSaleItemDetailV2(si.getId()));
 
         var dto = new PageDto<SaleItemV2Dto.SaleItemV2Response>();
         dto.setContent(pageData.getContent());
@@ -117,7 +117,7 @@ public class SaleItemController {
     public ResponseEntity<SaleItemV2Dto.SaleItemV2Response> getSaleItemV2ById(
             @PathVariable("saleItemId") Integer saleItemIdPath) {
 
-        var saleItemResponse = saleItemService.sendV2Response(saleItemIdPath);
+        var saleItemResponse = saleItemService.getSaleItemDetailV2(saleItemIdPath);
         return ResponseEntity.ok(saleItemResponse);
     }
 
@@ -198,14 +198,6 @@ public class SaleItemController {
     public ResponseEntity<Void> deleteSaleItemV2(@PathVariable Integer saleItemId) {
         saleItemService.deleteSaleItemAndImages(saleItemId);
         return ResponseEntity.noContent().build();
-    }
-
-    // DELETE images from a saleItem
-    @DeleteMapping("/v2/sale-items/{saleItemId}/images")
-    public ResponseEntity<SaleItemV2Dto.SaleItemV2Response> deleteImages(
-            @PathVariable Integer saleItemId,
-            @RequestBody SaleItemV2Dto.DeletePicturesRequest req) {
-        return ResponseEntity.ok(saleItemService.deleteSaleItemWithImages(saleItemId, req));
     }
 
 }

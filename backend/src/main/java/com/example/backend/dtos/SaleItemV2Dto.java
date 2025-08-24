@@ -52,16 +52,11 @@ public class SaleItemV2Dto {
     @Data
     @NoArgsConstructor
     public static class SaleItemImageRequest {
-        private Integer pictureId;
         private String fileName;
         private Integer order;
         private ImageStatus status;
         private MultipartFile imageFile;
     }
-
-    public record DeletePicturesRequest(List<Integer> pictureIds) {
-    }
-
 
 }
 

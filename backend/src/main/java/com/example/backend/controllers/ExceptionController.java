@@ -9,11 +9,13 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
 
-@RestControllerAdvice
+import java.util.Optional;
+
+@org.springframework.web.bind.annotation.RestControllerAdvice
+@org.springframework.core.annotation.Order(org.springframework.core.Ordered.HIGHEST_PRECEDENCE)
 public class ExceptionController {
     @ExceptionHandler(ItemNotFoundException.class)
     public ResponseEntity<MyErrorResponse> handleItemNotFoundException(
@@ -84,4 +86,26 @@ public class ExceptionController {
                 "Unexpected error.", req.getRequestURI());
         return ResponseEntity.status(500).body(body);
     }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<MyErrorResponse> handleIllegalState(IllegalStateException ex,
+                                                              HttpServletRequest request) {
+        var body = new MyErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.name(),
+                ex.getMessage(),
+                request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
+    }
+
+    @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+    public ResponseEntity<MyErrorResponse> handleRSE(org.springframework.web.server.ResponseStatusException ex,
+                                                     jakarta.servlet.http.HttpServletRequest req) {
+        int code = ex.getStatusCode().value();
+        var body = new MyErrorResponse(code, ex.getStatusCode().toString(),
+                Optional.ofNullable(ex.getReason()).orElse("Bad request"), req.getRequestURI());
+        return ResponseEntity.status(code).body(body);
+    }
+
+
 }
