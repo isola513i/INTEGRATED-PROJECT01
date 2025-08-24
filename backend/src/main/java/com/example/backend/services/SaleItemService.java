@@ -12,6 +12,7 @@ import com.example.backend.repositories.SaleItemPictureRepository;
 import com.example.backend.repositories.SaleItemRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -38,25 +39,18 @@ public class SaleItemService {
     private static final int MAX_IMAGES = 4;
     private static final String CANON_EXT = "jpg";
 
-    private final SaleItemRepository saleItemRepo;
-    private final BrandRepository brandRepo;
-    private final SaleItemPictureRepository pictureRepo;
-    private final FileStorage fileStorage;
+    @Autowired
+    private SaleItemRepository saleItemRepo;
+    @Autowired
+    private BrandRepository brandRepo;
+    @Autowired
+    private SaleItemPictureRepository pictureRepo;
+    @Autowired
+    private FileStorage fileStorage;
 
     @PersistenceContext
     private EntityManager em;
 
-    public SaleItemService(
-            SaleItemRepository saleItemRepo,
-            BrandRepository brandRepo,
-            SaleItemPictureRepository pictureRepo,
-            FileStorage fileStorage
-    ) {
-        this.saleItemRepo = saleItemRepo;
-        this.brandRepo = brandRepo;
-        this.pictureRepo = pictureRepo;
-        this.fileStorage = fileStorage;
-    }
 
     @Transactional(readOnly = true)
     public List<SaleItem> allSaleItems() {
@@ -121,25 +115,20 @@ public class SaleItemService {
                         sortField != null ? sortField : "createdOn")
                 .and(Sort.by(Sort.Direction.ASC, "id"));
         Pageable pageable = PageRequest.of(page, size, sort);
-       if(CollectionUtils.isEmpty(filterBrands)){
-           filterBrands = null;
-       }
-       if(CollectionUtils.isEmpty(storageSizes)){
-           storageSizes = null;
-       }
-        return saleItemRepo.findByFiltersWithBrand(filterBrands, lowerPrice, upperPrice, storageSizes,pageable);
-      
+        if(CollectionUtils.isEmpty(filterBrands)){
+            filterBrands = null;
+        }
         boolean searchNullStorage = storageSizes != null && storageSizes.contains(-1);
-      
+
         if (searchNullStorage) {
             storageSizes.remove(Integer.valueOf(-1));
         }
-      
+
         if (CollectionUtils.isEmpty(storageSizes)) {
             storageSizes = null;
         }
 
-        return saleItemRepository.findByAdvancedFilters(
+        return saleItemRepo.findByAdvancedFilters(
                 filterBrands,
                 lowerPrice,
                 upperPrice,
@@ -148,8 +137,6 @@ public class SaleItemService {
                 search,
                 pageable
         );
-
-// return saleItemRepository.findByFiltersWithBrand(filterBrands, lowerPrice, upperPrice, storageSizes,pageable);
     }
 
     @Transactional(readOnly = true)
@@ -580,7 +567,7 @@ public class SaleItemService {
     }
 
     public List<Integer> getAllStorageSizes() {
-        return saleItemRepository.findDistinctStorageSizes()
+        return saleItemRepo.findDistinctStorageSizes()
                 .stream()
                 .map(s -> s == null ? -1 : s)
                 .sorted()
