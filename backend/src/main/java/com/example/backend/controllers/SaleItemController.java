@@ -2,13 +2,11 @@ package com.example.backend.controllers;
 
 import com.example.backend.dtos.*;
 import com.example.backend.entities.SaleItem;
-import com.example.backend.exceptions.ItemNotFoundException;
 import com.example.backend.repositories.SaleItemPictureRepository;
 import com.example.backend.services.FileStorage;
 import com.example.backend.services.SaleItemService;
 import com.example.backend.utils.ListMapper;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.FileSystemResource;
 import lombok.Getter;
 import lombok.Setter;
 import org.modelmapper.ModelMapper;
@@ -16,9 +14,6 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Duration;
 import java.util.List;
 
 @RestController
@@ -153,40 +148,14 @@ public class SaleItemController {
             @PathVariable String fileName,
             @RequestHeader(value = "If-None-Match", required = false) String ifNoneMatch
     ) throws IOException {
-
-        var pic = picRepo.findBySaleItemIdAndFileName(saleItemId, fileName)
-                .orElseThrow(() -> new ItemNotFoundException("Image not found"));
-
-        Resource res = storage.loadSaleItemFile(saleItemId, fileName);
-        if (!res.exists() || !res.isReadable()) throw new ItemNotFoundException("Image file missing");
-        Path filePath = res.getFile().toPath();
-
-        if (!Files.exists(filePath) || !Files.isReadable(filePath)) {
-            throw new ItemNotFoundException("Image file missing");
+        var meta = saleItemService.loadImage(saleItemId, fileName);
+        if (ifNoneMatch != null && ifNoneMatch.equals(meta.etag())) {
+            return ResponseEntity.status(HttpStatus.NOT_MODIFIED).eTag(meta.etag()).build();
         }
-
-        var resource = new FileSystemResource(filePath);
-
-        // Content-Type
-        String contentType = Files.probeContentType(filePath);
-        if (contentType == null) contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
-
-        long size = Files.size(filePath);
-        long lastMod = Files.getLastModifiedTime(filePath).toMillis();
-        String eTag = "\"" + size + "-" + lastMod + "\"";
-
-        if (eTag.equals(ifNoneMatch)) {
-            return ResponseEntity.status(HttpStatus.NOT_MODIFIED).eTag(eTag).build();
-        }
-
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(contentType))
-                .contentLength(size)
-                .lastModified(lastMod)
-                .eTag(eTag)
-                .cacheControl(CacheControl.maxAge(Duration.ofDays(30)).cachePublic())
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileName + "\"")
-                .body(resource);
+                .contentType(meta.mediaType())
+                .eTag(meta.etag())
+                .body(meta.body());
     }
 
     // UPDATE saleItem
