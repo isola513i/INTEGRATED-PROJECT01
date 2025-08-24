@@ -34,19 +34,16 @@ export const addSaleItem = async (formData) => {
   }
 };
 
-export const updateSaleItem = async (saleItemId, saleItem) => {
+export const updateSaleItem = async (saleItemId, saleItemFormData) => {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10000);
 
   try {
     const response = await fetch(
-      `${API_BASE_URL}/v1/sale-items/${saleItemId}`,
+      `${API_BASE_URL}/v2/sale-items/${saleItemId}`,
       {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(saleItem),
+        body: saleItemFormData,
         signal: controller.signal,
       }
     );
@@ -60,7 +57,7 @@ export const updateSaleItem = async (saleItemId, saleItem) => {
 };
 
 export const deleteItemById = async (saleItemId) => {
-  const response = await fetch(`${API_BASE_URL}/v1/sale-items/${saleItemId}`, {
+  const response = await fetch(`${API_BASE_URL}/v2/sale-items/${saleItemId}`, {
     method: "DELETE",
   });
   if (!response.ok) throw new Error("Failed to delete item");

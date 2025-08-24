@@ -4,15 +4,14 @@ import { ref, reactive, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import SaleItemForm from "@/components/form/SaleItemForm.vue";
 import {
-  fetchItemById,
   addSaleItem,
   updateSaleItem,
   getItem,
 } from "@/services/saleItemService";
-import { fetchBrands ,} from "@/services/brandService";
+import { fetchBrands } from "@/services/brandService";
 import { useFlashStore } from "@/store/useFlashStore";
 import { useSaleItemValidator } from "@/validators/useValidation";
-import { previewBinaryFile } from "@/services/previewBinary.js";
+import {previewBinaryFile} from "@/services/previewBinary.js";
 
 const route = useRoute();
 const router = useRouter();
@@ -24,11 +23,10 @@ const isUpdate = ref(false);
 const errorMessage = ref("");
 const brands = ref([]);
 const originalItemData = ref(null);
-const imageFiles = ref(null)
+const imageFiles = ref(null);
 const retriveImageFiles = ref(null);
-const isAlreadyFetchData = ref(false)
-const isImageChange = ref(false)
-
+const isAlreadyFetchData = ref(false);
+const isImageChange = ref(false);
 
 const form = reactive({
   brandId: "",
@@ -70,7 +68,9 @@ const isDirty = computed(() => {
 
 const isReadyToSubmit = computed(() => {
   return (
-    isFormValid.value && ( isDirty.value) && (!isEditMode.value || isUpdate.value ||isImageChange.value)
+    isFormValid.value &&
+    isDirty.value &&
+    (!isEditMode.value || isUpdate.value || isImageChange.value)
   );
 });
 
@@ -92,21 +92,26 @@ onMounted(async () => {
         const res = await fetch(
           `${API_BASE_URL}/v2/sale-items/${route.params.id}/images/${image.fileName}`
         );
-
         if (!res.ok) return null;
-
-        const blob = await res.blob();
-        const file = previewBinaryFile(blob)
-        return {fileName:image.fileName , file , imageViewOrder:image.imageViewOrder , status:"ONLINE"}
+        const blob = await res.blob(); // convert response to Blob
+        const file = new File([blob], image.fileName, { type: blob.type }); // create a File object
+        const url = previewBinaryFile(file)
+        return {
+          fileName: image.fileName,
+          file,
+          url,
+          imageViewOrder: image.imageViewOrder,
+          status: "ONLINE",
+        };
       });
       // Wait for all images
       const results = await Promise.all(imagePromises);
-      retriveImageFiles.value = results
-      imageFiles.value = [...retriveImageFiles.value]
-      isAlreadyFetchData.value = true // use for delayed to load form component 
-      console.log(retriveImageFiles.value)
+      retriveImageFiles.value = results;
+      imageFiles.value = [...retriveImageFiles.value];
+      isAlreadyFetchData.value = true; // use for delayed to load form component
+      console.log(retriveImageFiles.value);
     } else {
-      isAlreadyFetchData.value = true
+      isAlreadyFetchData.value = true;
       Object.assign(initialForm, JSON.parse(JSON.stringify(form)));
     }
 
@@ -131,7 +136,7 @@ const watchFields = () => {
   });
 };
 
- //this
+//this
 const checkFormUpdate = () => {
   isUpdate.value =
     JSON.stringify(form) !== JSON.stringify(originalItemData.value);
@@ -172,10 +177,15 @@ const handleSubmit = async (imageFiles) => {
       (b) => Number(b.brandId) === brandId
     );
     if (!selectedBrand) throw new Error("Selected brand not found");
-
+    console.log(form);
     formData.append("saleItem.model", form.model.trim());
     formData.append("saleItem.brand.id", brandId); // required
     formData.append("saleItem.description", form.description.trim());
+    formData.append("saleItem.ramGb", String(form.ramGb || null));
+    formData.append(
+      "saleItem.screenSizeInch",
+      String(form.screenSizeInch || null)
+    );
     formData.append("saleItem.price", String(form.price || 0));
     formData.append("saleItem.quantity", String(form.quantity || 1));
     formData.append("saleItem.storageGb", String(form.storageGb || 0));
@@ -183,12 +193,16 @@ const handleSubmit = async (imageFiles) => {
 
     // === Image files ===
     imageFiles.forEach((file, index) => {
+      formData.append(`imageInfos[${index}].fileName`, file.fileName);
       formData.append(`imageInfos[${index}].status`, file.status);
-      formData.append(`imageInfos[${index}].order`, String(index + 1)); // backend expects 1,2,...
+      formData.append(
+        `imageInfos[${index}].order`,
+        file.status !== "DELETE" ? String(index + 1) : -1
+      ); // backend expects 1,2,...
       formData.append(`imageInfos[${index}].imageFile`, file.file); // file = File/Blob
     });
     if (isEditMode.value) {
-      await updateSaleItem(route.params.id, payload);
+      await updateSaleItem(route.params.id, formData);
       flash.setMessage(
         "✅ The sale item has been successfully updated.",
         "m-4 p-4 bg-green-100 text-green-800 shadow itbms-message"
@@ -233,12 +247,20 @@ const resetForm = () => {
 };
 
 const checkImageUpdate = (images) => {
-  const updatedImages = images.map(image => {
-    return {fileName:image.fileName , file: image.file , imageViewOrder:image.imageViewOrder +1 , status:image.status}
-  })
-  isImageChange.value = !(JSON.stringify(updatedImages) === JSON.stringify(retriveImageFiles.value))
-  console.log("is image change : " + isImageChange.value)
-}
+  const updatedImages = images.map((image) => {
+    return {
+      fileName: image.fileName,
+      file: image.file,
+      url:image.url,
+      imageViewOrder: image.imageViewOrder + 1,
+      status: image.status,
+    };
+  });
+  isImageChange.value = !(
+    JSON.stringify(updatedImages) === JSON.stringify(retriveImageFiles.value)
+  );
+  console.log("is image change : " + isImageChange.value);
+};
 </script>
 
 <template>
@@ -259,7 +281,7 @@ const checkImageUpdate = (images) => {
     <div v-if="errorMessage" class="text-red-600 mb-4">{{ errorMessage }}</div>
 
     <SaleItemForm
-      v-if="isAlreadyFetchData" 
+      v-if="isAlreadyFetchData"
       :form="form"
       :brands="sortedBrands"
       :isSubmitting="isSubmitting"

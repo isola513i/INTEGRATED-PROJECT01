@@ -38,9 +38,6 @@ public class SaleItemV2Dto {
         private Instant createdOn;
         private Instant updatedOn;
 
-        public void setScreenSizeInch(BigDecimal screenSizeInch) {
-        }
-
         @Data
         @NoArgsConstructor
         public static class SaleItemImageDto {

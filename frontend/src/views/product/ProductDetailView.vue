@@ -54,7 +54,7 @@ onMounted(async () => {
   try {
     const data = await getItem(`v2/sale-items/${route.params.id}`);
     if (!data) throw new Error("Not found");
-
+    console.log(data)
     product.value = data;
 
     // Load images
@@ -65,8 +65,7 @@ onMounted(async () => {
 
       if (!res.ok) return null;
 
-      const blob = await res.blob();
-      return URL.createObjectURL(blob); // browser-safe URL
+      return res.url
     });
 
     // Wait for all images

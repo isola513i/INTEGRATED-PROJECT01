@@ -55,7 +55,7 @@ if (props.retriveImageFiles) imageFiles.value = props.retriveImageFiles;
 imageFiles.value = imageFiles.value.map((image, index) => {
   return {
     fileName: image.fileName,
-    url: image.file,
+    url: image.url,
     imageViewOrder: index,
     file: image.file,
     status: "ONLINE",
@@ -206,6 +206,7 @@ const handleDeleteImage = (index) => {
           v-for="(image, index) in imageFiles"
           :key="index"
           class="w-20 h-20 bg-gray-50 border-2 border-gray-200 p-0.5 relative"
+          :class="index === selectedPreviewImage ? 'border-4 border-red-400' : '' "
         >
           <img
             :src="image.status !== 'DELETE' ? image.url : ''"
