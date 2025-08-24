@@ -2,13 +2,11 @@ package com.example.backend.controllers;
 
 import com.example.backend.dtos.*;
 import com.example.backend.entities.SaleItem;
-import com.example.backend.exceptions.ItemNotFoundException;
 import com.example.backend.repositories.SaleItemPictureRepository;
 import com.example.backend.services.FileStorage;
 import com.example.backend.services.SaleItemService;
 import com.example.backend.utils.ListMapper;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.FileSystemResource;
 import lombok.Getter;
 import lombok.Setter;
 import org.modelmapper.ModelMapper;
@@ -16,9 +14,6 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Duration;
 import java.util.List;
 
 @RestController
