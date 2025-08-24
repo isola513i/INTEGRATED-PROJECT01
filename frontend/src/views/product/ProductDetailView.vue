@@ -15,31 +15,6 @@ const successMessage = ref("");
 const successMessageStyle = ref("");
 const flash = useFlashStore();
 
-// onMounted(async () => {
-//   if (route.query.successMessage) {
-//     successMessage.value = String(route.query.successMessage);
-//     successMessageStyle.value = String(route.query.successMessageStyle);
-//     setTimeout(() => {
-//       successMessage.value = "";
-//       successMessageStyle.value = "";
-//     }, 4000);
-//     router.replace({ query: {} });
-//   }
-//   try {
-//     const data = await getItem(`v2/sale-items/${route.params.id}`)
-//   //const fetchImage = await getItem(`v2/sale-items/${route.params.id}/images`)
-//     if (!data) throw new Error("Not found");
-//     product.value = data;
-//     product.value.saleItemImages.forEach(image => {
-//       const pic = getItem(`v2/sale-items/${route.params.id}/images/${image.fileName}`)
-//       if(pic) images.value.push(pic)
-//     });
-//     console.log(images.value)
-//   } catch {
-//     // window.alert("The requested sale item does not exist.");
-//     router.push("/sale-items");
-//   }
-// });
 onMounted(async () => {
   if (route.query.successMessage) {
     successMessage.value = String(route.query.successMessage);
@@ -54,7 +29,6 @@ onMounted(async () => {
   try {
     const data = await getItem(`v2/sale-items/${route.params.id}`);
     if (!data) throw new Error("Not found");
-    console.log(data)
     product.value = data;
 
     // Load images
@@ -74,7 +48,6 @@ onMounted(async () => {
     // Filter out nulls and assign to images
     images.value = results.filter(Boolean);
 
-    //console.log(images.value); // contains blob URLs you can bind to <img>
   } catch(err) {
     console.log("error :" , err)
     router.push("/sale-items");

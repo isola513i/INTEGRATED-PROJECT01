@@ -125,7 +125,6 @@ watch(
           @update:price="handlePriceFilterChange"
           @update:storage="handleStorageFilterChange"
           @update:pageSize="handlePageSizeChange"
-          @update:search="handleSearchChange"
         />
       </div>
 
