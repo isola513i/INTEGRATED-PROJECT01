@@ -1,29 +1,21 @@
 <script setup>
 import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { useSearchStore } from "@/store/useSearchStore";
 
 const isOpen = ref(false);
-const searchQuery = ref("");
-const router = useRouter();
-const searchInput = ref(null);
+const searchStore = useSearchStore();
+const searchQuery = ref(searchStore.search); // sync กับ store
+
 const handleSearch = () => {
   const trimmed = searchQuery.value.trim();
-  if (!trimmed) {
-    // ถ้าเป็นค่าว่าง → ล้างค่า search และ reload
-    router.replace({ path: "/sale-items" }); // รีหน้าแต่ไม่เพิ่ม history
-    sessionStorage.removeItem("search");
-    return;
-  }
-
-  // ถ้ามีข้อความ → search ปกติ
-  router.push({ path: "/sale-items", query: { q: trimmed } });
+  searchStore.setSearch(trimmed); // อัพเดตค่าใน store
   isOpen.value = false;
 };
 
-// สำหรับปุ่ม ✖
+// ปุ่ม clear
 const clearSearch = () => {
   searchQuery.value = "";
-  handleSearch(); // ใช้ฟังก์ชันเดียวกัน → reload list
+  searchStore.setSearch("");
 };
 </script>
 

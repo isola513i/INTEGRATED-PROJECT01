@@ -97,13 +97,14 @@ public class SaleItemController {
             @RequestParam(defaultValue = "asc") String sortDirection,
             @RequestParam(required = false) Double lowerPrice,
             @RequestParam(required = false) Double upperPrice,
-            @RequestParam(required = false) List<Integer> storageSizes
+            @RequestParam(required = false) List<Integer> storageSizes,
+            @RequestParam(required = false) String search
     ) {
         if (lowerPrice != null && upperPrice != null && lowerPrice > upperPrice) {
             double t = lowerPrice; lowerPrice = upperPrice; upperPrice = t;
         }
         var pageData = saleItemService
-                .findAllSaleItemsPage(filterBrands, page, size, sortField, sortDirection, lowerPrice, upperPrice, storageSizes)
+                .findAllSaleItemsPage(filterBrands, page, size, sortField, sortDirection, lowerPrice, upperPrice, storageSizes,search)
                 .map(si -> saleItemService.getSaleItemDetailV2(si.getId()));
 
         var dto = new PageDto<SaleItemV2Dto.SaleItemV2Response>();
