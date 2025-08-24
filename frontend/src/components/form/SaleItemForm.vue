@@ -105,6 +105,7 @@ watch(
       }, 3000);
       imageFiles.value.splice(imageFiles.value.length - 1);
     }
+    selectedPreviewImage.value = imageFiles.value.findIndex(image => image.status !== 'DELETE')
   },
   { deep: true }
 );
@@ -155,17 +156,22 @@ const moveImageDown = (index) => {
 };
 
 const handleDeleteImage = (index) => {
-  if (props.retriveImageFiles) {
-    deletedImages.value.push({
-      fileName: imageFiles.value[index].fileName,
-      file: imageFiles.value[index].file,
-      status: "DELETE",
-    });
-    imageDeletedOrder.value = index;
-  }
-  imageFiles.value.splice(index, 1);
-  
+  imageFiles.value[index] = {
+    fileName: imageFiles.value[index].fileName,
+    file: imageFiles.value[index].file,
+    status: "DELETE",
+  };
 };
+const handleSubmit = () => {
+  const deletedImages = []
+  imageFiles.value.forEach((image, index)  => {
+    if(image.status === 'DELETE'){
+      deletedImages.push(image)
+      imageFiles.value.splice(index , 1)
+    }
+  });
+  emit('submit', [...imageFiles.value , ...deletedImages])
+}
 </script>
 
 <template>
@@ -183,7 +189,7 @@ const handleDeleteImage = (index) => {
     icon="⚠️"
   />
   <form
-    @submit.prevent="$emit('submit', [...imageFiles, ...deletedImages])"
+    @submit.prevent="handleSubmit"
     class="grid gap-6 md:grid-cols-12 md:gap-8 bg-white p-4 md:p-10 rounded-xl shadow-lg"
   >
     <!-- LEFT: Picture Upload Area -->
@@ -205,7 +211,9 @@ const handleDeleteImage = (index) => {
           v-for="(image, index) in imageFiles"
           :key="index"
           class="w-20 h-20 bg-gray-50 border-2 border-gray-200 p-0.5 relative"
-          :class="index === selectedPreviewImage ? 'border-4 border-red-400' : '' "
+          :class="
+            index === selectedPreviewImage ? 'border-4 border-red-400' : ''
+          "
         >
           <img
             :src="image.status !== 'DELETE' ? image.url : ''"
@@ -244,8 +252,9 @@ const handleDeleteImage = (index) => {
         </div>
         <div v-for="(image, index) in imageFiles" :key="index" class="flex">
           <p
-            v-show="image.status !== 'DELETE'"
+           
             class="bg-blue-200 px-1 rounded-md text-gray-500 mb-2"
+            :class="image.status === 'DELETE' ? 'line-through text-red-400 bg-white' : ''"
           >
             {{ image.fileName }}
           </p>

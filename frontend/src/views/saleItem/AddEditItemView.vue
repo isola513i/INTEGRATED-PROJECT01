@@ -87,7 +87,6 @@ onMounted(async () => {
     if (isEditMode.value) {
       const data = await getItem(`v2/sale-items/${route.params.id}`);
       populateForm(data);
-      // originalItemData.value = JSON.parse(JSON.stringify(form));
       const imagePromises = data.saleItemImages.map(async (image) => {
         const res = await fetch(
           `${API_BASE_URL}/v2/sale-items/${route.params.id}/images/${image.fileName}`
