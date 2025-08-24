@@ -1,5 +1,8 @@
 <script setup>
+import { ref, watch } from "vue";
+import { previewBinaryFile } from "../../services/previewBinary.js";
 import Alert from "../actions/Alert.vue";
+
 const props = defineProps({
   updatePage: {
     type: Boolean,
@@ -17,11 +20,19 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["update:form", "submit", "cancel", "blur"]);
+const emit = defineEmits([
+  "update:form",
+  "submit",
+  "cancel",
+  "blur",
+  "updateImage:images",
+]);
 
 const updateField = (field, value) => {
   emit("update:form", { ...props.form, [field]: value });
 };
+
+// const updatedImage = ()
 
 const trimField = (field, value) => {
   emit("update:form", { ...props.form, [field]: value.trim() });
@@ -33,18 +44,22 @@ const focusNext = (nextIndex) => {
   if (nextInputField) nextInputField.focus();
 };
 
-import { ref, watch } from "vue";
-import { previewBinaryFile } from "../../services/previewBinary.js";
-
 const imageFiles = ref([]);
 const selectedPreviewImage = ref(0);
 const isUploadImageError = ref(false);
 const isFileSizeOver = ref(false);
+const imageDeletedOrder = ref(-1);
+const deletedImages = ref([]);
 
 if (props.retriveImageFiles) imageFiles.value = props.retriveImageFiles;
-console.log(props.retriveImageFiles);
-imageFiles.value = imageFiles.value.map((image) => {
-  return { fileName: image.fileName, url: image.file, file: image.file };
+imageFiles.value = imageFiles.value.map((image, index) => {
+  return {
+    fileName: image.fileName,
+    url: image.file,
+    imageViewOrder: index,
+    file: image.file,
+    status: "ONLINE",
+  };
 });
 
 const chooseBinaryFiles = (event) => {
@@ -55,12 +70,18 @@ const chooseBinaryFiles = (event) => {
       file.name.toLowerCase().endsWith(".png")
     ) {
       if (file.size <= 2 * 1024 * 1024) {
-        imageFiles.value.push({
+        const image = {
           fileName: file.name,
           url: previewBinaryFile(file),
           file,
           status: "NEW",
-        });
+        };
+        if (imageDeletedOrder.value !== -1) {
+          imageFiles.value.splice(imageDeletedOrder.value, 0, image); // insert to order that just have been deleted.
+          imageDeletedOrder.value = -1;
+        } else {
+          imageFiles.value.push(image);
+        }
       } else {
         isFileSizeOver.value = true;
         setTimeout(() => {
@@ -76,48 +97,75 @@ const chooseBinaryFiles = (event) => {
 watch(
   imageFiles,
   (newVal) => {
-    if (newVal.length > 4) {
+    const undeleteImage = newVal.filter((image) => image.status !== "DELETE");
+    console.log(undeleteImage);
+    if (undeleteImage.length > 4) {
       isUploadImageError.value = true;
       setTimeout(() => {
         isUploadImageError.value = false;
       }, 3000);
-
-      imageFiles.value.splice(4);
+      imageFiles.value.splice(imageFiles.value.length - 1);
     }
   },
   { deep: true }
 );
 
-// select image to show a big picture
+// trigger parent element when have somthing change in imageFiles (such as delete , insert , edit order).
+watch(
+  imageFiles,
+  (newVal) => {
+    emit("updateImage:images", newVal);
+  },
+  { deep: true, immediate: true }
+);
+
+// select image to show as big picture
 const choosePreview = (index) => {
   selectedPreviewImage.value = index;
 };
-const moveImage = (index, action) => {
-  const originalIndex = index;
-  if (action === "up") {
-    const image = imageFiles.value.splice(index, 1)[0]; // move image up
-    imageFiles.value.splice(index - 1, 0, image);
-    if (props.retriveImageFiles) {
-      imageFiles.value[index - 1].status = "MOVE";
-      if(index-1 === originalIndex) {imageFiles.value[index - 1].status = "ONLINE"}
-    }
-    
-  }else{
-    const image = imageFiles.value.splice(index, 1)[0]; // move image down
-    imageFiles.value.splice(index + 1, 0, image);
-    if (props.retriveImageFiles) {
-      imageFiles.value[index + 1].status = "MOVE"
-      if(index + 1 === originalIndex){imageFiles.value[index + 1].status = "ONLINE"}
-    }
-    
-  }
-  console.log(imageFiles.value)
+
+const editStatus = () => {
+  imageFiles.value.map((image, index) => {
+    if (
+      image?.imageViewOrder !== index &&
+      image.status !== "NEW" &&
+      image.status !== "DELETE"
+    )
+      image.status = "MOVE";
+    if (
+      image?.imageViewOrder == index &&
+      image.status !== "ONLINE" &&
+      image.status !== "DELETE"
+    )
+      image.status = "ONLINE";
+  });
+  if (imageDeletedOrder.value !== -1) {
+    imageDeletedOrder.value = -1;
+  } // if deleted image but edit image order before insert new image , new image will store as last element in array.
 };
 
+const moveImageUp = (index) => {
+  const image = imageFiles.value.splice(index, 1)[0]; // move image up
+  imageFiles.value.splice(index - 1, 0, image);
+  editStatus();
+};
+const moveImageDown = (index) => {
+  const image = imageFiles.value.splice(index, 1)[0]; // move image down
+  imageFiles.value.splice(index + 1, 0, image);
+  editStatus();
+};
 
 const handleDeleteImage = (index) => {
-  imageFiles.value[index].status = "DELETE";
-  console.log(imageFiles.value);
+  if (props.retriveImageFiles) {
+    deletedImages.value.push({
+      fileName: imageFiles.value[index].fileName,
+      file: imageFiles.value[index].file,
+      status: "DELETE",
+    });
+    imageDeletedOrder.value = index;
+  }
+  imageFiles.value.splice(index, 1);
+  
 };
 </script>
 
@@ -136,7 +184,7 @@ const handleDeleteImage = (index) => {
     icon="⚠️"
   />
   <form
-    @submit.prevent="$emit('submit', imageFiles)"
+    @submit.prevent="$emit('submit', [...imageFiles, ...deletedImages])"
     class="grid gap-6 md:grid-cols-12 md:gap-8 bg-white p-4 md:p-10 rounded-xl shadow-lg"
   >
     <!-- LEFT: Picture Upload Area -->
@@ -154,12 +202,13 @@ const handleDeleteImage = (index) => {
 
       <div class="grid grid-cols-4 gap-2">
         <div
+          v-show="image.status !== 'DELETE'"
           v-for="(image, index) in imageFiles"
           :key="index"
           class="w-20 h-20 bg-gray-50 border-2 border-gray-200 p-0.5 relative"
         >
           <img
-            :src="image.status != 'DELETE' ? image.url : ''"
+            :src="image.status !== 'DELETE' ? image.url : ''"
             class="w-full h-full object-cover"
             :class="`itbms-picture-file${index + 1}`"
             @click="choosePreview(index)"
@@ -185,8 +234,19 @@ const handleDeleteImage = (index) => {
         </label>
       </div>
       <div class="mt-5 w-full">
+        <div
+          v-if="deletedImages.length > 0"
+          v-for="deletedImage in deletedImages"
+        >
+          <p class="px-1 rounded-md mb-2 line-through text-red-400">
+            {{ deletedImage.fileName }}
+          </p>
+        </div>
         <div v-for="(image, index) in imageFiles" :key="index" class="flex">
-          <p class="bg-blue-200 px-1 rounded-md text-gray-500 mb-2" :class="image.status === 'DELETE' ?'line-through text-red-400':'' "  >
+          <p
+            v-show="image.status !== 'DELETE'"
+            class="bg-blue-200 px-1 rounded-md text-gray-500 mb-2"
+          >
             {{ image.fileName }}
           </p>
           <div>
@@ -201,18 +261,20 @@ const handleDeleteImage = (index) => {
           </div>
           <div class="flex flex-col">
             <button
+              v-show="image.status !== 'DELETE'"
               type="button"
               :disabled="index == 0"
-              @click="moveImage(index,'up' )"
+              @click="moveImageUp(index)"
               :class="`itbms-picture-file${index + 1}-up`"
               class="disabled:opacity-50 disabled:cursor-not-allowed"
             >
               ▲
             </button>
             <button
+              v-show="image.status !== 'DELETE'"
               type="button"
               :disabled="index == imageFiles.length - 1"
-              @click="moveImage(index , 'down')"
+              @click="moveImageDown(index)"
               :class="`itbms-picture-file${index + 1}-down`"
               class="disabled:opacity-50 disabled:cursor-not-allowed"
             >

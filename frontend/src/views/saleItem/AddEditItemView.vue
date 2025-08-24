@@ -27,6 +27,7 @@ const originalItemData = ref(null);
 const imageFiles = ref(null)
 const retriveImageFiles = ref(null);
 const isAlreadyFetchData = ref(false)
+const isImageChange = ref(false)
 
 
 const form = reactive({
@@ -69,7 +70,7 @@ const isDirty = computed(() => {
 
 const isReadyToSubmit = computed(() => {
   return (
-    isFormValid.value && isDirty.value && (!isEditMode.value || isUpdate.value)
+    isFormValid.value && ( isDirty.value) && (!isEditMode.value || isUpdate.value ||isImageChange.value)
   );
 });
 
@@ -86,7 +87,7 @@ onMounted(async () => {
     if (isEditMode.value) {
       const data = await getItem(`v2/sale-items/${route.params.id}`);
       populateForm(data);
-      originalItemData.value = JSON.parse(JSON.stringify(form));
+      // originalItemData.value = JSON.parse(JSON.stringify(form));
       const imagePromises = data.saleItemImages.map(async (image) => {
         const res = await fetch(
           `${API_BASE_URL}/v2/sale-items/${route.params.id}/images/${image.fileName}`
@@ -96,18 +97,14 @@ onMounted(async () => {
 
         const blob = await res.blob();
         const file = previewBinaryFile(blob)
-        return {fileName:image.fileName , file , imageViewOrder:image.imageViewOrder}
+        return {fileName:image.fileName , file , imageViewOrder:image.imageViewOrder , status:"ONLINE"}
       });
       // Wait for all images
       const results = await Promise.all(imagePromises);
       retriveImageFiles.value = results
       imageFiles.value = [...retriveImageFiles.value]
-      isAlreadyFetchData.value = true
-      // // Filter out nulls and assign to images
-      // retriveImageFiles.value = results.filter(Boolean);
+      isAlreadyFetchData.value = true // use for delayed to load form component 
       console.log(retriveImageFiles.value)
-      console.log(imageFiles.value)
-      
     } else {
       isAlreadyFetchData.value = true
       Object.assign(initialForm, JSON.parse(JSON.stringify(form)));
@@ -134,6 +131,7 @@ const watchFields = () => {
   });
 };
 
+ //this
 const checkFormUpdate = () => {
   isUpdate.value =
     JSON.stringify(form) !== JSON.stringify(originalItemData.value);
@@ -189,7 +187,6 @@ const handleSubmit = async (imageFiles) => {
       formData.append(`imageInfos[${index}].order`, String(index + 1)); // backend expects 1,2,...
       formData.append(`imageInfos[${index}].imageFile`, file.file); // file = File/Blob
     });
-    
     if (isEditMode.value) {
       await updateSaleItem(route.params.id, payload);
       flash.setMessage(
@@ -234,6 +231,14 @@ const resetForm = () => {
   Object.assign(form, initialForm);
   errorMessage.value = "";
 };
+
+const checkImageUpdate = (images) => {
+  const updatedImages = images.map(image => {
+    return {fileName:image.fileName , file: image.file , imageViewOrder:image.imageViewOrder +1 , status:image.status}
+  })
+  isImageChange.value = !(JSON.stringify(updatedImages) === JSON.stringify(retriveImageFiles.value))
+  console.log("is image change : " + isImageChange.value)
+}
 </script>
 
 <template>
@@ -254,7 +259,7 @@ const resetForm = () => {
     <div v-if="errorMessage" class="text-red-600 mb-4">{{ errorMessage }}</div>
 
     <SaleItemForm
-      v-if="isAlreadyFetchData"
+      v-if="isAlreadyFetchData" 
       :form="form"
       :brands="sortedBrands"
       :isSubmitting="isSubmitting"
@@ -266,6 +271,7 @@ const resetForm = () => {
       @submit="handleSubmit"
       @cancel="handleCancel"
       @blur="validateField"
+      @update-image:images="checkImageUpdate"
     />
   </div>
 </template>
