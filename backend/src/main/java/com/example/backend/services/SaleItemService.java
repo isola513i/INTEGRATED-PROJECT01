@@ -103,7 +103,9 @@ public class SaleItemService {
             String sortDirection,
             Double lowerPrice,
             Double upperPrice,
-            List<Integer> storageSizes) {
+            List<Integer> storageSizes,
+            String search
+    ) {
 
         Sort sort = Sort.by(Sort.Direction.fromString(sortDirection),
                         sortField != null ? sortField : "createdOn")
@@ -128,6 +130,7 @@ public class SaleItemService {
                 upperPrice,
                 storageSizes,
                 searchNullStorage,
+                search,
                 pageable
         );
 
@@ -514,6 +517,14 @@ public class SaleItemService {
 
     private String canonicalName(Integer itemId, int order, String extension) {
         return itemId + "." + order + "." + extension;
+    }
+
+    public List<Integer> getAllStorageSizes() {
+        return saleItemRepository.findDistinctStorageSizes()
+                .stream()
+                .map(s -> s == null ? -1 : s)
+                .sorted()
+                .toList();
     }
 
 }
