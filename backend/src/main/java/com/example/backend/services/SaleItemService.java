@@ -48,6 +48,9 @@ public class SaleItemService {
     @Autowired
     private FileStorage fileStorage;
 
+
+
+
     @PersistenceContext
     private EntityManager em;
 

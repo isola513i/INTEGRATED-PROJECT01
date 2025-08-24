@@ -1,15 +1,17 @@
 <script setup>
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 import { ref, reactive, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import SaleItemForm from "@/components/form/SaleItemForm.vue";
 import {
-  fetchItemById,
   addSaleItem,
   updateSaleItem,
+  getItem,
 } from "@/services/saleItemService";
 import { fetchBrands } from "@/services/brandService";
 import { useFlashStore } from "@/store/useFlashStore";
 import { useSaleItemValidator } from "@/validators/useValidation";
+import {previewBinaryFile} from "@/services/previewBinary.js";
 
 const route = useRoute();
 const router = useRouter();
@@ -21,6 +23,10 @@ const isUpdate = ref(false);
 const errorMessage = ref("");
 const brands = ref([]);
 const originalItemData = ref(null);
+const imageFiles = ref(null);
+const retriveImageFiles = ref(null);
+const isAlreadyFetchData = ref(false);
+const isImageChange = ref(false);
 
 const form = reactive({
   brandId: "",
@@ -62,7 +68,9 @@ const isDirty = computed(() => {
 
 const isReadyToSubmit = computed(() => {
   return (
-    isFormValid.value && isDirty.value && (!isEditMode.value || isUpdate.value)
+    isFormValid.value &&
+    isDirty.value &&
+    (!isEditMode.value || isUpdate.value || isImageChange.value)
   );
 });
 
@@ -77,10 +85,32 @@ onMounted(async () => {
     brands.value = await fetchBrands();
 
     if (isEditMode.value) {
-      const data = await fetchItemById(route.params.id);
+      const data = await getItem(`v2/sale-items/${route.params.id}`);
       populateForm(data);
-      originalItemData.value = JSON.parse(JSON.stringify(form));
+      // originalItemData.value = JSON.parse(JSON.stringify(form));
+      const imagePromises = data.saleItemImages.map(async (image) => {
+        const res = await fetch(
+          `${API_BASE_URL}/v2/sale-items/${route.params.id}/images/${image.fileName}`
+        );
+        if (!res.ok) return null;
+        const blob = await res.blob(); // convert response to Blob
+        const file = new File([blob], image.fileName, { type: blob.type }); // create a File object
+        const url = previewBinaryFile(file)
+        return {
+          fileName: image.fileName,
+          file,
+          url,
+          imageViewOrder: image.imageViewOrder,
+          status: "ONLINE",
+        };
+      });
+      // Wait for all images
+      const results = await Promise.all(imagePromises);
+      retriveImageFiles.value = results;
+      imageFiles.value = [...retriveImageFiles.value];
+      isAlreadyFetchData.value = true; // use for delayed to load form component
     } else {
+      isAlreadyFetchData.value = true;
       Object.assign(initialForm, JSON.parse(JSON.stringify(form)));
     }
 
@@ -105,6 +135,7 @@ const watchFields = () => {
   });
 };
 
+//this
 const checkFormUpdate = () => {
   isUpdate.value =
     JSON.stringify(form) !== JSON.stringify(originalItemData.value);
@@ -145,51 +176,14 @@ const handleSubmit = async (imageFiles) => {
       (b) => Number(b.brandId) === brandId
     );
     if (!selectedBrand) throw new Error("Selected brand not found");
-
-    /*
-    // const payload = {
-    //   model: form.model.trim(),
-    //   brand: { id: brandId, name: selectedBrand.name },
-    //   description: form.description.trim(),
-    //   price: Number(form.price),
-    //   ramGb: form.ramGb !== null ? Number(form.ramGb) : null,
-    //   screenSizeInch:
-    //     form.screenSizeInch !== null ? Number(form.screenSizeInch) : null,
-    //   quantity: Number(form.quantity),
-    //   storageGb: form.storageGb !== null ? Number(form.storageGb) : null,
-    //   color: form.color?.trim() || null,
-    // };
-    formData.append('model',form.model.trim())
-    formData.append('brand' , JSON.stringify({ id: brandId, name: selectedBrand.name }))
-    formData.append('description', String(form.description.trim()))
-    formData.append('price', String(form.price))
-    formData.append('ramGb', String(form.ramGb !== null ? Number(form.ramGb) : null))
-    formData.append('screenSizeInch', String(form.screenSizeInch !== null ? Number(form.screenSizeInch) : null))
-    formData.append('quantity', String(form.quantity))
-    formData.append('storageGb', String(form.storageGb !== null ? Number(form.storageGb) : null))
-    formData.append('color', String(form.color?.trim() || null))
-
-    imageFiles.forEach((image) => {
-      formData.append('files' , image)
-    });
-    
-    console.log(formData)
-    */
-    // const saleItem = {
-    //   model: form.model.trim(),
-    //   brand: { id: brandId, name: selectedBrand.name },
-    //   description: form.description.trim(),
-    //   price: form.price ? Number(form.price) : null,
-    //   ramGb: form.ramGb ? Number(form.ramGb) : null,
-    //   screenSizeInch: form.screenSizeInch ? Number(form.screenSizeInch) : null,
-    //   quantity: form.quantity ? Number(form.quantity) : null,
-    //   storageGb: form.storageGb ? Number(form.storageGb) : null,
-    //   color: form.color?.trim() || null,
-    // };
-
     formData.append("saleItem.model", form.model.trim());
     formData.append("saleItem.brand.id", brandId); // required
     formData.append("saleItem.description", form.description.trim());
+    formData.append("saleItem.ramGb", String(form.ramGb || null));
+    formData.append(
+      "saleItem.screenSizeInch",
+      String(form.screenSizeInch || null)
+    );
     formData.append("saleItem.price", String(form.price || 0));
     formData.append("saleItem.quantity", String(form.quantity || 1));
     formData.append("saleItem.storageGb", String(form.storageGb || 0));
@@ -197,15 +191,16 @@ const handleSubmit = async (imageFiles) => {
 
     // === Image files ===
     imageFiles.forEach((file, index) => {
-      formData.append(`imageInfos[${index}].status`, "NEW");
-      formData.append(`imageInfos[${index}].order`, String(index + 1)); // backend expects 1,2,...
+      formData.append(`imageInfos[${index}].fileName`, file.fileName);
+      formData.append(`imageInfos[${index}].status`, file.status);
+      formData.append(
+        `imageInfos[${index}].order`,
+        file.status !== "DELETE" ? String(index + 1) : -1
+      ); // backend expects 1,2,...
       formData.append(`imageInfos[${index}].imageFile`, file.file); // file = File/Blob
     });
-    console.log(imageFiles)
-    console.log(formData);
-
     if (isEditMode.value) {
-      await updateSaleItem(route.params.id, payload);
+      await updateSaleItem(route.params.id, formData);
       flash.setMessage(
         "✅ The sale item has been successfully updated.",
         "m-4 p-4 bg-green-100 text-green-800 shadow itbms-message"
@@ -248,6 +243,21 @@ const resetForm = () => {
   Object.assign(form, initialForm);
   errorMessage.value = "";
 };
+
+const checkImageUpdate = (images) => {
+  const updatedImages = images.map((image) => {
+    return {
+      fileName: image.fileName,
+      file: image.file,
+      url:image.url,
+      imageViewOrder: image.imageViewOrder + 1,
+      status: image.status,
+    };
+  });
+  isImageChange.value = !(
+    JSON.stringify(updatedImages) === JSON.stringify(retriveImageFiles.value)
+  );
+};
 </script>
 
 <template>
@@ -268,16 +278,19 @@ const resetForm = () => {
     <div v-if="errorMessage" class="text-red-600 mb-4">{{ errorMessage }}</div>
 
     <SaleItemForm
+      v-if="isAlreadyFetchData"
       :form="form"
       :brands="sortedBrands"
       :isSubmitting="isSubmitting"
       :isReadyToSubmit="isReadyToSubmit"
       :errors="errors"
       :isUpdate="isEditMode"
+      :retriveImageFiles="retriveImageFiles"
       @update:form="updateForm"
       @submit="handleSubmit"
       @cancel="handleCancel"
       @blur="validateField"
+      @update-image:images="checkImageUpdate"
     />
   </div>
 </template>

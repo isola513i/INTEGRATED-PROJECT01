@@ -54,7 +54,7 @@ onMounted(async () => {
   try {
     const data = await getItem(`v2/sale-items/${route.params.id}`);
     if (!data) throw new Error("Not found");
-
+    console.log(data)
     product.value = data;
 
     // Load images
@@ -65,8 +65,7 @@ onMounted(async () => {
 
       if (!res.ok) return null;
 
-      const blob = await res.blob();
-      return URL.createObjectURL(blob); // browser-safe URL
+      return res.url
     });
 
     // Wait for all images
@@ -75,7 +74,7 @@ onMounted(async () => {
     // Filter out nulls and assign to images
     images.value = results.filter(Boolean);
 
-    console.log(images.value); // contains blob URLs you can bind to <img>
+    //console.log(images.value); // contains blob URLs you can bind to <img>
   } catch(err) {
     console.log("error :" , err)
     router.push("/sale-items");
@@ -192,7 +191,7 @@ const deleteItem = async () => {
               @click="handleSelectedIndex(index)"
               :src="img"
               alt="Thumbnail"
-              class="w-full h-full object-contain"
+              class="w-full h-full object-cover"
             />
           </button>
         </div>
