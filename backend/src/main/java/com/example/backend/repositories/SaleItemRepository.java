@@ -76,7 +76,5 @@ WHERE (:brands IS NULL OR m.brand.name IN :brands)
             "FROM SaleItem s ORDER BY CASE WHEN s.storageGb IS NULL THEN -1 ELSE s.storageGb END ASC")
     List<Integer> findDistinctStorageSizes();
 
-
-
 }
 
