@@ -5,14 +5,13 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 
 import java.time.Instant;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "users")
+@Table(name = "users", schema = "itbms")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,10 +38,10 @@ public class User {
     @Column(name = "fullName", nullable = false, length = 40)
     private String fullName;
 
+    @Size(max = 10)
     @NotNull
-    @Lob
-    @Column(name = "userType", nullable = false)
-    private UserType userType;
+    @Column(name = "userType", nullable = false, length = 10)
+    private String userType;
 
     @Size(max = 20)
     @Column(name = "phoneNumber", length = 20)
@@ -69,14 +68,13 @@ public class User {
     private String idCardImageBack;
 
     @NotNull
-    @ColumnDefault("0")
     @Column(name = "isActive", nullable = false)
     private Boolean isActive = false;
 
-    @Column(name = "updatedOn", nullable = false, insertable = false,updatable = false)
+    @Column(name = "createdOn",nullable = false,insertable = false,updatable = false,columnDefinition = "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP")
     private Instant createdOn;
 
-    @Column(name = "updatedOn", nullable = false, insertable = false,updatable = false)
+    @Column(name = "updatedOn",nullable = false,insertable = false,updatable = false,columnDefinition = "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private Instant updatedOn;
 
 }

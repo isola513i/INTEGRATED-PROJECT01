@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartException;
@@ -73,10 +72,30 @@ public class ExceptionController {
     }
 
     @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
-    public ResponseEntity<MyErrorResponse> handleDataIntegrity(org.springframework.dao.DataIntegrityViolationException ex,
-                                                               HttpServletRequest req) {
-        var body = new MyErrorResponse(422, "UNPROCESSABLE_ENTITY",
-                "Request conflicts with database constraints.", req.getRequestURI());
+    public ResponseEntity<MyErrorResponse> handleDataIntegrity(
+            org.springframework.dao.DataIntegrityViolationException ex,
+            HttpServletRequest req) {
+
+        var root = org.springframework.core.NestedExceptionUtils.getMostSpecificCause(ex);
+        var msg  = root != null ? root.getMessage() : ex.getMessage();
+
+        if (msg != null && msg.contains("Duplicate entry")) {
+            if (msg.contains("uq_users_email")) {
+                return ResponseEntity.status(409).body(
+                        new MyErrorResponse(409, "CONFLICT",
+                                "email already exists", req.getRequestURI()));
+            }
+            if (msg.contains("uq_users_idcard")) {
+                return ResponseEntity.status(409).body(
+                        new MyErrorResponse(409, "CONFLICT",
+                                "idCardNumber already exists", req.getRequestURI()));
+            }
+        }
+
+        var body = new MyErrorResponse(
+                422, "UNPROCESSABLE_ENTITY",
+                "Request conflicts with database constraints.",
+                req.getRequestURI());
         return ResponseEntity.status(422).body(body);
     }
 
@@ -107,5 +126,15 @@ public class ExceptionController {
         return ResponseEntity.status(code).body(body);
     }
 
+    @ExceptionHandler(com.example.backend.exceptions.DuplicateFieldException.class)
+    public ResponseEntity<MyErrorResponse> handleDuplicateField(
+            com.example.backend.exceptions.DuplicateFieldException ex,
+            HttpServletRequest req) {
+        var body = new MyErrorResponse(
+                409, "CONFLICT",
+                ex.getMessage(),
+                req.getRequestURI());
+        return ResponseEntity.status(409).body(body);
+    }
 
 }

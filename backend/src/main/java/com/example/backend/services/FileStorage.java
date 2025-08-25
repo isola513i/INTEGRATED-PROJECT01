@@ -33,15 +33,13 @@ public class FileStorage {
 
     @Value("${itbms.upload-dir:uploads/sale-items}")
     private String baseDir;
+    @Value("${itbms.upload-dir.users:uploads/users}")
+    private String userBaseDir;
 
     @Getter @AllArgsConstructor
     public static class StoredFile {
-        private String fileName; // ชื่อไฟล์จริงในโฟลเดอร์ของ item
-        private String path;     // relative path ที่เก็บใน DB: "{itemId}/{fileName}"
-    }
-
-    private Path getRoot() {
-        return Paths.get(baseDir).toAbsolutePath().normalize();
+        private String fileName;
+        private String path;
     }
 
     public StoredFile storeSaleItemFile(Integer saleItemId, MultipartFile file) throws IOException {
@@ -91,6 +89,51 @@ public class FileStorage {
         }
 
         return new StoredFile(safe, saleItemId + "/" + safe);
+    }
+
+    public StoredFile storeUserIdCardFile(Integer userId, MultipartFile file, String side) throws IOException {
+        Path root = Paths.get(userBaseDir).toAbsolutePath().normalize();
+        Path dir = root.resolve(String.valueOf(userId)).normalize();
+        if (!dir.startsWith(root)) throw new IOException("Invalid path resolution");
+        Files.createDirectories(dir);
+
+        String safe = UUID.randomUUID().toString().replace("-", "") + "_" + side + ".jpg";
+        Path target = dir.resolve(safe).normalize();
+        if (!target.startsWith(root)) throw new IOException("Invalid target path");
+
+        BufferedImage src;
+        try (var in = file.getInputStream()) {
+            src = ImageIO.read(in);
+        }
+        if (src == null) throw new IOException("Unsupported image format: " + file.getOriginalFilename());
+
+        BufferedImage rgb = new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = rgb.createGraphics();
+        try {
+            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g.setColor(Color.WHITE);
+            g.fillRect(0, 0, rgb.getWidth(), rgb.getHeight());
+            g.drawImage(src, 0, 0, null);
+        } finally { g.dispose(); }
+
+        Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpg");
+        if (!writers.hasNext()) throw new IOException("No JPEG writer available");
+        ImageWriter writer = writers.next();
+        try (ImageOutputStream ios = ImageIO.createImageOutputStream(target.toFile())) {
+            writer.setOutput(ios);
+            ImageWriteParam param = writer.getDefaultWriteParam();
+            if (param.canWriteCompressed()) {
+                param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+                param.setCompressionQuality(0.9f);
+            }
+            writer.write(null, new javax.imageio.IIOImage(rgb, null, null), param);
+        } finally { writer.dispose(); }
+
+        return new StoredFile(safe, userId + "/" + safe);
+    }
+
+    private Path getRoot() {
+        return Paths.get(baseDir).toAbsolutePath().normalize();
     }
 
     public void deleteIfExists(String relativePath) {

@@ -74,6 +74,11 @@
             <artifactId>modelmapper</artifactId>
             <version>3.2.2</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-security -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
