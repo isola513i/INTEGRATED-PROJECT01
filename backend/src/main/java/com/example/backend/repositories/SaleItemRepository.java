@@ -56,10 +56,9 @@ WHERE (:brands IS NULL OR m.brand.name IN :brands)
         OR (:storageSizes IS NULL AND :searchNullStorage = false)
       )
   AND (
-        :search IS NULL 
-        OR LOWER(CAST(m.description AS string)) LIKE LOWER(CONCAT('%', :search, '%'))
-        OR LOWER(m.model) LIKE LOWER(CONCAT('%', :search, '%'))
-        OR LOWER(m.color) LIKE LOWER(CONCAT('%', :search, '%'))
+        :search IS NULL
+        OR LOWER(CONCAT(m.description, ' ', m.model, ' ', m.color))
+           LIKE LOWER(CONCAT('%', REPLACE(:search, ' ', '%'), '%'))
       )
 """)
     Page<SaleItem> findByAdvancedFilters(

@@ -66,7 +66,7 @@ const clearSearch = () => {
             type="text"
             placeholder="Search"
             @keyup.enter="handleSearch"
-            class="pl-10 pr-10 py-2 w-64 xl:w-72 rounded-full bg-white text-black text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="itbms-search-text pl-10 pr-10 py-2 w-64 xl:w-72 rounded-full bg-white text-black text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <!-- Search Icon -->
           <svg
@@ -86,7 +86,7 @@ const clearSearch = () => {
           <button
             v-if="searchQuery"
             @click="clearSearch"
-            class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-black"
+            class="itbms-search-clear-button absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-black"
           >
             ✖
           </button>
