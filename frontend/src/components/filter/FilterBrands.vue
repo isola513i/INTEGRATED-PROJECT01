@@ -75,7 +75,6 @@ function toggleBrand(brand) {
   sessionStorage.setItem("filterBrands", JSON.stringify(selectedBrands.value));
 }
 
-// ลบแบรนด์ออก
 function removeBrand(index) {
   selectedBrands.value.splice(index, 1);
 

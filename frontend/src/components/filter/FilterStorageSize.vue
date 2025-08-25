@@ -1,5 +1,6 @@
 <script setup>
 import { ref, watch, onMounted } from "vue";
+import { fetchStorage } from "@/services/storageService";
 
 const emit = defineEmits(["update:storage"]);
 
@@ -9,20 +10,16 @@ const props = defineProps({
 
 const selectedStorage = ref([]);
 const showStorageDropdown = ref(false);
-const storageOptions = ref([
-  { label: "32 GB", value: 32 },
-  { label: "64 GB", value: 64 },
-  { label: "128 GB", value: 128 },
-  { label: "256 GB", value: 256 },
-  { label: "512 GB", value: 512 },
-  { label: "Not specified", value: -1 },
-]);
+const storageOptions = ref([]);
 
-// โหลดค่า sessionStorage เมื่อ mounted
-onMounted(() => {
+// โหลดค่า sessionStorage + storage options ตอน mounted
+onMounted(async () => {
   const stored = JSON.parse(sessionStorage.getItem("filterStorage") || "[]");
   selectedStorage.value = stored;
   emit("update:storage", selectedStorage.value);
+
+  // ดึงข้อมูลจาก API
+  storageOptions.value = await fetchStorage();
 });
 
 watch(

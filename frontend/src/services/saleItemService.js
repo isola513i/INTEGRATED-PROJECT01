@@ -22,7 +22,7 @@ export const addSaleItem = async (formData) => {
   try {
     const res = await fetch(`${API_BASE_URL}/v2/sale-items`, {
       method: "POST",
-      body: formData
+      body: formData 
     });
 
     if (!res.ok) throw new Error("Failed to create new sale item");
@@ -33,6 +33,11 @@ export const addSaleItem = async (formData) => {
     return { success: false, error };
   }
 };
+
+
+//add user
+
+
 
 export const updateSaleItem = async (saleItemId, saleItemFormData) => {
   const controller = new AbortController();
@@ -84,7 +89,7 @@ export const fetchSaleItemsV2 = async (
   if (sortDirection) searchParams += `&sortDirection=${sortDirection}`;
   if (minPrice) searchParams += `&lowerPrice=${minPrice}`;
   if (maxPrice) searchParams += `&upperPrice=${maxPrice}`;
-  if (search) searchParams += `&search=${search}`;
+  if (search) searchParams += `&searchKeyWord=${search}`;
 
   filterBrands.forEach((brand) => (searchParams += `&filterBrands=${brand}`));
   storageSizes.forEach((size) => (searchParams += `&storageSizes=${size}`));

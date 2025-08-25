@@ -32,8 +32,6 @@ const updateField = (field, value) => {
   emit("update:form", { ...props.form, [field]: value });
 };
 
-// const updatedImage = ()
-
 const trimField = (field, value) => {
   emit("update:form", { ...props.form, [field]: value.trim() });
   emit("blur", field);

@@ -11,7 +11,6 @@ export const useSearchStore = defineStore("search", () => {
     } else {
       sessionStorage.removeItem("search");
     }
-  };
-
+    };
   return { search, setSearch };
 });

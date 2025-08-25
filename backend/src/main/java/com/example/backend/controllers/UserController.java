@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/itb-mshop")
+@CrossOrigin("*")
 public class UserController {
     @Autowired
     private UserService userService;
