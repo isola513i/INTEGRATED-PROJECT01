@@ -510,7 +510,6 @@ public class SaleItemService {
     }
 
     // Rename files to {itemId}.{order}.jpg
-
     @Transactional
     protected void normalizeFileNamesToCanonical(Integer itemId) throws IOException {
         var all = pictureRepo.findBySaleItemIdOrderByPositionAsc(itemId);
@@ -548,7 +547,6 @@ public class SaleItemService {
     }
 
     // Etc. helpers //
-
     private int clampOrder(int order) { return Math.max(1, Math.min(MAX_IMAGES, order)); }
 
     private int placeToNearestFree(int pos, boolean[] used) {
