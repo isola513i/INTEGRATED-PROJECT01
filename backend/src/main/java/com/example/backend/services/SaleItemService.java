@@ -48,12 +48,8 @@ public class SaleItemService {
     @Autowired
     private FileStorage fileStorage;
 
-
-
-
     @PersistenceContext
     private EntityManager em;
-
 
     @Transactional(readOnly = true)
     public List<SaleItem> allSaleItems() {

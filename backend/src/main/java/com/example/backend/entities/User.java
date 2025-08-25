@@ -71,12 +71,10 @@ public class User {
     @Column(name = "isActive", nullable = false)
     private Boolean isActive = false;
 
-    @NotNull
-    @Column(name = "createdOn", nullable = false)
+    @Column(name = "createdOn",nullable = false,insertable = false,updatable = false,columnDefinition = "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP")
     private Instant createdOn;
 
-    @NotNull
-    @Column(name = "updatedOn", nullable = false)
+    @Column(name = "updatedOn",nullable = false,insertable = false,updatable = false,columnDefinition = "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private Instant updatedOn;
 
 }
