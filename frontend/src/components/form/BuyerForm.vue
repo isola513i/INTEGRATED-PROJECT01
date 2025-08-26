@@ -1,7 +1,5 @@
 <script setup>
 import { useRouter } from "vue-router";
-// import flashForm จาก store ถ้ามี
-// import { useFlashStore } from "@/store/useFlashStore";
 import { ref, computed } from "vue";
 
 const isDisabled = computed(() => {
@@ -60,7 +58,7 @@ const handleCancel = () => {
           <input
             id="nickname"
             type="text"
-            v-model="buyerForm.nickName"
+            v-model.trim="buyerForm.nickName"
             class="itbms-nickname w-full border border-gray-300 px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
           />
         </div>
@@ -75,7 +73,7 @@ const handleCancel = () => {
           <input
             id="fullname"
             type="text"
-            v-model="buyerForm.fullName"
+            v-model.trim="buyerForm.fullName"
             class="itbms-fullname w-full border border-gray-300 px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
           />
         </div>
@@ -90,7 +88,7 @@ const handleCancel = () => {
           <input
             id="email"
             type="email"
-            v-model="buyerForm.email"
+            v-model.trim="buyerForm.email"
             class="itbms-email w-full border border-gray-300 px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
           />
         </div>
@@ -106,7 +104,7 @@ const handleCancel = () => {
           <input
             id="password"
             type="password"
-            v-model="buyerForm.password"
+            v-model.trim="buyerForm.password"
             class="itbms-password w-full border border-gray-300 px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
           />
         </div>

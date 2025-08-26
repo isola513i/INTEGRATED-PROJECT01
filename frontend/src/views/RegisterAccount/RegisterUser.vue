@@ -3,8 +3,12 @@ import { ref } from "vue";
 import BuyerForm from "@/components/form/BuyerForm.vue";
 import SellerForm from "@/components/form/SellerForm.vue";
 import { registerUser } from "@/services/userService";
+import { useRoute, useRouter } from "vue-router";
+import { useFlashStore } from "@/store/useFlashStore";
+const router = useRouter();
 
 const activeForm = ref("buyer"); // ค่าเริ่มต้น
+const flash = useFlashStore();
 
 // ฟังก์ชันรับข้อมูลจากฟอร์ม
 async function handleFormSubmit(data) {
@@ -15,11 +19,18 @@ async function handleFormSubmit(data) {
     formData.append(key, value);
   });
 
-  // ทดสอบ log ดูก่อน
-  for (const [key, value] of formData.entries()) {
-    console.log(`${key}: ${value}`);
+  try {
+    const response = await registerUser(formData);
+    if (response) {
+      flash.setMessage(
+          "The user account has been successfully registered.",
+          "itbms-message m-4 p-4 bg-green-100 text-green-800 shadow",
+        );
+        router.back();
+    }
+  } catch (error) {
+    console.error("Failed to register user:", error);
   }
-  await registerUser(formData);
 }
 </script>
 
