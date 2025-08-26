@@ -104,7 +104,7 @@ const isDisabled = computed(() => {
         >
         <div class="col-span-8">
           <input
-            v-model="sellerForm.nickName"
+            v-model.trim="sellerForm.nickName"
             type="text"
             class="w-full border px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
           />
@@ -116,7 +116,7 @@ const isDisabled = computed(() => {
         >
         <div class="col-span-8">
           <input
-            v-model="sellerForm.fullName"
+            v-model.trim="sellerForm.fullName"
             type="text"
             class="w-full border px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
           />
@@ -128,7 +128,7 @@ const isDisabled = computed(() => {
         >
         <div class="col-span-8">
           <input
-            v-model="sellerForm.email"
+            v-model.trim="sellerForm.email"
             type="email"
             class="w-full border px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
           />
@@ -140,7 +140,7 @@ const isDisabled = computed(() => {
         >
         <div class="col-span-8">
           <input
-            v-model="sellerForm.password"
+            v-model.trim="sellerForm.password"
             type="password"
             class="w-full border px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
           />
@@ -152,7 +152,7 @@ const isDisabled = computed(() => {
         >
         <div class="col-span-8">
           <input
-            v-model="sellerForm.phoneNumber"
+            v-model.trim="sellerForm.phoneNumber"
             type="text"
             class="w-full border px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
           />
@@ -164,7 +164,7 @@ const isDisabled = computed(() => {
         >
         <div class="col-span-8">
           <input
-            v-model="sellerForm.bankAccount"
+            v-model.trim="sellerForm.bankAccount"
             type="text"
             class="w-full border px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
           />
@@ -176,7 +176,7 @@ const isDisabled = computed(() => {
         >
         <div class="col-span-8">
           <input
-            v-model="sellerForm.bankName"
+            v-model.trim="sellerForm.bankName"
             type="text"
             class="w-full border px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
           />
@@ -188,7 +188,7 @@ const isDisabled = computed(() => {
         >
         <div class="col-span-8">
           <input
-            v-model="sellerForm.idCardNumber"
+            v-model.trim="sellerForm.idCardNumber"
             type="text"
             class="w-full border px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
           />
