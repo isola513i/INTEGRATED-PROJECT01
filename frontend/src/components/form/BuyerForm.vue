@@ -34,6 +34,11 @@ const handleCancel = () => {
   // flashForm.clearAllMessages();
   router.push({ path: "/" });
 };
+// 👇 state สำหรับเปิด/ปิด password
+const showPassword = ref(false);
+const togglePassword = () => {
+  showPassword.value = !showPassword.value;
+};
 </script>
 
 <template>
@@ -60,6 +65,7 @@ const handleCancel = () => {
             type="text"
             v-model.trim="buyerForm.nickName"
             class="itbms-nickname w-full border border-gray-300 px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
+            @keydown.enter="focusNext('fullname')"
           />
         </div>
         <!-- Fullname -->
@@ -75,6 +81,7 @@ const handleCancel = () => {
             type="text"
             v-model.trim="buyerForm.fullName"
             class="itbms-fullname w-full border border-gray-300 px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
+            @keydown.enter="focusNext('email')"
           />
         </div>
         <!-- Email -->
@@ -90,23 +97,29 @@ const handleCancel = () => {
             type="email"
             v-model.trim="buyerForm.email"
             class="itbms-email w-full border border-gray-300 px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-          />
+            @keydown.enter="focusNext('password')"
+            />
         </div>
 
-        <!-- Password -->
-        <label
-          for="password"
-          class="col-span-4 flex items-center font-medium text-gray-700"
-        >
+         <!-- Password -->
+         <label for="password" class="col-span-4 flex items-center font-medium text-gray-700">
           Password
         </label>
-        <div class="col-span-8">
+        <div class="col-span-8 relative">
           <input
             id="password"
-            type="password"
+            :type="showPassword ? 'text' : 'password'"
             v-model.trim="buyerForm.password"
-            class="itbms-password w-full border border-gray-300 px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
+            class="itbms-password w-full border border-gray-300 px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition pr-12"
           />
+          <!-- toggle button -->
+          <button
+            type="button"
+            @click="togglePassword"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+          >
+            {{ showPassword ? '🙈' : '👁️' }}
+          </button>
         </div>
       </div>
 
@@ -137,5 +150,5 @@ const handleCancel = () => {
 </template>
 
 <style scoped>
-/* เพิ่มความสวยแบบเล็กน้อย */
+
 </style>
