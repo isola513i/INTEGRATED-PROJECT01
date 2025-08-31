@@ -15,3 +15,20 @@ export const registerUser = async (formData) => {
     return { success: false, error };
   }
 };
+
+export const signInUser = async (formData) => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/v2/users/signIn`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) throw new Error("Failed to Sign In");
+
+    return await res.json();
+  } catch (error) {
+    console.error("API error:", error);
+    return { success: false, error };
+  }
+};
+

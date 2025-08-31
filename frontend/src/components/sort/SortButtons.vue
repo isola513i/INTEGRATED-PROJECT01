@@ -12,7 +12,7 @@ const setSort = (value) => {
 <template>
   <div class="flex gap-1">
     <button
-      class="p-2 rounded border hover:bg-gray-100 transition flex items-center justify-center cursor-pointer itbms-brand-none"
+      class="p-2 rounded border transition flex items-center justify-center cursor-pointer itbms-brand-none hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
       :class="
         selected === 'none'
           ? 'bg-gray-200 border-gray-300'
@@ -28,7 +28,7 @@ const setSort = (value) => {
     </button>
 
     <button
-      class="p-2 rounded border hover:bg-gray-100 transition flex items-center justify-center cursor-pointer itbms-brand-asc"
+      class="p-2 rounded border transition flex items-center justify-center cursor-pointer itbms-brand-asc hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
       :class="
         selected === 'asc'
           ? 'bg-blue-100 border-blue-200'
@@ -44,7 +44,7 @@ const setSort = (value) => {
     </button>
 
     <button
-      class="p-2 rounded border hover:bg-gray-100 transition flex items-center justify-center cursor-pointer itbms-brand-desc"
+      class="p-2 rounded border transition flex items-center justify-center cursor-pointer itbms-brand-desc hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
       :class="
         selected === 'desc'
           ? 'bg-blue-100 border-blue-200'

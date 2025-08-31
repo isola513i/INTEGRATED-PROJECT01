@@ -85,6 +85,15 @@ const isDisabled = computed(() => {
     !sellerForm.value.idCardImageBack
   );
 });
+const focusNext = (nextIndex) => {
+  const nextInputField = document.getElementById(nextIndex);
+  if (nextInputField) nextInputField.focus();
+};
+// 👇 state สำหรับเปิด/ปิด password
+const showPassword = ref(false);
+const togglePassword = () => {
+  showPassword.value = !showPassword.value;
+};
 </script>
 
 <template>
@@ -104,10 +113,12 @@ const isDisabled = computed(() => {
         >
         <div class="col-span-8">
           <input
+            id="nickname"
             v-model.trim="sellerForm.nickName"
             type="text"
-            class="w-full border px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-          />
+            class="w-full border px-4 py-2.5 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
+            @keydown.enter="focusNext('fullname')"
+            />
         </div>
 
         <!-- Fullname -->
@@ -116,10 +127,12 @@ const isDisabled = computed(() => {
         >
         <div class="col-span-8">
           <input
+            id="fullname"
             v-model.trim="sellerForm.fullName"
             type="text"
-            class="w-full border px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-          />
+            class="w-full border px-4 py-2.5 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
+            @keydown.enter="focusNext('email')"
+            />
         </div>
 
         <!-- Email -->
@@ -128,34 +141,48 @@ const isDisabled = computed(() => {
         >
         <div class="col-span-8">
           <input
+            id="email"
             v-model.trim="sellerForm.email"
             type="email"
-            class="w-full border px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-          />
+            class="itbms-email w-full border border-gray-300 px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition pr-12"
+            @keydown.enter="focusNext('password')"
+            />
         </div>
 
-        <!-- Password -->
-        <label class="col-span-4 flex items-center font-medium text-gray-700"
-          >Password</label
-        >
-        <div class="col-span-8">
+         <!-- Password -->
+         <label for="password" class="col-span-4 flex items-center font-medium text-gray-700">
+          Password
+        </label>
+        <div class="col-span-8 relative">
           <input
+            id="password"
+            :type="showPassword ? 'text' : 'password'"
             v-model.trim="sellerForm.password"
-            type="password"
-            class="w-full border px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-          />
+            class="itbms-password w-full border border-gray-300 px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition pr-12"
+            @keydown.enter="focusNext('phoneNumber')"
+            />
+          <!-- toggle button -->
+          <button
+            type="button"
+            @click="togglePassword"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+          >
+            {{ showPassword ? '🙈' : '👁️' }}
+          </button>
         </div>
 
         <!-- Mobile -->
         <label class="col-span-4 flex items-center font-medium text-gray-700"
-          >Mobile</label
+          >Phone Number</label
         >
         <div class="col-span-8">
           <input
+            id="phoneNumber"
             v-model.trim="sellerForm.phoneNumber"
             type="text"
-            class="w-full border px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-          />
+            class="w-full border px-4 py-2.5 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
+          @keydown.enter="focusNext('BankAccountNo')"
+            />
         </div>
 
         <!-- Bank Account No -->
@@ -164,10 +191,12 @@ const isDisabled = computed(() => {
         >
         <div class="col-span-8">
           <input
+            id="BankAccountNo"
             v-model.trim="sellerForm.bankAccount"
             type="text"
-            class="w-full border px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-          />
+            class="w-full border px-4 py-2.5 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
+            @keydown.enter="focusNext('bankName')"
+            />
         </div>
 
         <!-- Bank Name -->
@@ -176,10 +205,12 @@ const isDisabled = computed(() => {
         >
         <div class="col-span-8">
           <input
+            id="bankName"
             v-model.trim="sellerForm.bankName"
             type="text"
-            class="w-full border px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-          />
+            class="w-full border px-4 py-2.5 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
+            @keydown.enter="focusNext('NationalCardNo')"
+            />
         </div>
 
         <!-- National Card No -->
@@ -188,9 +219,10 @@ const isDisabled = computed(() => {
         >
         <div class="col-span-8">
           <input
+            id="NationalCardNo"
             v-model.trim="sellerForm.idCardNumber"
             type="text"
-            class="w-full border px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
+            class="w-full border px-4 py-2.5 border-gray-300  rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
           />
         </div>
 
@@ -204,7 +236,7 @@ const isDisabled = computed(() => {
             ref="inputRefsFront"
             accept="image/*"
             @change="(e) => (sellerForm.idCardImageFront = e.target.files[0])"
-            class="w-full border px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
+            class="w-full border px-4 py-2.5 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
           />
           <div v-if="previewFront" class="relative w-40 h-24 mt-2">
             <img
@@ -231,7 +263,7 @@ const isDisabled = computed(() => {
             ref="inputRefsBack"
             accept="image/*"
             @change="(e) => (sellerForm.idCardImageBack = e.target.files[0])"
-            class="w-full border px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
+            class="w-full border px-4 py-2.5 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
           />
           <div v-if="previewBack" class="relative w-40 h-24 mt-2">
             <img
