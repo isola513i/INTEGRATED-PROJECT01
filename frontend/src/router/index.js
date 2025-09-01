@@ -9,6 +9,7 @@ import AddEditBrandView from "@/views/brand/AddEditBrandView.vue";
 import ProductGalleryView from "@/views/product/ProductGalleryView.vue";
 import AddEditItemView from "@/views/saleItem/AddEditItemView.vue";
 import RegisterUser from "@/views/RegisterAccount/RegisterUser.vue";
+import VerifyEmail from "@/views/RegisterAccount/VerifyEmail.vue";
 const routes = [
   {
     path: "/",
@@ -73,6 +74,11 @@ const routes = [
     path: "/registers",
     name: "register",
     component: RegisterUser
+  },
+  {
+    path: "/verify-email",
+    name: "VerifyEmail",
+    component: VerifyEmail
   },
 ];
 

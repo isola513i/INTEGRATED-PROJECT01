@@ -1,5 +1,6 @@
 package com.example.backend.controllers;
 
+import com.example.backend.exceptions.AlreadyVerifiedException;
 import com.example.backend.exceptions.ItemNotFoundException;
 import com.example.backend.exceptions.MyErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -137,4 +138,10 @@ public class ExceptionController {
         return ResponseEntity.status(409).body(body);
     }
 
+    @ExceptionHandler(AlreadyVerifiedException.class)
+    public ResponseEntity<MyErrorResponse> handleAlreadyVerifiedException(
+            AlreadyVerifiedException ex, HttpServletRequest request){
+        MyErrorResponse myErrorResponse = new MyErrorResponse(HttpStatus.CONFLICT.value(),HttpStatus.CONFLICT.name(),ex.getMessage(), request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(myErrorResponse);
+    }
 }

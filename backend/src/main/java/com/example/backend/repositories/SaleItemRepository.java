@@ -4,13 +4,14 @@ import com.example.backend.entities.SaleItem;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface SaleItemRepository extends JpaRepository<SaleItem,Integer> {
+public interface SaleItemRepository extends JpaRepository<SaleItem, Integer>, JpaSpecificationExecutor<SaleItem> {
     @Query("select s from SaleItem s join fetch s.brand order by s.createdOn asc, s.id asc")
     List<SaleItem> findAllWithBrandOrderByCreatedOnAscIdAsc();
     boolean existsByBrand_Id(Integer brandId);
@@ -57,8 +58,12 @@ WHERE (:brands IS NULL OR m.brand.name IN :brands)
       )
   AND (
         :search IS NULL
-        OR LOWER(CONCAT(m.description, ' ', m.model, ' ', m.color))
-           LIKE LOWER(CONCAT('%', REPLACE(:search, ' ', '%'), '%'))
+        OR LOWER(CONCAT(
+            COALESCE(m.description, ''), ' ',
+            COALESCE(m.color, ''), ' ',
+            COALESCE(m.model, '')
+        ))
+        LIKE LOWER(CONCAT('%', REPLACE(:search, ' ', '%'), '%'))
       )
 """)
     Page<SaleItem> findByAdvancedFilters(
@@ -70,6 +75,11 @@ WHERE (:brands IS NULL OR m.brand.name IN :brands)
             @Param("search") String search,
             Pageable pageable
     );
+/*
+:search IS NULL
+        OR LOWER(CONCAT(m.description, ' ', m.model, ' ', m.color))
+           LIKE LOWER(CONCAT('%', REPLACE(:search, ' ', '%'), '%'))
+ */
 
     @Query("SELECT DISTINCT CASE WHEN s.storageGb IS NULL THEN -1 ELSE s.storageGb END " +
             "FROM SaleItem s ORDER BY CASE WHEN s.storageGb IS NULL THEN -1 ELSE s.storageGb END ASC")

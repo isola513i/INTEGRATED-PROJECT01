@@ -15,3 +15,15 @@ export const registerUser = async (formData) => {
     return { success: false, error };
   }
 };
+
+export const verfyByToken = async (token)=>{
+  try{
+    const res = await fetch(`${API_BASE_URL}/v2/users/verify-email?token=${token}`,{
+      method:"POST"
+    })
+    return await res.json();
+  }catch(error){
+    console.error("API error:", error)
+    return { success: false, error };
+  }
+}
