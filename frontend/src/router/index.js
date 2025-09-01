@@ -8,8 +8,13 @@ import ManageBrandView from "@/views/brand/ManageBrandView.vue";
 import AddEditBrandView from "@/views/brand/AddEditBrandView.vue";
 import ProductGalleryView from "@/views/product/ProductGalleryView.vue";
 import AddEditItemView from "@/views/saleItem/AddEditItemView.vue";
+<<<<<<< HEAD
 import RegisterUser from "@/views/RegisterAccount/RegisterUser.vue";
 import VerifyEmail from "@/views/RegisterAccount/VerifyEmail.vue";
+=======
+import RegisterUser from "@/views/AccountUser/RegisterUser.vue";
+import SignInUser from "@/views/AccountUser/SignInUser.vue";
+>>>>>>> c1f2f5a6c02f9a7338b4900f05c1f96c7c73f61f
 const routes = [
   {
     path: "/",
@@ -73,7 +78,12 @@ const routes = [
   {
     path: "/registers",
     name: "register",
-    component: RegisterUser
+    component: RegisterUser,
+  },
+  {
+    path: "/signin",
+    name: "signin",
+    component: SignInUser,
   },
   {
     path: "/verify-email",
