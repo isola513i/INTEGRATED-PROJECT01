@@ -25,13 +25,11 @@ const focusNext = (nextIndex) => {
 
 const emit = defineEmits(["submitForm"]);
 const router = useRouter();
-// const flashForm = useFlashStore();
 
 function submitData() {
   emit("submitForm", buyerForm.value);
 }
 const handleCancel = () => {
-  // flashForm.clearAllMessages();
   router.push({ path: "/" });
 };
 // 👇 state สำหรับเปิด/ปิด password
