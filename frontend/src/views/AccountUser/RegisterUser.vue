@@ -3,7 +3,7 @@ import { ref } from "vue";
 import BuyerForm from "@/components/form/BuyerForm.vue";
 import SellerForm from "@/components/form/SellerForm.vue";
 import { registerUser } from "@/services/userService";
-import { useRoute, useRouter } from "vue-router";
+import { useRouter } from "vue-router";
 import { useFlashStore } from "@/store/useFlashStore";
 const router = useRouter();
 
