@@ -15,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/itb-mshop")
 @CrossOrigin("*")
@@ -25,16 +27,6 @@ public class UserController {
     private ModelMapper modelMapper;
     @Autowired
     private EmailService emailService;
-    @Autowired
-    private JwtTokenUtils jwtTokenUtils;
-
-//    @PostMapping(value = "/v2/users/register", consumes = {"multipart/form-data"})
-//    public ResponseEntity<UserCreateResponseDto> registerUsers(@Valid @ModelAttribute UserCreateRequestDto request)
-//            throws Exception {
-//        var response = userService.registerUsers(request);
-//        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-//    }
-
 
     @PostMapping(value = "/v2/users/register", consumes = {"multipart/form-data"})
     public ResponseEntity<UserCreateResponseDto> registerUsers(@Valid @ModelAttribute UserCreateRequestDto request)
@@ -53,8 +45,16 @@ public class UserController {
     }
 
     @PostMapping("/v2/users/authentications")
-    public ResponseEntity<Object> authentications(@RequestBody JwtRequestUser user){
-        return ResponseEntity.ok(userService.authenticate(user));
+    public ResponseEntity<Map<String, String>> authentications(@RequestBody JwtRequestUser body){
+        return ResponseEntity.ok(userService.authenticate(body));
+    }
 
+    @PostMapping("/v2/users/authentications/refresh")
+    public ResponseEntity<Map<String, String>> refresh(@RequestBody Map<String, String> body){
+        String refresh = body.getOrDefault("refresh_token", body.get("refreshToken"));
+        if (refresh == null || refresh.isBlank()) {
+            throw new IllegalArgumentException("refresh_token is required");
+        }
+        return ResponseEntity.ok(userService.refresh(refresh));
     }
 }

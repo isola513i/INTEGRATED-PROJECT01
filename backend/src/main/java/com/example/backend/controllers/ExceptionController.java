@@ -1,5 +1,6 @@
 package com.example.backend.controllers;
 
+import com.example.backend.exceptions.ActivationRequiredException;
 import com.example.backend.exceptions.AlreadyVerifiedException;
 import com.example.backend.exceptions.ItemNotFoundException;
 import com.example.backend.exceptions.MyErrorResponse;
@@ -7,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
@@ -143,5 +145,21 @@ public class ExceptionController {
             AlreadyVerifiedException ex, HttpServletRequest request){
         MyErrorResponse myErrorResponse = new MyErrorResponse(HttpStatus.CONFLICT.value(),HttpStatus.CONFLICT.name(),ex.getMessage(), request.getRequestURI());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(myErrorResponse);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<MyErrorResponse> handleBadCred(BadCredentialsException ex,
+                                                         HttpServletRequest req) {
+        var body = new MyErrorResponse(401, "UNAUTHORIZED",
+                "Username or Password is incorrect", req.getRequestURI());
+        return ResponseEntity.status(401).body(body);
+    }
+
+    @ExceptionHandler(ActivationRequiredException.class)
+    public ResponseEntity<MyErrorResponse> handleActivation(ActivationRequiredException ex,
+                                                            HttpServletRequest req) {
+        var body = new MyErrorResponse(403, "FORBIDDEN",
+                "You need to activate your account before signing in.", req.getRequestURI());
+        return ResponseEntity.status(403).body(body);
     }
 }
