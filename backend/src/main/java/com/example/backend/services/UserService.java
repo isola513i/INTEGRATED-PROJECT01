@@ -2,19 +2,18 @@ package com.example.backend.services;
 
 import com.example.backend.dtos.JwtRequestUser;
 import com.example.backend.dtos.UserCreateRequestDto;
-import com.example.backend.dtos.UserCreateResponseDto;
 import com.example.backend.entities.User;
+import com.example.backend.exceptions.ActivationRequiredException;
 import com.example.backend.exceptions.AlreadyVerifiedException;
-import com.example.backend.exceptions.DuplicateFieldException;
 import com.example.backend.repositories.UserRepository;
 import com.example.backend.utils.JwtTokenUtils;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -29,7 +28,6 @@ public class UserService {
     private String trim(String s) {
         return s == null ? null : s.trim();
     }
-
 
     public User registerUsers(UserCreateRequestDto requestUser) throws IOException {
         User isExistingUser = userRepository.getUserByEmail(requestUser.getEmail());
@@ -55,12 +53,6 @@ public class UserService {
             user.setLatestVerifyToken(token);
 
             if ("SELLER".equals(userType)) {
-
-                // wait for requirement
-//                    if (userRepository.existsByIdCardNumber(idCard)) {
-//                        throw new DuplicateFieldException("idCardNumber", idCard);
-//                    }
-
                 user.setPhoneNumber((requestUser.getPhoneNumber()));
                 user.setBankAccount((requestUser.getBankAccount()));
                 user.setBankName((requestUser.getBankName()));
@@ -78,9 +70,11 @@ public class UserService {
             return savedUser;
         }
     }
+
     public User getUserByEmail(String email){
         return userRepository.getUserByEmail(email);
     }
+
     public User verifyUserByEmail(String token){
         String emailString = jwtTokenUtils.extractEmail(token);
         User user = getUserByEmail(emailString);
@@ -93,25 +87,50 @@ public class UserService {
         user.setIsActive(true);
         return userRepository.save(user);
     }
-    public Map<String, Object> authenticate(JwtRequestUser user) {
-        User finduser = userRepository.getUserByEmail(user.getEmail());
 
-        if (finduser == null) {
-            throw new IllegalArgumentException("User not found");
+    public Map<String, String> authenticate(JwtRequestUser req) {
+        User u = userRepository.getUserByEmail(req.getEmail());
+        if (u == null || !passwordEncoder.matches(req.getPassword(), u.getPasswordHash())) {
+            throw new BadCredentialsException("Username or Password is incorrect");
         }
-        boolean match = passwordEncoder.matches(user.getPassword(), finduser.getPasswordHash());
-        if (!match) {
-            throw new IllegalArgumentException("Wrong password");
+        if (Boolean.FALSE.equals(u.getIsActive())) {
+            throw new ActivationRequiredException("You need to activate your accout before signing in.");
         }
-        return Map.of(
-                "access_token",
-                "string",
-                "refresh_token",
-                "string"
+
+        Map<String,Object> claims = new HashMap<>();
+        claims.put("nickname", u.getNickName());
+        claims.put("id", u.getId());
+        claims.put("email", u.getEmail());
+        claims.put("role", u.getUserType());
+
+        String access  = jwtTokenUtils.generateAccessToken(claims);
+        String refresh = jwtTokenUtils.generateRefreshToken(claims);
+
+        return Map.of("access_token", access, "refresh_token", refresh);
+    }
+
+    public Map<String,String> refresh(String refreshToken) {
+        if (!jwtTokenUtils.isValidAuthToken(refreshToken) || !jwtTokenUtils.isRefreshToken(refreshToken)) {
+            throw new BadCredentialsException("Invalid refresh token");
+        }
+        var claims = jwtTokenUtils.parseAuth(refreshToken).getBody();
+        String email = (String) claims.get("email");
+        User u = userRepository.getUserByEmail(email);
+        if (u == null) throw new BadCredentialsException("Invalid refresh token");
+        if (Boolean.FALSE.equals(u.getIsActive()))
+            throw new ActivationRequiredException("You need to activate your accout before signing in.");
+
+        Map<String,Object> newClaims = Map.of(
+                "nickname", u.getNickName(),
+                "id", u.getId(),
+                "email", u.getEmail(),
+                "role", u.getUserType()
         );
 
-
-
+        return Map.of(
+                "access_token",  jwtTokenUtils.generateAccessToken(newClaims),
+                "refresh_token", jwtTokenUtils.generateRefreshToken(newClaims)
+        );
     }
 
 }
