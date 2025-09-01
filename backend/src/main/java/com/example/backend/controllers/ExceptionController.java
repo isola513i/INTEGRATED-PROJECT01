@@ -80,7 +80,7 @@ public class ExceptionController {
             HttpServletRequest req) {
 
         var root = org.springframework.core.NestedExceptionUtils.getMostSpecificCause(ex);
-        var msg  = root != null ? root.getMessage() : ex.getMessage();
+        var msg  = root.getMessage();
 
         if (msg != null && msg.contains("Duplicate entry")) {
             if (msg.contains("uq_users_email")) {

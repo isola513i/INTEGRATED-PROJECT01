@@ -1,6 +1,5 @@
 package com.example.backend.services;
 
-import com.example.backend.dtos.JwtAuthResponse;
 import com.example.backend.dtos.JwtRequestUser;
 import com.example.backend.dtos.UserCreateRequestDto;
 import com.example.backend.entities.User;

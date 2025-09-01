@@ -7,7 +7,6 @@ import com.example.backend.dtos.UserCreateResponseDto;
 import com.example.backend.entities.User;
 import com.example.backend.services.EmailService;
 import com.example.backend.services.UserService;
-import com.example.backend.utils.JwtTokenUtils;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
