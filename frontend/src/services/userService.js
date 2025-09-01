@@ -28,23 +28,24 @@ export const verfyByToken = async (token)=>{
   }
 }
 
+
 export const signInUser = async (email, password) => {
-  try {
-    const res = await fetch(`${API_BASE_URL}/v2/users/authentications`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
-
-    if (res.status === 401) {
-      throw new Error("Email or Password is incorrect");
-    }
-    if (!res.ok) return null;
-
-    return await res.json();
-  } catch (error) {
-    throw error;
+  const res = await fetch(`${API_BASE_URL}/v2/users/authentications`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  if (res.status === 403) {
+    const REQUIRED = "You need to activate your account before signing in."; 
+    throw new Error(REQUIRED);
   }
-}
+  if (res.status === 401) {
+    throw new Error("Username or Password is incorrect");
+  }
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(body || "Sign-in failed");
+  }
+
+  return await res.json(); 
+};
