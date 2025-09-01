@@ -8,8 +8,9 @@ import ManageBrandView from "@/views/brand/ManageBrandView.vue";
 import AddEditBrandView from "@/views/brand/AddEditBrandView.vue";
 import ProductGalleryView from "@/views/product/ProductGalleryView.vue";
 import AddEditItemView from "@/views/saleItem/AddEditItemView.vue";
-import RegisterUser from "@/views/AccountUser/RegisterUser.vue";
-import SignInUser from "@/views/AccountUser/SignInUser.vue";
+import RegisterUser from "@/views/RegisterAccount/RegisterUser.vue";
+import VerifyEmail from "@/views/RegisterAccount/VerifyEmail.vue";
+import SignInUser from "@/views/RegisterAccount/SignInUser.vue";
 const routes = [
   {
     path: "/",
@@ -79,6 +80,11 @@ const routes = [
     path: "/signin",
     name: "signin",
     component: SignInUser,
+  },
+  {
+    path: "/verify-email",
+    name: "VerifyEmail",
+    component: VerifyEmail
   },
 ];
 

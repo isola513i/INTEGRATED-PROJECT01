@@ -9,19 +9,14 @@ import org.springframework.web.multipart.MultipartFile;
 @Data
 public class UserCreateRequestDto {
     @NotBlank
-    @NotNull
     private String nickName;
     @NotBlank
-    @NotNull
     private String email;
     @NotBlank
-    @NotNull
     private String fullName;
     @NotBlank
-    @NotNull
     private String password;
     @NotBlank
-    @NotNull
     private String userType;
     private String phoneNumber;
     private String bankAccount;

@@ -26,7 +26,7 @@ async function handleFormSubmit(data) {
           "The user account has been successfully registered.",
           "itbms-message m-4 p-4 bg-green-100 text-green-800 shadow",
         );
-        router.back();
+        router.push('/sale-items');
     }
   } catch (error) {
     console.error("Failed to register user:", error);

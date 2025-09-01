@@ -67,6 +67,10 @@ public class User {
     @Column(name = "idCardImageBack")
     private String idCardImageBack;
 
+    @Size(max = 512)
+    @Column(name = "latestVerifyToken", length = 512)
+    private String latestVerifyToken;
+
     @NotNull
     @Column(name = "isActive", nullable = false)
     private Boolean isActive = false;
@@ -76,5 +80,6 @@ public class User {
 
     @Column(name = "updatedOn",nullable = false,insertable = false,updatable = false,columnDefinition = "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP")
     private Instant updatedOn;
+
 
 }
