@@ -1,5 +1,6 @@
 package com.example.backend.services;
 
+import com.example.backend.dtos.JwtRequestUser;
 import com.example.backend.dtos.UserCreateRequestDto;
 import com.example.backend.dtos.UserCreateResponseDto;
 import com.example.backend.entities.User;
@@ -14,6 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Map;
 
 @Service
 public class UserService {
@@ -90,6 +92,26 @@ public class UserService {
         }
         user.setIsActive(true);
         return userRepository.save(user);
+    }
+    public Map<String, Object> authenticate(JwtRequestUser user) {
+        User finduser = userRepository.getUserByEmail(user.getEmail());
+
+        if (finduser == null) {
+            throw new IllegalArgumentException("User not found");
+        }
+        boolean match = passwordEncoder.matches(user.getPassword(), finduser.getPasswordHash());
+        if (!match) {
+            throw new IllegalArgumentException("Wrong password");
+        }
+        return Map.of(
+                "access_token",
+                "string",
+                "refresh_token",
+                "string"
+        );
+
+
+
     }
 
 }

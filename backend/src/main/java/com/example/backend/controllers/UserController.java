@@ -1,5 +1,6 @@
 package com.example.backend.controllers;
 
+import com.example.backend.dtos.JwtRequestUser;
 import com.example.backend.dtos.UserCreateRequestDto;
 
 import com.example.backend.dtos.UserCreateResponseDto;
@@ -49,5 +50,11 @@ public class UserController {
     public ResponseEntity<UserCreateResponseDto> verifyByEmail(@RequestParam("token") String token){
         System.out.println(token);
         return ResponseEntity.ok(modelMapper.map(userService.verifyUserByEmail(token),UserCreateResponseDto.class));
+    }
+
+    @PostMapping("/v2/users/authentications")
+    public ResponseEntity<Object> authentications(@RequestBody JwtRequestUser user){
+        return ResponseEntity.ok(userService.authenticate(user));
+
     }
 }

@@ -20,6 +20,10 @@ const showPassword = ref(false);
 const togglePassword = () => {
   showPassword.value = !showPassword.value;
 };
+const focusNext = (nextIndex) => {
+  const nextInputField = document.getElementById(nextIndex);
+  if (nextInputField) nextInputField.focus();
+};
 </script>
 
 <template>
@@ -46,7 +50,7 @@ const togglePassword = () => {
             type="email"
             v-model.trim="SignInForm.email"
             class="itbms-email w-full border border-gray-300 px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-          />
+            @keydown.enter="focusNext('password')"/>
         </div>
 
         <!-- Password -->
