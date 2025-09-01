@@ -1,18 +1,19 @@
 <script setup>
 import { ref } from "vue";
 import { useSearchStore } from "@/store/useSearchStore";
+import { useAuthStore } from "@/store/useAuthStore";   
 
+const auth = useAuthStore();                            
 const isOpen = ref(false);
 const searchStore = useSearchStore();
-const searchQuery = ref(searchStore.search); // sync กับ store
+const searchQuery = ref(searchStore.search); 
 
 const handleSearch = () => {
   const trimmed = searchQuery.value.trim();
-  searchStore.setSearch(trimmed); // อัพเดตค่าใน store
+  searchStore.setSearch(trimmed); 
   isOpen.value = false;
 };
 
-// ปุ่ม clear
 const clearSearch = () => {
   searchQuery.value = "";
   searchStore.setSearch("");
@@ -134,6 +135,9 @@ const clearSearch = () => {
               />
             </svg>
           </button>
+          <div v-if="auth.isAuthenticated" class="hidden md:block font-medium">
+          Hi, {{ auth.nickname }}
+        </div>
         </div>
 
         <!-- Mobile Menu Button -->

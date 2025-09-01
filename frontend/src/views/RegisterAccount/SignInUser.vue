@@ -1,28 +1,29 @@
 <script setup>
+import { useRouter } from "vue-router";
+import { ref } from "vue";
 import SignInForm from "@/components/form/SignInForm.vue";
+import { useAuthStore } from "@/store/useAuthStore";
 
-// // ฟังก์ชันรับข้อมูลจากฟอร์ม
-// async function handleFormSubmit(data) {
-//   const formData = new FormData();
+const router = useRouter();
+const auth = useAuthStore();
+const errorMsg = ref("");
 
-//   // map key และ value เข้าไปใน formData
-//   Object.entries(data).forEach(([key, value]) => {
-//     formData.append(key, value);
-//   });
+async function handleFormSubmit({ email, password }) {
+  errorMsg.value = "";
+  try {
+    await auth.login(email.trim(), password);
+    router.replace("/sale-items");
+  } catch (e) {
+  
+    const required403 = "You need to activate your account before signing in.";
+    errorMsg.value =
+      e.message === required403
+        ? required403
+        : e.message || "Sign-in failed";
+  }
+}
 
-//   try {
-//     const response = await signInUser(formData);
-//     if (response) {
-//       flash.setMessage(
-//           "The user account has been successfully registered.",
-//           "itbms-message m-4 p-4 bg-green-100 text-green-800 shadow",
-//         );
-//         router.back();
-//     }
-//   } catch (error) {
-//     console.error("Failed to register user:", error);
-//   }
-// }
+
 </script>
 
 <template>
@@ -39,7 +40,11 @@ import SignInForm from "@/components/form/SignInForm.vue";
     <!-- Right side (form) -->
     <div class="flex w-full md:w-1/2 items-center justify-center p-8">
       <div class="w-full max-w-md">
-        <SignInForm @submitForm="handleFormSubmit" />
+        <SignInForm
+          :errorMessage="errorMsg"
+          :loading="loading"
+          @submitForm="handleFormSubmit"
+        />
       </div>
     </div>
   </div>
