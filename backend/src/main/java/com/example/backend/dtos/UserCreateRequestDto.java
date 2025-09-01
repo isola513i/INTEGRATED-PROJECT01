@@ -1,8 +1,6 @@
 package com.example.backend.dtos;
 
-import jakarta.validation.constraints.AssertTrue;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -11,10 +9,13 @@ public class UserCreateRequestDto {
     @NotBlank
     private String nickName;
     @NotBlank
+    @Email(message = "Email format is invalid")
+    @Size(max = 50, message = "Email length must not exceed 50 characters")
     private String email;
     @NotBlank
     private String fullName;
     @NotBlank
+    @Size(max = 14, message = "Password length must not exceed 14 characters")
     private String password;
     @NotBlank
     private String userType;

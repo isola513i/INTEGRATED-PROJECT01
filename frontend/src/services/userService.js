@@ -27,19 +27,24 @@ export const verfyByToken = async (token)=>{
     return { success: false, error };
   }
 }
-export const signInUser = async (formData) => {
+
+export const signInUser = async (email, password) => {
   try {
-    const res = await fetch(`${API_BASE_URL}/v2/users/signIn`, {
+    const res = await fetch(`${API_BASE_URL}/v2/users/authentications`, {
       method: "POST",
-      body: formData,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
     });
 
-    if (!res.ok) throw new Error("Failed to Sign In");
+    if (res.status === 401) {
+      throw new Error("Email or Password is incorrect");
+    }
+    if (!res.ok) return null;
 
     return await res.json();
   } catch (error) {
-    console.error("API error:", error);
-    return { success: false, error };
+    throw error;
   }
-};
-
+}
