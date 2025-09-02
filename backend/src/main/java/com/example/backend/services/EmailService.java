@@ -20,8 +20,8 @@ public class EmailService {
     private String from;
     @Value("${host}")
     private String host;
-    @Value("${port}")
-    private String port;
+//    @Value("${port}")
+//    private String port;
 
 
     public void sendVerificationEmail(String email, String verificationToken) {
@@ -36,7 +36,7 @@ public class EmailService {
             String actionUrl = UriComponentsBuilder.newInstance()
                     .scheme("http")
                     .host(host)
-                   // .port(port)
+                    //.port(port)
                     .path(path)
                     .queryParam("token", token)
                     .toUriString();

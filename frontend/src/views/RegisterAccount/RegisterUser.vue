@@ -9,6 +9,7 @@ const router = useRouter();
 
 const activeForm = ref("buyer"); // ค่าเริ่มต้น
 const flash = useFlashStore();
+const isStillSubmiting = ref(false);
 
 // ฟังก์ชันรับข้อมูลจากฟอร์ม
 async function handleFormSubmit(data) {
@@ -20,16 +21,19 @@ async function handleFormSubmit(data) {
   });
 
   try {
+    isStillSubmiting.value = true;
     const response = await registerUser(formData);
     if (response) {
       flash.setMessage(
-          "The user account has been successfully registered.",
-          "itbms-message m-4 p-4 bg-green-100 text-green-800 shadow",
-        );
-        router.push('/sale-items');
+        "The user account has been successfully registered.",
+        "itbms-message m-4 p-4 bg-green-100 text-green-800 shadow"
+      );
+      router.push("/sale-items");
     }
   } catch (error) {
     console.error("Failed to register user:", error);
+  } finally {
+    isStillSubmiting.value = false;
   }
 }
 </script>
@@ -71,9 +75,14 @@ async function handleFormSubmit(data) {
       <div class="flex-1">
         <BuyerForm
           v-if="activeForm === 'buyer'"
+          :isStillSubmit="isStillSubmiting"
           @submitForm="handleFormSubmit"
         />
-        <SellerForm v-else @submitForm="handleFormSubmit" />
+        <SellerForm
+          v-else
+          @submitForm="handleFormSubmit"
+          :isStillSubmit="isStillSubmiting"
+        />
       </div>
     </div>
   </div>

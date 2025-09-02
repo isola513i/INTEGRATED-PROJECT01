@@ -1,17 +1,26 @@
 <script setup>
+import {ref} from "vue";
 import { RouterView } from "vue-router";
 import Navbar from "./components/layout/Navbar.vue";
 import Footer from "./components/layout/Footer.vue";
 import Register from "./components/layout/RegisterBanner.vue";
+
+const isLogin = ref(false)
+const nickName = localStorage.getItem('nickname')
+if(nickName){
+  isLogin.value = true
+}
+
 </script>
 
 <template>
    <div class="bg-[#ffffff]">
+    
     <!-- Register Bar -->
-    <Register class="fixed top-0 left-0 w-full z-50 h-10" />
+    <Register v-show="!isLogin" class="top-0 left-0 w-full  h-10" />
 
     <!-- Navbar -->
-    <Navbar class="fixed top-10 left-0 w-full z-40 h-16" />
+    <Navbar class="top-10 left-0 w-full h-16" />
 
     <!-- Main content (เว้น padding-top = Register + Navbar) -->
     <main class="pt-[104px]">
