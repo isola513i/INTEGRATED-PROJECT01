@@ -2,12 +2,17 @@
 import { useRouter } from "vue-router";
 import { ref, computed } from "vue";
 
+const props = defineProps({
+  isStillSubmit: Boolean,
+})
+
 const isDisabled = computed(() => {
   return (
     !buyerForm.value.nickName.trim() ||
     !buyerForm.value.fullName.trim() ||
     !buyerForm.value.email.trim() ||
-    !buyerForm.value.password.trim()
+    !buyerForm.value.password.trim() ||
+    props.isStillSubmit
   );
 });
 const buyerForm = ref({

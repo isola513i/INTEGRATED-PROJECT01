@@ -3,6 +3,10 @@ import { previewBinaryFile } from "@/services/previewBinary";
 import { ref, watch ,computed } from "vue";
 import { useRouter } from "vue-router";
 
+const props = defineProps({
+  isStillSubmit: Boolean,
+})
+
 const sellerForm = ref({
   nickName: "",
   userType: "SELLER",
@@ -82,7 +86,8 @@ const isDisabled = computed(() => {
     !sellerForm.value.bankName?.trim() ||
     !sellerForm.value.idCardNumber?.trim() ||
     !sellerForm.value.idCardImageFront ||
-    !sellerForm.value.idCardImageBack
+    !sellerForm.value.idCardImageBack ||
+    props.isStillSubmit
   );
 });
 const focusNext = (nextIndex) => {

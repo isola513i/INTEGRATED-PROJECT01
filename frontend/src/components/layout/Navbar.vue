@@ -2,8 +2,9 @@
 import { ref } from "vue";
 import { useSearchStore } from "@/store/useSearchStore";
 import { useAuthStore } from "@/store/useAuthStore";   
+import router from "@/router";
 
-const auth = useAuthStore();                            
+const auth = useAuthStore();  // state management                           
 const isOpen = ref(false);
 const searchStore = useSearchStore();
 const searchQuery = ref(searchStore.search); 
@@ -18,10 +19,14 @@ const clearSearch = () => {
   searchQuery.value = "";
   searchStore.setSearch("");
 };
+const handleLogOut = () =>{
+  auth.logout()
+  router.push('sale-items')
+}
 </script>
 
 <template>
-  <nav class="bg-[#171717] fixed w-full z-50 text-white py-3">
+  <nav class="bg-[#171717] w-full z-50 text-white py-3">
     <div
       class="w-full relative flex items-center justify-between px-4 sm:px-6 lg:px-8"
     >
@@ -138,6 +143,7 @@ const clearSearch = () => {
           <div v-if="auth.isAuthenticated" class="hidden md:block font-medium">
           Hi, {{ auth.nickname }}
         </div>
+        <div><button v-if="auth.isAuthenticated" @click="handleLogOut">log out</button></div>
         </div>
 
         <!-- Mobile Menu Button -->
