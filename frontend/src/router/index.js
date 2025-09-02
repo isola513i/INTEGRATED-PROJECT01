@@ -10,7 +10,7 @@ import ProductGalleryView from "@/views/product/ProductGalleryView.vue";
 import AddEditItemView from "@/views/saleItem/AddEditItemView.vue";
 import RegisterUser from "@/views/RegisterAccount/RegisterUser.vue";
 import VerifyEmail from "@/views/RegisterAccount/VerifyEmail.vue";
-import SignInUser from "@/views/AccountUser/SignInUser.vue";
+import SignInUser from "@/views/RegisterAccount/SignInUser.vue";
 const routes = [
   {
     path: "/",

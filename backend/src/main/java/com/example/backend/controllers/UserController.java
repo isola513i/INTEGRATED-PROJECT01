@@ -39,7 +39,6 @@ public class UserController {
 
     @PostMapping("/v2/users/verify-email")
     public ResponseEntity<UserCreateResponseDto> verifyByEmail(@RequestParam("token") String token){
-        System.out.println(token);
         return ResponseEntity.ok(modelMapper.map(userService.verifyUserByEmail(token),UserCreateResponseDto.class));
     }
 

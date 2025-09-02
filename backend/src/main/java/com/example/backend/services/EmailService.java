@@ -33,14 +33,10 @@ public class EmailService {
 
     private void sendEmail(String email, String token, String subject, String path, String message) {
         try {
-//            String actionUrl = ServletUriComponentsBuilder.fromCurrentContextPath()
-//                    .path(path)
-//                    .queryParam("token",token)
-//                    .toUriString();
             String actionUrl = UriComponentsBuilder.newInstance()
                     .scheme("http")
                     .host(host)
-                    .port(port)
+                   // .port(port)
                     .path(path)
                     .queryParam("token", token)
                     .toUriString();
