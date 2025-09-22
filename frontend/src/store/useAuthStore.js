@@ -1,6 +1,6 @@
 // src/store/useAuthStore.js
 import { defineStore } from "pinia";
-import { signInUser } from "@/services/userService";
+import { fetchProfile, signInUser } from "@/services/userService";
 // decode JWT
 function decodeJWT(token) {
 	if (!token) return {};
@@ -78,5 +78,13 @@ export const useAuthStore = defineStore("auth", {
 			localStorage.removeItem("email");
 			localStorage.removeItem("role");
 		},
+	},
+	async fectchCheckUser() {
+		try {
+			const res = await fetchProfile(this.user.id);
+			if (!res.ok) this.logout;
+		} catch (er) {
+			this.logout;
+		}
 	},
 });

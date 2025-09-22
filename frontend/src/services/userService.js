@@ -76,3 +76,21 @@ export const updateUserProfile = async (userId, { nickName, fullName }) => {
 	if (!res.ok) throw new Error((await res.text()) || "Update profile failed");
 	return await res.json();
 };
+
+export const fetchProfile = async (id) => {
+	const token = localStorage.getItem("accessToken");
+
+	const res = await fetch(`${API_BASE_URL}/v2/users/${id}`, {
+		method: "GET",
+		headers: {
+			"Content-Type": "application/json",
+			Authorization: `Bearer ${token}`,
+		},
+	});
+
+	if (!res.ok) {
+		throw new Error(`Error ${res.status}: ${res.statusText}`);
+	}
+
+	return await res.json();
+};
