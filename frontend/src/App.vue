@@ -23,7 +23,7 @@ if(nickName){
     <Navbar class="top-10 left-0 w-full h-16" />
 
     <!-- Main content (เว้น padding-top = Register + Navbar) -->
-    <main class="pt-[104px]">
+    <main>
       <RouterView />
     </main>
 
