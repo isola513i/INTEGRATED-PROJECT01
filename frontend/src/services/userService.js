@@ -2,7 +2,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const registerUser = async (formData) => {
   try {
-    const res = await fetch(`${API_BASE_URL}/v2/users/register`, {
+    const res = await fetch(`${API_BASE_URL}/v2/auth/register`, {
       method: "POST",
       body: formData,
     });
@@ -18,7 +18,7 @@ export const registerUser = async (formData) => {
 
 export const verfyByToken = async (token)=>{
   try{
-    const res = await fetch(`${API_BASE_URL}/v2/users/verify-email?token=${token}`,{
+    const res = await fetch(`${API_BASE_URL}/v2/auth/verify-email?token=${token}`,{
       method:"POST"
     })
     return await res.json();
@@ -30,7 +30,7 @@ export const verfyByToken = async (token)=>{
 
 
 export const signInUser = async (email, password) => {
-  const res = await fetch(`${API_BASE_URL}/v2/users/authentications`, {
+  const res = await fetch(`${API_BASE_URL}/v2/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),

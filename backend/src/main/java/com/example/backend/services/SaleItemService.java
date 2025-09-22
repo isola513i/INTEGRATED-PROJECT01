@@ -137,6 +137,23 @@ public class SaleItemService {
                 pageable
         );
     }
+    @Transactional(readOnly = true)
+    public Page<SaleItem> findAllSaleItemsPageBySeller(
+            Integer page,
+            Integer size,
+            String sortField,
+            String sortDirection,
+            Integer sellerId
+    ) {
+
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection),
+                        sortField != null ? sortField : "createdOn")
+                .and(Sort.by(Sort.Direction.ASC, "id"));
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+
+        return saleItemRepo.findBySellerId(sellerId,pageable);
+    }
 
     @Transactional(readOnly = true)
     public SaleItemDto.GetSaleItemDto getSaleItemDetail(Integer id) {

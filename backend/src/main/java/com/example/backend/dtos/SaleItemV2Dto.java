@@ -9,7 +9,7 @@ import java.time.Instant;
 import java.util.List;
 
 @Data
-@NoArgsConstructor
+//@NoArgsConstructor
 public class SaleItemV2Dto {
 
     // ---------- REQUEST ----------
@@ -43,6 +43,27 @@ public class SaleItemV2Dto {
         public static class SaleItemImageDto {
             private String fileName;
             private Integer imageViewOrder;
+        }
+    }
+    @Data
+    public static class SaleItemV2SellerResponse {
+        private Integer id;
+        private String model;
+        private String brandName;
+        private Integer price;
+        private Integer ramGb;
+        private Integer storageGb;
+        private String color;
+        private SellerDto seller;
+
+        public void setSaleItemImages(Object o) {
+        }
+
+        @Data
+        public static class SellerDto {
+            private Integer id;
+            private String email;
+
         }
     }
 

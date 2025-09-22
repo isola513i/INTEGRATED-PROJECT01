@@ -6,14 +6,19 @@ import com.example.backend.repositories.SaleItemPictureRepository;
 import com.example.backend.services.FileStorage;
 import com.example.backend.services.SaleItemService;
 import com.example.backend.utils.ListMapper;
+import org.eclipse.angus.mail.iap.Response;
+import org.hibernate.dialect.SybaseDialect;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import lombok.Getter;
 import lombok.Setter;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.sql.SQLOutput;
 import java.util.List;
 
 @RestController
@@ -22,31 +27,36 @@ import java.util.List;
 @CrossOrigin("*")
 @RequestMapping("/itb-mshop")
 public class SaleItemController {
+    @Autowired
+    private SaleItemService saleItemService;
+    @Autowired
+    private ListMapper listMapper;
+    @Autowired
+    private SaleItemPictureRepository picRepo;
+    @Autowired
+    private FileStorage storage;
+    @Autowired
+    private ModelMapper modelMapper;
 
-    private final SaleItemService saleItemService;
-    private final ModelMapper modelMapper;
-    private final ListMapper listMapper;
-    private final SaleItemPictureRepository picRepo;
-    private final FileStorage storage;
-
-    public SaleItemController(SaleItemService saleItemService, ModelMapper modelMapper, ListMapper listMapper, SaleItemPictureRepository picRepo, FileStorage storage) {
-        this.saleItemService = saleItemService;
-        this.modelMapper = modelMapper;
-        this.listMapper = listMapper;
-        this.picRepo = picRepo;
-        this.storage = storage;
-    }
+//    public SaleItemController(SaleItemService saleItemService, ModelMapper modelMapper, ListMapper listMapper, SaleItemPictureRepository picRepo, FileStorage storage) {
+//        this.saleItemService = saleItemService;
+//        this.modelMapper = modelMapper;
+//        this.listMapper = listMapper;
+//        this.picRepo = picRepo;
+//        this.storage = storage;
+//    }
 
     // ========== V1 Endpoints ==========
     @GetMapping("/v1/sale-items")
-    public ResponseEntity<List<SaleItemDto.GetAllSaleItemsDto>> getAllItems(){
-        return ResponseEntity.ok(listMapper.mapList(saleItemService.allSaleItems(),SaleItemDto.GetAllSaleItemsDto.class,modelMapper));
+    public ResponseEntity<List<SaleItemDto.GetAllSaleItemsDto>> getAllItems() {
+        return ResponseEntity.ok(listMapper.mapList(saleItemService.allSaleItems(), SaleItemDto.GetAllSaleItemsDto.class, modelMapper));
     }
 
     @GetMapping("/v1/sale-items/{saleItemId}")
-    public ResponseEntity<SaleItemDto.GetSaleItemDto> getSaleItemById(@PathVariable Integer saleItemId){
+    public ResponseEntity<SaleItemDto.GetSaleItemDto> getSaleItemById(@PathVariable Integer saleItemId) {
         return ResponseEntity.ok(saleItemService.getSaleItemDetail(saleItemId));
     }
+
     @GetMapping("/v1/storage")
     public List<Integer> getStorageSizes() {
         return saleItemService.getAllStorageSizes();
@@ -54,21 +64,21 @@ public class SaleItemController {
 
 
     @PutMapping("/v1/sale-items/{saleItemId}")
-    public ResponseEntity<SaleItemDto.GetSaleItemDto> updateSaleItem(@PathVariable Integer saleItemId ,@RequestBody SaleItemDto.GetCreateSaleItemDto saleItemDto){
-        return ResponseEntity.ok(modelMapper.map(saleItemService.updateSaleItem(saleItemId,saleItemDto),SaleItemDto.GetSaleItemDto.class));
+    public ResponseEntity<SaleItemDto.GetSaleItemDto> updateSaleItem(@PathVariable Integer saleItemId, @RequestBody SaleItemDto.GetCreateSaleItemDto saleItemDto) {
+        return ResponseEntity.ok(modelMapper.map(saleItemService.updateSaleItem(saleItemId, saleItemDto), SaleItemDto.GetSaleItemDto.class));
     }
 
     @PostMapping("/v1/sale-items")
     public ResponseEntity<SaleItemDto.GetSaleItemDto> addSaleItem(
             @RequestBody SaleItemDto.GetCreateSaleItemDto saleItemDto) {
-        SaleItem saleItem = modelMapper.map(saleItemDto,SaleItem.class);
+        SaleItem saleItem = modelMapper.map(saleItemDto, SaleItem.class);
         SaleItem savedItem = saleItemService.addSaleItem(saleItem);
         SaleItemDto.GetSaleItemDto dto = modelMapper.map(savedItem, SaleItemDto.GetSaleItemDto.class);
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
     @DeleteMapping("/v1/sale-items/{saleItemId}")
-    public ResponseEntity<Void> deleteSaleItem(@PathVariable Integer saleItemId){
+    public ResponseEntity<Void> deleteSaleItem(@PathVariable Integer saleItemId) {
         saleItemService.deleteSaleItem(saleItemId);
         return ResponseEntity.noContent().build();
     }
@@ -96,10 +106,12 @@ public class SaleItemController {
             @RequestParam(required = false) String searchKeyWord
     ) {
         if (lowerPrice != null && upperPrice != null && lowerPrice > upperPrice) {
-            double t = lowerPrice; lowerPrice = upperPrice; upperPrice = t;
+            double t = lowerPrice;
+            lowerPrice = upperPrice;
+            upperPrice = t;
         }
         var pageData = saleItemService
-                .findAllSaleItemsPage(filterBrands, page, size, sortField, sortDirection, lowerPrice, upperPrice, storageSizes,searchKeyWord)
+                .findAllSaleItemsPage(filterBrands, page, size, sortField, sortDirection, lowerPrice, upperPrice, storageSizes, searchKeyWord)
                 .map(si -> saleItemService.getSaleItemDetailV2(si.getId()));
 
         var dto = new PageDto<SaleItemV2Dto.SaleItemV2Response>();
@@ -159,7 +171,7 @@ public class SaleItemController {
     }
 
     // UPDATE saleItem
-    @PutMapping(value = "/v2/sale-items/{saleItemId}" ,consumes =  MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/v2/sale-items/{saleItemId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SaleItemV2Dto.SaleItemV2Response> updateSaleItemWithImages(
             @PathVariable("saleItemId") Integer itemId,
             @ModelAttribute SaleItemV2Dto.SaleItemWithImageInfo request
@@ -173,6 +185,30 @@ public class SaleItemController {
     public ResponseEntity<Void> deleteSaleItemV2(@PathVariable Integer saleItemId) {
         saleItemService.deleteSaleItemAndImages(saleItemId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/v2/sellers/{id}/sale-items")
+    public ResponseEntity<PageDto<SaleItemV2Dto.SaleItemV2SellerResponse>> getSaleItemsBySeller(
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(required = false) String sortField,
+            @RequestParam(defaultValue = "asc") String sortDirection,
+            @PathVariable Integer id) {
+
+        var saleItemPage =
+                saleItemService.findAllSaleItemsPageBySeller(page, size, sortField, sortDirection, id).map(si -> modelMapper.map(si, SaleItemV2Dto.SaleItemV2SellerResponse.class));
+
+
+        PageDto<SaleItemV2Dto.SaleItemV2SellerResponse> dto = new PageDto<>();
+        dto.setContent(saleItemPage.getContent());
+        dto.setNumber(saleItemPage.getNumber());
+        dto.setSize(saleItemPage.getSize());
+        dto.setTotalElements((int) saleItemPage.getTotalElements()); // use long if your PageDto supports it
+        dto.setTotalPages(saleItemPage.getTotalPages());
+        dto.setFirst(saleItemPage.isFirst());
+        dto.setLast(saleItemPage.isLast());
+
+        return ResponseEntity.ok(dto);
     }
 
 }

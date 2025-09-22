@@ -15,12 +15,21 @@ public class BackendApplication {
         SpringApplication.run(BackendApplication.class, args);
     }
 
+//    @Bean
+//    public ListMapper listMapper(){
+//        return ListMapper.getInstance();
+//    }
+//    public <S, T> List<T> mapList(List<S> source, Class<T> targetClass, ModelMapper modelMapper) {
+//        return source.stream().map(entity -> modelMapper.map(entity, targetClass)).toList();
+//    }
+//@Bean
+//public ModelMapper modelMapper(){
+//    return new ModelMapper();
+//}
     @Bean
     public ListMapper listMapper(){
         return ListMapper.getInstance();
     }
-    public <S, T> List<T> mapList(List<S> source, Class<T> targetClass, ModelMapper modelMapper) {
-        return source.stream().map(entity -> modelMapper.map(entity, targetClass)).toList();
-    }
+
 
 }

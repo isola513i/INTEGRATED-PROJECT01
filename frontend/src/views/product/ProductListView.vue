@@ -15,6 +15,8 @@ const route = useRoute();
 const flash = useFlashStore();
 
 onMounted(async () => {
+  const accessToken = localStorage.getItem('access_token')
+  console.log(accessToken)
   if (route.query.successMessage) {
     successMessage.value = String(route.query.successMessage);
     setTimeout(() => {
