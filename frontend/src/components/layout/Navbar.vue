@@ -1,17 +1,17 @@
 <script setup>
 import { ref } from "vue";
 import { useSearchStore } from "@/store/useSearchStore";
-import { useAuthStore } from "@/store/useAuthStore";   
+import { useAuthStore } from "@/store/useAuthStore";
 import router from "@/router";
 
-const auth = useAuthStore();  // state management                           
+const auth = useAuthStore(); // state management
 const isOpen = ref(false);
 const searchStore = useSearchStore();
-const searchQuery = ref(searchStore.search); 
+const searchQuery = ref(searchStore.search);
 
 const handleSearch = () => {
   const trimmed = searchQuery.value.trim();
-  searchStore.setSearch(trimmed); 
+  searchStore.setSearch(trimmed);
   isOpen.value = false;
 };
 
@@ -19,10 +19,10 @@ const clearSearch = () => {
   searchQuery.value = "";
   searchStore.setSearch("");
 };
-const handleLogOut = () =>{
-  auth.logout()
-  router.push('sale-items')
-}
+const handleLogOut = () => {
+  auth.logout();
+  router.push("sale-items");
+};
 </script>
 
 <template>
@@ -55,11 +55,6 @@ const handleLogOut = () =>{
           to="/"
           class="relative font-semibold tracking-wide text-white hover:text-gray-300 transition duration-300"
           >Categories</router-link
-        >
-        <router-link
-          to="/"
-          class="relative font-semibold tracking-wide text-white hover:text-gray-300 transition duration-300"
-          >Promotions</router-link
         >
       </div>
 
@@ -141,9 +136,13 @@ const handleLogOut = () =>{
             </svg>
           </button>
           <div v-if="auth.isAuthenticated" class="hidden md:block font-medium">
-          Hi, {{ auth.nickname }}
-        </div>
-        <div><button v-if="auth.isAuthenticated" @click="handleLogOut">log out</button></div>
+            Hi, {{ auth.user.nickName }}
+          </div>
+          <div>
+            <button v-if="auth.isAuthenticated" @click="handleLogOut">
+              log out
+            </button>
+          </div>
         </div>
 
         <!-- Mobile Menu Button -->

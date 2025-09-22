@@ -11,6 +11,7 @@ import AddEditItemView from "@/views/saleItem/AddEditItemView.vue";
 import RegisterUser from "@/views/RegisterAccount/RegisterUser.vue";
 import VerifyEmail from "@/views/RegisterAccount/VerifyEmail.vue";
 import SignInUser from "@/views/RegisterAccount/SignInUser.vue";
+import { useAuthStore } from "@/store/useAuthStore";
 const routes = [
   {
     path: "/",
@@ -41,6 +42,7 @@ const routes = [
     path: "/sale-items/list",
     name: "ProductListView",
     component: ProductListView,
+    // meta: { requiresAuth: true, roles: ["SELLER"] },
   },
   {
     path: "/brands",
@@ -87,10 +89,32 @@ const routes = [
     component: VerifyEmail,
   },
 ];
-
 const router = createRouter({
   history: createWebHistory("/ssi4/"),
   routes,
+});
+
+router.beforeEach(async (to, from, next) => {
+  const auth = useAuthStore();
+
+  if (to.meta.requiresAuth) {
+    await auth.fectchCheckUser();
+
+    if (!auth.isAuthenticated) {
+      return next({ name: "signin" });
+    }
+
+    try {
+      if (to.meta.roles && !to.meta.roles.includes(auth.user.userType)) {
+        return next({ name: "NotFound" });
+      }
+    } catch (e) {
+      console.error("Token invalid or expired", e);
+      return next({ name: "Landing" });
+    }
+  }
+
+  next();
 });
 
 export default router;

@@ -16,18 +16,20 @@ export const registerUser = async (formData) => {
   }
 };
 
-export const verfyByToken = async (token)=>{
-  try{
-    const res = await fetch(`${API_BASE_URL}/v2/users/verify-email?token=${token}`,{
-      method:"POST"
-    })
+export const verfyByToken = async (token) => {
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/v2/users/verify-email?token=${token}`,
+      {
+        method: "POST",
+      }
+    );
     return await res.json();
-  }catch(error){
-    console.error("API error:", error)
+  } catch (error) {
+    console.error("API error:", error);
     return { success: false, error };
   }
-}
-
+};
 
 export const signInUser = async (email, password) => {
   const res = await fetch(`${API_BASE_URL}/v2/users/authentications`, {
@@ -36,7 +38,7 @@ export const signInUser = async (email, password) => {
     body: JSON.stringify({ email, password }),
   });
   if (res.status === 403) {
-    const REQUIRED = "You need to activate your account before signing in."; 
+    const REQUIRED = "You need to activate your account before signing in.";
     throw new Error(REQUIRED);
   }
   if (res.status === 401) {
@@ -47,5 +49,23 @@ export const signInUser = async (email, password) => {
     throw new Error(body || "Sign-in failed");
   }
 
-  return await res.json(); 
+  return await res.json();
+};
+
+export const fetchProfile = async (id) => {
+  const token = localStorage.getItem("accessToken");
+
+  const res = await fetch(`${API_BASE_URL}/v2/users/${id}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Error ${res.status}: ${res.statusText}`);
+  }
+
+  return await res.json();
 };
