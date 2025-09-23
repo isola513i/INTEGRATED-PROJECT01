@@ -119,4 +119,27 @@ router.beforeEach((to, from, next) => {
 	next();
 });
 
+router.beforeEach(async (to, from, next) => {
+	const auth = useAuthStore();
+
+	if (to.meta.requiresAuth) {
+		await auth.fectchCheckUser();
+
+		if (!auth.isAuthenticated) {
+			return next({ name: "signin" });
+		}
+
+		try {
+			if (to.meta.roles && !to.meta.roles.includes(auth.user.userType)) {
+				return next({ name: "NotFound" });
+			}
+		} catch (e) {
+			console.error("Token invalid or expired", e);
+			return next({ name: "Landing" });
+		}
+	}
+
+	next();
+});
+
 export default router;
