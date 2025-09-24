@@ -16,6 +16,7 @@ function safeAuth() {
 	}
 }
 
+//request
 async function request(
 	path,
 	{ method = "GET", headers = {}, body, attachAuth = true } = {}
@@ -36,7 +37,7 @@ async function request(
 	return res;
 }
 
-// apiClient 
+// apiClient
 export const apiClient = {
 	get: (path, opts) => request(path, { ...opts, method: "GET" }),
 
