@@ -1,7 +1,9 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+//const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+import { apiClient } from "./httpClient";
 
 export const fetchStorage = async () => {
-  const response = await fetch(`${API_BASE_URL}/v1/storage`);
+  const response = await apiClient.get(`/v1/storage`);
   if (!response.ok) throw new Error("Failed to fetch storage");
   const data = await response.json(); // [32, 64, 128...]
 

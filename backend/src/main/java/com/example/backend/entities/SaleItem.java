@@ -1,5 +1,6 @@
 package com.example.backend.entities;
 
+import com.example.backend.dtos.SaleItemV2Dto;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -9,7 +10,9 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -30,6 +33,10 @@ public class SaleItem {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "brandId", nullable = false)
     private Brand brand;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sellerId")
+    private User seller;
 
     @NotNull
     @Lob
@@ -57,15 +64,18 @@ public class SaleItem {
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
-    @Column(name = "createdOn", nullable = false, insertable = false, updatable = false)
+
+    @Column(name = "createdOn", nullable = false , insertable = false)
     private Instant createdOn;
 
-    @Column(name = "updatedOn", nullable = false, insertable = false,updatable = false)
+
+    @Column(name = "updatedOn", nullable = false , insertable = false, updatable = false)
     private Instant updatedOn;
 
     @OneToMany(mappedBy = "saleItem", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("position ASC")
     @com.fasterxml.jackson.annotation.JsonIgnore
     private List<SaleItemPicture> pictures = new ArrayList<>();
+
 
 }

@@ -39,24 +39,33 @@ async function request(
 
 // apiClient
 export const apiClient = {
-	get: (path, opts) => request(path, { ...opts, method: "GET" }),
+  get: (path, opts) => request(path, { ...opts, method: "GET" }),
 
-	postJson: (path, data, opts) =>
-		request(path, {
-			method: "POST",
-			headers: { "Content-Type": "application/json", ...(opts?.headers || {}) },
-			body: JSON.stringify(data ?? {}),
-			...opts,
-		}),
+  postJson: (path, data, opts) =>
+    request(path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...(opts?.headers || {}) },
+      body: JSON.stringify(data ?? {}),
+      ...opts,
+    }),
 
-	postForm: (path, formData, opts) =>
-		request(path, { method: "POST", body: formData, ...opts }),
+  postForm: (path, formData, opts) =>
+    request(path, { method: "POST", body: formData, ...opts }),
 
-	putJson: (path, data, opts) =>
-		request(path, {
-			method: "PUT",
-			headers: { "Content-Type": "application/json", ...(opts?.headers || {}) },
-			body: JSON.stringify(data ?? {}),
-			...opts,
-		}),
+  putJson: (path, data, opts) =>
+    request(path, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", ...(opts?.headers || {}) },
+      body: JSON.stringify(data ?? {}),
+      ...opts,
+    }),
+	
+  putFormData: (path, formData, opts) =>
+    request(path, {
+      method: "PUT",
+      body: formData,
+      ...opts,
+	}),
+  delete: (path, opts) =>
+    request(path, { ...opts, method: "DELETE" }),
 };

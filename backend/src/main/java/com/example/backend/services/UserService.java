@@ -7,12 +7,15 @@ import com.example.backend.exceptions.ActivationRequiredException;
 import com.example.backend.exceptions.AlreadyVerifiedException;
 import com.example.backend.repositories.UserRepository;
 import com.example.backend.utils.JwtTokenUtils;
+import com.example.backend.utils.JwtUtils;
+import com.nimbusds.jwt.JWTClaimsSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,7 +25,10 @@ public class UserService {
     private UserRepository userRepository;
     @Autowired
     private FileStorage fileStorage;
-    @Autowired JwtTokenUtils jwtTokenUtils;
+    @Autowired
+    private JwtTokenUtils jwtTokenUtils;
+    @Autowired
+    private JwtUtils jwtUtils;
     private Argon2PasswordEncoder passwordEncoder = new Argon2PasswordEncoder(16, 16, 8, 1024*128, 2);
 
     private String trim(String s) {
@@ -94,7 +100,7 @@ public class UserService {
             throw new BadCredentialsException("Username or Password is incorrect");
         }
         if (Boolean.FALSE.equals(u.getIsActive())) {
-            throw new ActivationRequiredException("You need to activate your accout before signing in.");
+            throw new ActivationRequiredException("You need to activate your account before signing in.");
         }
 
         Map<String,Object> claims = new HashMap<>();
@@ -103,34 +109,55 @@ public class UserService {
         claims.put("email", u.getEmail());
         claims.put("role", u.getUserType());
 
-        String access  = jwtTokenUtils.generateAccessToken(claims);
-        String refresh = jwtTokenUtils.generateRefreshToken(claims);
+        String access  = jwtUtils.generateAccessToken(claims);
+        String refresh = jwtUtils.generateRefreshToken(claims);
 
         return Map.of("access_token", access, "refresh_token", refresh);
     }
 
-    public Map<String,String> refresh(String refreshToken) {
-        if (!jwtTokenUtils.isValidAuthToken(refreshToken) || !jwtTokenUtils.isRefreshToken(refreshToken)) {
+    public Map<String, String> refresh(String refreshToken) throws ParseException {
+        // 1) Verify signature/expiry and that this is a refresh token
+        if (!jwtUtils.isValidAuthToken(refreshToken) || !jwtUtils.isRefreshToken(refreshToken)) {
             throw new BadCredentialsException("Invalid refresh token");
         }
-        var claims = jwtTokenUtils.parseAuth(refreshToken).getBody();
-        String email = (String) claims.get("email");
+
+        // 2) Parse claims (RSA verified inside parseAuth)
+        JWTClaimsSet claims = jwtUtils.parseAuth(refreshToken);
+
+        // If you store email in a custom claim "email" (as you do in newClaims):
+        String email = claims.getStringClaim("email");
+        // If instead you stored it as subject, use: String email = claims.getSubject();
+
+        if (email == null || email.isBlank()) {
+            throw new BadCredentialsException("Invalid refresh token");
+        }
+
+        // 3) Load user and validate status
         User u = userRepository.getUserByEmail(email);
-        if (u == null) throw new BadCredentialsException("Invalid refresh token");
-        if (Boolean.FALSE.equals(u.getIsActive()))
-            throw new ActivationRequiredException("You need to activate your accout before signing in.");
+        if (u == null) {
+            throw new BadCredentialsException("Invalid refresh token");
+        }
+        if (Boolean.FALSE.equals(u.getIsActive())) {
+            throw new ActivationRequiredException("You need to activate your account before signing in.");
+        }
 
-        Map<String,Object> newClaims = Map.of(
+        // 4) Build fresh claims for new tokens
+        Map<String, Object> newClaims = Map.of(
                 "nickname", u.getNickName(),
-                "id", u.getId(),
-                "email", u.getEmail(),
-                "role", u.getUserType()
+                "id",       u.getId(),
+                "email",    u.getEmail(),
+                "role",     String.valueOf(u.getUserType())
         );
 
+        // 5) Issue new tokens
         return Map.of(
-                "access_token",  jwtTokenUtils.generateAccessToken(newClaims),
-                "refresh_token", jwtTokenUtils.generateRefreshToken(newClaims)
+                "access_token",  jwtUtils.generateAccessToken(newClaims),
+                "refresh_token", jwtUtils.generateRefreshToken(newClaims)
         );
+    }
+
+    public User getUserById(Integer id) {
+        return userRepository.findById(id).orElse(null);
     }
 
 }

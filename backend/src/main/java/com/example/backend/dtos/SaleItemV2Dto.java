@@ -9,16 +9,16 @@ import java.time.Instant;
 import java.util.List;
 
 @Data
-@NoArgsConstructor
+//@NoArgsConstructor
 public class SaleItemV2Dto {
 
     // ---------- REQUEST ----------
-    @Data
-    @NoArgsConstructor
-    public static class SaleItemWithImageInfo {
-        private SaleItemDto.GetCreateSaleItemDto saleItem;
-        private List<SaleItemImageRequest> imageInfos;
-    }
+        @Data
+        @NoArgsConstructor
+        public static class SaleItemWithImageInfo {
+            private SaleItemDto.GetCreateSaleItemDto saleItem;
+            private List<SaleItemImageRequest> imageInfos;
+        }
 
     // ---------- RESPONSE ----------
     @Data
@@ -43,6 +43,29 @@ public class SaleItemV2Dto {
         public static class SaleItemImageDto {
             private String fileName;
             private Integer imageViewOrder;
+        }
+    }
+    @Data
+    @NoArgsConstructor
+    public static class SaleItemV2SellerResponse {
+        private Integer id;
+        private String model;
+        private String brandName;
+        private Integer price;
+        private Integer ramGb;
+        private Integer storageGb;
+        private String color;
+        private SellerDto seller;
+
+
+        @Data
+        public static class SellerDto {
+            private Integer id;
+            private String username;
+            public SellerDto(Integer id, String username) {
+                this.id = id;
+                this.username = username;
+            }
         }
     }
 

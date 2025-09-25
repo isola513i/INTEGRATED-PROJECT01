@@ -16,130 +16,121 @@ import SignInUser from "@/views/RegisterAccount/SignInUser.vue";
 import ProfileView from "@/views/profile/ProfileView.vue";
 import ProfileEdit from "@/views/profile/ProfileEdit.vue";
 const routes = [
-	{
-		path: "/",
-		name: "Landing",
-		component: LandingPageView,
-	},
-	{
-		path: "/sale-items",
-		name: "SaleItemsV2",
-		component: ProductGalleryView,
-	},
-	{
-		path: "/sale-items/:id",
-		name: "SaleItems-Detail",
-		component: ProductDetailView,
-	},
-	{
-		path: "/sale-items/add",
-		name: "Add-SaleItem",
-		component: AddEditItemView,
-	},
-	{
-		path: "/sale-items/:id/edit",
-		name: "Edit-SaleItem",
-		component: AddEditItemView,
-	},
-	{
-		path: "/sale-items/list",
-		name: "ProductListView",
-		component: ProductListView,
-	},
-	{
-		path: "/brands",
-		name: "MangeBrandView",
-		component: ManageBrandView,
-	},
-	{
-		path: "/brands/add",
-		name: "AddBrandView",
-		component: AddEditBrandView,
-	},
-	{
-		path: "/brands/:brandId/edit",
-		name: "EditBrandView",
-		component: AddEditBrandView,
-	},
-	{
-		path: "/not-found",
-		name: "NotFound",
-		component: NotFoundView,
-	},
-	{
-		path: "/server-error",
-		name: "ServerError",
-		component: Error500View,
-	},
-	{
-		path: "/:pathMatch(.*)*",
-		redirect: "/not-found",
-	},
-	{
-		path: "/registers",
-		name: "register",
-		component: RegisterUser,
-	},
-	{
-		path: "/signin",
-		name: "signin",
-		component: SignInUser,
-	},
-	{
-		path: "/verify-email",
-		name: "VerifyEmail",
-		component: VerifyEmail,
-	},
-	{
-		path: "/profile",
-		name: "ProfileView",
-		component: ProfileView,
-		meta: { requiresAuth: true },
-	},
-	{
-		path: "/profile/edit",
-		name: "ProfileEditView",
-		component: ProfileEdit,
-		meta: { requiresAuth: true },
-	},
+  {
+    path: "/",
+    name: "Landing",
+    component: LandingPageView,
+  },
+  {
+    path: "/sale-items",
+    name: "SaleItemsV2",
+    component: ProductGalleryView,
+  },
+  {
+    path: "/sale-items/:id",
+    name: "SaleItems-Detail",
+    component: ProductDetailView,
+  },
+  {
+    path: "/sale-items/add",
+    name: "Add-SaleItem",
+    component: AddEditItemView,
+  },
+  {
+    path: "/sale-items/:id/edit",
+    name: "Edit-SaleItem",
+    component: AddEditItemView,
+  },
+  {
+    path: "/sale-items/list",
+    name: "ProductListView",
+    component: ProductListView,
+    meta: { requiresAuth: true, roles: ["SELLER"] },
+  },
+  {
+    path: "/brands",
+    name: "MangeBrandView",
+    component: ManageBrandView,
+  },
+  {
+    path: "/brands/add",
+    name: "AddBrandView",
+    component: AddEditBrandView,
+  },
+  {
+    path: "/brands/:brandId/edit",
+    name: "EditBrandView",
+    component: AddEditBrandView,
+  },
+  {
+    path: "/not-found",
+    name: "NotFound",
+    component: NotFoundView,
+  },
+  {
+    path: "/server-error",
+    name: "ServerError",
+    component: Error500View,
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    redirect: "/not-found",
+  },
+  {
+    path: "/registers",
+    name: "register",
+    component: RegisterUser,
+  },
+  {
+    path: "/signin",
+    name: "signin",
+    component: SignInUser,
+  },
+  {
+    path: "/verify-email",
+    name: "VerifyEmail",
+    component: VerifyEmail,
+  },
+  {
+    path: "/profile",
+    name: "ProfileView",
+    component: ProfileView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/profile/edit",
+    name: "ProfileEditView",
+    component: ProfileEdit,
+    meta: { requiresAuth: true },
+  },
 ];
 
 const router = createRouter({
-	history: createWebHistory("/ssi4/"),
-	routes,
+  history: createWebHistory("/ssi4/"),
+  routes,
 });
 
-router.beforeEach((to, from, next) => {
-	const auth = useAuthStore();
+router.beforeEach(async (to, from, next) => {
+  const auth = useAuthStore();
 
-	if (to.meta.requiresAuth && !auth.isAuthenticated) {
-		return next({ name: "signin" });
-	}
+  if (to.meta.requiresAuth) {
+    await auth.fectchCheckUser;
 
-	next();
+    if (!auth.isAuthenticated) {
+      return next({ name: "signin" });
+    }
+
+    try {
+      if (to.meta.roles && !to.meta.roles.includes(auth.user.userType)) {
+        return next({ name: "SaleItemsV2" });
+      }
+    } catch (e) {
+      console.error("Token invalid or expired", e);
+      return next({ name: "Landing" });
+    }
+  }
+
+  next();
 });
-
-// router.beforeEach(async (to, from, next) => {
-// 	const auth = useAuthStore();
-
-// 	if (to.meta.requiresAuth) {
-// 		await auth.fectchCheckUser();
-
-// 		if (!auth.isAuthenticated) {
-// 			return next({ name: "signin" });
-// 		}
-
-// 		try {
-// 			if (to.meta.roles && !to.meta.roles.includes(auth.user.userType)) {
-// 				return next({ name: "NotFound" });
-// 			}
-// 		} catch (e) {
-// 			console.error("Token invalid or expired", e);
-// 			return next({ name: "Landing" });
-// 		}
-// 	}
-
-// 	next();
-// });
 
 export default router;

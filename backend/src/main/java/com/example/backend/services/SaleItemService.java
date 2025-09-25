@@ -1,17 +1,22 @@
 package com.example.backend.services;
 
 import com.example.backend.dtos.ImageStatus;
+import com.example.backend.dtos.PageDto;
 import com.example.backend.dtos.SaleItemDto;
 import com.example.backend.dtos.SaleItemV2Dto;
 import com.example.backend.entities.Brand;
 import com.example.backend.entities.SaleItem;
 import com.example.backend.entities.SaleItemPicture;
+import com.example.backend.entities.User;
 import com.example.backend.exceptions.ItemNotFoundException;
+import com.example.backend.exceptions.SellerNotMatchInTokenException;
 import com.example.backend.repositories.BrandRepository;
 import com.example.backend.repositories.SaleItemPictureRepository;
 import com.example.backend.repositories.SaleItemRepository;
+import com.example.backend.utils.JwtUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
@@ -47,6 +52,10 @@ public class SaleItemService {
     private SaleItemPictureRepository pictureRepo;
     @Autowired
     private FileStorage fileStorage;
+    @Autowired
+    private JwtUtils jwtUtils;
+    @Autowired
+    private UserService userService;
 
     @PersistenceContext
     private EntityManager em;
@@ -137,6 +146,50 @@ public class SaleItemService {
                 pageable
         );
     }
+    @Transactional(readOnly = true)
+    public PageDto<SaleItemV2Dto.SaleItemV2SellerResponse> findAllSaleItemsPageBySeller(
+            Integer page,
+            Integer size,
+            String sortField,
+            String sortDirection,
+            Integer sellerId
+    ) {
+
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection),
+                        sortField != null ? sortField : "createdOn")
+                .and(Sort.by(Sort.Direction.ASC, "id"));
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        Page<SaleItemV2Dto.SaleItemV2SellerResponse> saleItemPage = saleItemRepo.findBySellerId(sellerId, pageable)
+                .map(saleItem -> {
+                    var dto = new SaleItemV2Dto.SaleItemV2SellerResponse();
+                    dto.setId(saleItem.getId());
+                    dto.setModel(saleItem.getModel());
+                    dto.setBrandName(saleItem.getBrand() != null ? saleItem.getBrand().getName() : null);
+                    dto.setPrice(saleItem.getPrice());
+                    dto.setStorageGb(saleItem.getStorageGb());
+                    dto.setRamGb(saleItem.getRamGb());
+                    dto.setColor(saleItem.getColor());
+
+                    var seller = saleItem.getSeller();
+                    dto.setSeller(new SaleItemV2Dto.SaleItemV2SellerResponse.SellerDto(
+                            seller != null ? seller.getId() : null,
+                            seller != null ? seller.getEmail() : null
+                    ));
+                    return dto;
+                });
+
+        PageDto<SaleItemV2Dto.SaleItemV2SellerResponse> saleItemPageDto = new PageDto<>();
+        saleItemPageDto.setContent(saleItemPage.getContent());
+        saleItemPageDto.setNumber(saleItemPage.getNumber());
+        saleItemPageDto.setSize(saleItemPage.getSize());
+        saleItemPageDto.setTotalElements((int) saleItemPage.getTotalElements()); // use long if your PageDto supports it
+        saleItemPageDto.setTotalPages(saleItemPage.getTotalPages());
+        saleItemPageDto.setFirst(saleItemPage.isFirst());
+        saleItemPageDto.setLast(saleItemPage.isLast());
+
+        return saleItemPageDto;
+    }
 
     @Transactional(readOnly = true)
     public SaleItemDto.GetSaleItemDto getSaleItemDetail(Integer id) {
@@ -192,7 +245,14 @@ public class SaleItemService {
     }
 
     @Transactional
-    public SaleItemV2Dto.SaleItemV2Response createSaleItemWithImages(SaleItemV2Dto.SaleItemWithImageInfo req) throws IOException {
+    public SaleItemV2Dto.SaleItemV2Response createSaleItemWithImages(SaleItemV2Dto.SaleItemWithImageInfo req , HttpServletRequest request , Integer sellerId) throws IOException {
+        Integer userIdInToken =  jwtUtils.extractUserId(request);
+        User user = userService.getUserById(sellerId);
+        if (userIdInToken == null || !userIdInToken.equals(sellerId) || !user.getIsActive()) {
+            throw new SellerNotMatchInTokenException("Seller does not match the user in token or user is not active.");
+        }
+
+
         var s = req.getSaleItem();
         if (s == null) throw new IllegalArgumentException("saleItem is required");
         if (s.getBrand() == null || s.getBrand().getId() == null)
@@ -211,6 +271,7 @@ public class SaleItemService {
         item.setQuantity(s.getQuantity());
         item.setStorageGb(s.getStorageGb());
         item.setColor(s.getColor());
+        item.setSeller(user);
         item = saleItemRepo.saveAndFlush(item);
 
         var infos = Optional.ofNullable(req.getImageInfos()).orElse(List.of());

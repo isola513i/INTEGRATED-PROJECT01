@@ -113,57 +113,53 @@ onMounted(async () => {
 
 <template>
   <div
-    class="text-center border-r border-gray-300 cursor-pointer relative w-full max-w-[25%]"
     ref="dropdownRef"
+    class="relative w-full text-center cursor-pointer"
     @click="toggleBrandDropdown"
   >
-    <p class="text-sm font-semibold text-gray-800">Brand</p>
+    <p class="text-xs font-semibold text-gray-700 uppercase tracking-wide">Brand</p>
 
-    <!-- แสดงแบรนด์ที่เลือก -->
-    <div
-      class="flex flex-nowrap overflow-x-auto gap-1 mt-1 max-w-full whitespace-nowrap items-center min-h-[28px]"
-    >
+    <!-- Selected chips -->
+    <div class="flex flex-nowrap overflow-x-auto gap-1 mt-1 max-w-full whitespace-nowrap items-center justify-center min-h-[28px]">
       <template v-if="selectedBrands.length">
         <span
           v-for="(brand, index) in selectedBrands"
           :key="brand?.brandId ?? brand.name"
-          class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs flex items-center gap-1 flex-shrink-0"
+          class="bg-slate-100 text-slate-800 px-2 py-0.5 rounded-full text-xs flex items-center gap-1 flex-shrink-0 border border-slate-200"
         >
           {{ brand?.name ?? brand }}
           <button
             @click.stop="removeBrand(index)"
-            class="text-blue-500 hover:text-red-500 font-bold"
+            class="text-slate-500 hover:text-red-500 font-bold leading-none"
+            aria-label="Remove brand"
           >
-            x
+            ×
           </button>
         </span>
       </template>
       <template v-else>
-        <span class="flex-1 text-center text-gray-500 text-xs">
-          Filter by brand(s)
-        </span>
+        <span class="text-gray-500 text-xs">Filter by brand(s)</span>
       </template>
     </div>
 
     <!-- Dropdown -->
     <div
       v-if="showBrandDropdown"
-      class="absolute mt-2 bg-white border text-black border-gray-300 rounded-lg max-h-60 overflow-auto shadow-lg z-50 w-full sm:w-64"
+      class="absolute mt-2 bg-white text-black border border-gray-300 rounded-lg shadow-lg z-50 w-full sm:w-64 max-h-60 overflow-auto p-1"
+      @click.stop
     >
       <div
-        v-for="brand in brandOptions
-          .slice()
-          .sort((a, b) => a.name.localeCompare(b.name))"
+        v-for="brand in brandOptions.slice().sort((a, b) => a.name.localeCompare(b.name))"
         :key="brand.brandId"
-        class="px-4 py-2 hover:bg-gray-100 flex items-center gap-2 cursor-pointer"
-        @click.stop="toggleBrand(brand)"
+        class="px-3 py-2 hover:bg-gray-100 flex items-center gap-2 cursor-pointer rounded"
+        @click="toggleBrand(brand)"
       >
         <input
           type="checkbox"
           :checked="isBrandChecked(brand)"
-          @change="toggleBrand(brand)"
+          @change.stop="toggleBrand(brand)"
         />
-        <span>{{ brand.name }}</span>
+        <span class="text-sm">{{ brand.name }}</span>
       </div>
     </div>
   </div>

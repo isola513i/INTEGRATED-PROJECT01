@@ -1,111 +1,59 @@
 <script setup>
-import { useRouter, useRoute } from "vue-router";
-import { fetchSaleItems } from "@/services/saleItemService";
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { fetchSaleItems, fetchSaleItemsV2 } from "@/services/saleItemService";
 import SaleItemList from "@/components/product/SaleItemList.vue";
-import ProductCarousel from "@/components/product/ProductCarousel.vue";
-import PromoBar from "@/components/promo/PromoBar.vue";
-import { useFlashStore } from "@/store/useFlashStore";
-import { ref, onMounted, watch } from "vue";
-import { fetchSaleItemsV2 } from "@/services/saleItemService";
-import SaleItemCard from "@/components/product/SaleItemCard.vue";
-import SortButtons from "@/components/sort/SortButtons.vue";
 import Pagination from "@/components/Pagination/Pagination.vue";
-import FilterBar from "@/components/filter/FilterBar.vue";
-import { useSearchStore } from "@/store/useSearchStore";
+import { useFlashStore } from "@/store/useFlashStore";
+import { useAuthStore } from "@/store/useAuthStore";
+
+const router = useRouter();
+const flash = useFlashStore();
 
 const saleItems = ref([]);
 const loading = ref(true);
-const router = useRouter();
-const route = useRoute();
-const flash = useFlashStore();
+
+// --- เหลือเท่าที่ API ใช้จริง ---
 const pageSize = ref(10);
-const filteredBrands = ref([]);
-const min = ref(sessionStorage.getItem("minPrice") || null);
-const max = ref(sessionStorage.getItem("maxPrice") || null);
-const storages = ref([]);
 const sortField = ref("id");
 const sortDirection = ref("asc");
-const sortType = ref("");
-const paginate = ref({});
-const searchStore = useSearchStore();
-
-const syncSessionToRefs = () => {
-  pageSize.value = parseInt(sessionStorage.getItem("pageSize")) || 10;
-  sortField.value = sessionStorage.getItem("sortField") || "id";
-  sortDirection.value = sessionStorage.getItem("sortDirection") || "asc";
-  filteredBrands.value = JSON.parse(
-    sessionStorage.getItem("filterBrands") || "[]"
-  );
-  storages.value = JSON.parse(sessionStorage.getItem("filterStorage") || "[]");
-  // min/max เก็บค่าไว้แล้วด้านบน ไม่ต้องแก้
+const paginate = ref({ page: 0, totalPages: 0 });
+const userStore = useAuthStore();
+const loadItems = async (page = 0) => {
+  loading.value = true;
+  try {
+    const res = await fetchSaleItems({
+      sellerId: userStore.user.id,
+      page,
+      size: pageSize.value,
+      sortField: sortField.value,
+      sortDirection: sortDirection.value,
+    });
+    paginate.value = res;
+    saleItems.value = res?.content ?? [];
+  } catch (e) {
+    console.error(e);
+    router.push("/server-error");
+  } finally {
+    loading.value = false;
+  }
 };
 
-const loadItems = async (page) => {
-  sessionStorage.setItem("page", page);
-  sessionStorage.setItem("pageSize", pageSize.value);
-  sessionStorage.setItem("sortField", sortField.value);
-  sessionStorage.setItem("sortDirection", sortDirection.value);
-  sessionStorage.setItem("filterBrands", JSON.stringify(filteredBrands.value));
-  sessionStorage.setItem("minPrice", min.value);
-  sessionStorage.setItem("maxPrice", max.value);
-
-  paginate.value = await fetchSaleItemsV2(
-    filteredBrands.value,
-    page,
-    pageSize.value,
-    sortField.value,
-    sortDirection.value,
-    storages.value,
-    min.value ? parseInt(min.value) : null,
-    max.value ? parseInt(max.value) : null,
-    searchStore.search
-  );
-
-  saleItems.value = paginate.value.content;
-};
-
-// onMounted(async () => {
-//   if (route.query.successMessage) {
-//     successMessage.value = String(route.query.successMessage);
-//     setTimeout(() => {
-//       successMessage.value = "";
-//     }, 4000);
-//     router.replace({ query: {} });
-//   }
-
-//   try {
-//     const data = await fetchSaleItems();
-//     if (data) saleItems.value = data;
-//     else saleItems.value = [];
-//   } catch (err) {
-//     router.push("/server-error");
-//   } finally {
-//     loading.value = false;
-//   }
-// });
 onMounted(() => {
-  syncSessionToRefs();
-  loadItems(parseInt(sessionStorage.getItem("page")) || 0);
+  loadItems(0);
 });
 
-// --- filter อื่น ๆ ---
-async function handleGoToLast() {
-  await loadItems(0);
-  const totalPages = paginate.value.totalPages;
-  const lastPageIndex = totalPages - 1;
-  await loadItems(lastPageIndex);
-}
+// เปลี่ยน page size → กลับหน้าแรก
 const handlePageSizeChange = (size) => {
   pageSize.value = size;
-  loadItems(0); // รีเซ็ตไปหน้าแรกและโหลดใหม่
+  loadItems(0);
 };
 
-watch(
-  () => searchStore.search,
-  () => {
-    loadItems(0);
-  }
-);
+async function handleGoToLast() {
+  if (!paginate.value?.totalPages) await loadItems(0);
+  const lastPageIndex = (paginate.value.totalPages || 1) - 1;
+  await loadItems(lastPageIndex);
+}
 </script>
 
 <template>
@@ -119,6 +67,7 @@ watch(
           Add New Sale Item
         </router-link>
       </div>
+
       <div class="flex items-center gap-2 h-[42px]">
         <label for="pageSize" class="text-gray-700 text-sm cursor-pointer"
           >Show :</label
@@ -135,6 +84,7 @@ watch(
           <option :value="20">20</option>
         </select>
       </div>
+
       <div class="itbms-manage-brand">
         <router-link
           to="/brands"
@@ -145,17 +95,17 @@ watch(
       </div>
     </div>
 
-    <div v-if="flash.message" :class="flash.style">
-      {{ flash.message }}
-    </div>
+    <div v-if="flash.message" :class="flash.style">{{ flash.message }}</div>
+
     <div
-      v-if="saleItems.length === 0"
-      class="itbms-no-sale-item p-10 text-center text-gray-400 text-xl"
+      v-if="!loading && saleItems.length === 0"
+      class="p-10 text-center text-gray-400 text-xl"
     >
       No sale item
     </div>
+
     <SaleItemList v-if="saleItems.length > 0" :items="saleItems" />
-    <!-- Pagination -->
+
     <div class="flex justify-center py-4">
       <Pagination
         :current-page="paginate.page"
