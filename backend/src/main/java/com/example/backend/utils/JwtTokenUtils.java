@@ -51,51 +51,5 @@ public class JwtTokenUtils {
                 .getExpiration();
     }
 
-    @Value("${jwt.secret}") private String hmacSecretBase64;
-    @Value("${jwt.issuer}") private String issuer;
-    @Value("${jwt.access.minutes}") private long accessMinutes;
-    @Value("${jwt.refresh.hours}") private long refreshHours;
-    private Key hmacKey() {
-        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(hmacSecretBase64));
-    }
 
-    public String generateAccessToken(Map<String, Object> claims) {
-        Instant now = Instant.now();
-        Instant exp = now.plusSeconds(accessMinutes * 60);
-        return Jwts.builder()
-                .setClaims(claims)
-                .setIssuer(issuer)                 // iss
-                .setIssuedAt(Date.from(now))       // iat
-                .setExpiration(Date.from(exp))     // exp
-                .claim("typ", "access")
-                .signWith(hmacKey(), SignatureAlgorithm.HS256)
-                .compact();
-    }
-
-    public String generateRefreshToken(Map<String, Object> claims) {
-        Instant now = Instant.now();
-        Instant exp = now.plusSeconds(refreshHours * 3600);
-        return Jwts.builder()
-                .setClaims(claims)
-                .setIssuer(issuer)
-                .setIssuedAt(Date.from(now))
-                .setExpiration(Date.from(exp))
-                .claim("typ", "refresh")
-                .signWith(hmacKey(), SignatureAlgorithm.HS256)
-                .compact();
-    }
-
-    public Jws<Claims> parseAuth(String token) {
-        return Jwts.parserBuilder().setSigningKey(hmacKey()).build().parseClaimsJws(token);
-    }
-
-    public boolean isValidAuthToken(String token) {
-        try { parseAuth(token); return true; } catch (JwtException | IllegalArgumentException e) { return false; }
-    }
-
-    public boolean isRefreshToken(String token) {
-        try {
-            return "refresh".equals(parseAuth(token).getBody().get("typ"));
-        } catch (Exception e) { return false; }
-    }
 }

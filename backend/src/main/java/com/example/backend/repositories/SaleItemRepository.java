@@ -3,6 +3,7 @@ package com.example.backend.repositories;
 import com.example.backend.entities.SaleItem;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -75,6 +76,7 @@ WHERE (:brands IS NULL OR m.brand.name IN :brands)
             @Param("search") String search,
             Pageable pageable
     );
+    Page<SaleItem> findBySellerId(Integer sellerId, Pageable pageable);
 /*
 :search IS NULL
         OR LOWER(CONCAT(m.description, ' ', m.model, ' ', m.color))

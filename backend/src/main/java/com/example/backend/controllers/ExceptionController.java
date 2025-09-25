@@ -1,9 +1,6 @@
 package com.example.backend.controllers;
 
-import com.example.backend.exceptions.ActivationRequiredException;
-import com.example.backend.exceptions.AlreadyVerifiedException;
-import com.example.backend.exceptions.ItemNotFoundException;
-import com.example.backend.exceptions.MyErrorResponse;
+import com.example.backend.exceptions.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -160,6 +157,13 @@ public class ExceptionController {
                                                             HttpServletRequest req) {
         var body = new MyErrorResponse(403, "FORBIDDEN",
                 "You need to activate your account before signing in.", req.getRequestURI());
+        return ResponseEntity.status(403).body(body);
+    }
+    @ExceptionHandler(SellerNotMatchInTokenException.class)
+    public ResponseEntity<MyErrorResponse> handleSellerNotMatchInToken(SellerNotMatchInTokenException ex,
+                                                            HttpServletRequest req) {
+        var body = new MyErrorResponse(403, "FORBIDDEN",
+                ex.getMessage(), req.getRequestURI());
         return ResponseEntity.status(403).body(body);
     }
 }

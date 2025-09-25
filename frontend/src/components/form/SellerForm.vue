@@ -87,6 +87,7 @@ const isDisabled = computed(() => {
     !sellerForm.value.idCardNumber?.trim() ||
     !sellerForm.value.idCardImageFront ||
     !sellerForm.value.idCardImageBack ||
+    sellerForm.value.password.length < 8 ||
     props.isStillSubmit
   );
 });

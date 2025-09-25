@@ -4,6 +4,8 @@ import com.example.backend.dtos.ProfileUpdateDto;
 import com.example.backend.dtos.ProfileViewDto;
 import com.example.backend.services.ProfileService;
 import com.example.backend.utils.JwtTokenUtils;
+import com.example.backend.utils.JwtUtils;
+import com.nimbusds.jwt.JWTClaimsSet;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,7 +25,7 @@ public class UserProfileController {
     private ProfileService profileService;
 
     @Autowired
-    private JwtTokenUtils jwtTokenUtils;
+    private JwtUtils jwtUtils;
 
     // GET /v2/users/{id}
     @GetMapping("/v2/users/{id}")
@@ -46,36 +48,31 @@ public class UserProfileController {
 
     // Extracts and validates the authenticated user's ID from the Authorization header.
     private Integer extractUserIdFromAccessToken(HttpServletRequest request) {
-        String authorization = request.getHeader("Authorization");
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
+        // 1) read "Bearer <token>"
+        String token = jwtUtils.resolveToken(request);
+        if (token == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid Token");
         }
 
-        String jwt = authorization.substring(7);
+        // 2) verify signature + parse claims (Nimbus)
+        var claims = jwtUtils.parseAuth(token);
 
-        // verify signature + expiration
-        if (!jwtTokenUtils.isValidAuthToken(jwt)) {
+        // 3) expiration check (Nimbus doesn't do it for you)
+        var exp = claims.getExpirationTime();
+        if (exp == null || exp.before(new java.util.Date())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid Token");
         }
 
-        // read claims
-        Jws<Claims> jwsClaims = jwtTokenUtils.parseAuth(jwt);
-        Claims claims = jwsClaims.getBody();
-
-        // must be access token only
-        Object typ = claims.get("typ");
-        if (typ == null || !"access".equals(typ.toString())) {
+        // 4) must be access token
+        Object typ = claims.getClaim("typ");
+        if (!"access".equals(String.valueOf(typ))) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid Token");
         }
 
-        Object idClaim = claims.get("id");
-        if (idClaim == null) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid Token");
-        }
-
+        // 5) extract user id using your util (checks sub/id/uid)
         try {
-            return Integer.valueOf(String.valueOf(idClaim)); // รองรับทั้ง String/Integer/Long
-        } catch (NumberFormatException ex) {
+            return jwtUtils.extractUserId(token);
+        } catch (IllegalArgumentException ex) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid Token");
         }
     }
