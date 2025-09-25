@@ -34,7 +34,7 @@ public class EmailService {
             String actionUrl = UriComponentsBuilder.newInstance()
                     .scheme("http")
                     .host(host)
-                    .port("5173")
+                    //.port("5173")
                     .path(path)
                     .queryParam("token", token)
                     .toUriString();

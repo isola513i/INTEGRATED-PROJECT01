@@ -10,6 +10,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -193,5 +194,39 @@ public class JwtUtils {
         } catch (Exception e) {
             throw new IllegalStateException("Failed to build/sign JWT", e);
         }
+    }
+    public String resolveToken(HttpServletRequest request) {
+        String h = request.getHeader("Authorization");
+        if (h != null && h.startsWith("Bearer ")) {
+            return h.substring(7).trim();
+        }
+        return null;
+    }
+
+    /** Extract user id from a JWT string. Looks for `uid` claim, else falls back to `sub`. */
+    public Integer extractUserId(String token) {
+        JWTClaimsSet c = parseAuth(token);  // verifies & parses
+
+        // 1) prefer standard 'sub'
+        String sub = c.getSubject();
+        if (sub != null && !sub.isBlank()) return Integer.valueOf(sub);
+
+        // 2) fallback to your custom 'id' claim
+        Object id = c.getClaim("id");
+        if (id instanceof Number n) return n.intValue();
+        if (id instanceof String s) return Integer.valueOf(s);
+
+        // 3) (optional) also check 'uid' if you ever add it
+        Object uid = c.getClaim("uid");
+        if (uid instanceof Number n2) return n2.intValue();
+        if (uid instanceof String s2) return Integer.valueOf(s2);
+
+        throw new IllegalArgumentException("Token has no user id claim");
+    }
+
+    /** Convenience: read from request header and extract the id. Returns null if no token. */
+    public Integer extractUserId(HttpServletRequest request) {
+        String token = resolveToken(request);
+        return (token != null) ? extractUserId(token) : null;
     }
 }

@@ -2,10 +2,15 @@ package com.example.backend.controllers;
 
 import com.example.backend.dtos.*;
 import com.example.backend.entities.SaleItem;
+import com.example.backend.entities.User;
+import com.example.backend.exceptions.SellerNotMatchInTokenException;
 import com.example.backend.repositories.SaleItemPictureRepository;
 import com.example.backend.services.FileStorage;
 import com.example.backend.services.SaleItemService;
+import com.example.backend.services.UserService;
+import com.example.backend.utils.JwtUtils;
 import com.example.backend.utils.ListMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import org.eclipse.angus.mail.iap.Response;
 import org.hibernate.dialect.SybaseDialect;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +20,7 @@ import lombok.Setter;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.http.*;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -37,6 +43,10 @@ public class SaleItemController {
     private FileStorage storage;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private JwtUtils jwtUtils;
 
 //    public SaleItemController(SaleItemService saleItemService, ModelMapper modelMapper, ListMapper listMapper, SaleItemPictureRepository picRepo, FileStorage storage) {
 //        this.saleItemService = saleItemService;
@@ -85,10 +95,18 @@ public class SaleItemController {
 
     // ========== V2 Endpoints ==========
     // Create saleItem with images
-    @PostMapping(value = "/v2/sale-items", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    @PostMapping(value = "/v2/sale-items", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public ResponseEntity<SaleItemV2Dto.SaleItemV2Response> createSaleItemV2(
+//            @ModelAttribute SaleItemV2Dto.SaleItemWithImageInfo req) throws IOException {
+//        var res = saleItemService.createSaleItemWithImages(req);
+//        return ResponseEntity.status(HttpStatus.CREATED).body(res);
+//    }
+    @PostMapping(value = "/v2/sellers/{id}/sale-items", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SaleItemV2Dto.SaleItemV2Response> createSaleItemV2(
-            @ModelAttribute SaleItemV2Dto.SaleItemWithImageInfo req) throws IOException {
-        var res = saleItemService.createSaleItemWithImages(req);
+            @ModelAttribute SaleItemV2Dto.SaleItemWithImageInfo req,
+            @PathVariable Integer id,
+            HttpServletRequest request) throws IOException {
+        var res = saleItemService.createSaleItemWithImages(req , request , id);
         return ResponseEntity.status(HttpStatus.CREATED).body(res);
     }
 
@@ -193,22 +211,15 @@ public class SaleItemController {
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(required = false) String sortField,
             @RequestParam(defaultValue = "asc") String sortDirection,
-            @PathVariable Integer id) {
-
-        var saleItemPage =
-                saleItemService.findAllSaleItemsPageBySeller(page, size, sortField, sortDirection, id).map(si -> modelMapper.map(si, SaleItemV2Dto.SaleItemV2SellerResponse.class));
-
-
-        PageDto<SaleItemV2Dto.SaleItemV2SellerResponse> dto = new PageDto<>();
-        dto.setContent(saleItemPage.getContent());
-        dto.setNumber(saleItemPage.getNumber());
-        dto.setSize(saleItemPage.getSize());
-        dto.setTotalElements((int) saleItemPage.getTotalElements()); // use long if your PageDto supports it
-        dto.setTotalPages(saleItemPage.getTotalPages());
-        dto.setFirst(saleItemPage.isFirst());
-        dto.setLast(saleItemPage.isLast());
-
-        return ResponseEntity.ok(dto);
+            @PathVariable Integer id,
+            HttpServletRequest request
+    ) {
+        Integer userIdInToken =  jwtUtils.extractUserId(request);
+        User user = userService.getUserById(id);
+        if (userIdInToken == null || !userIdInToken.equals(id) || !user.getIsActive()) {
+            throw new SellerNotMatchInTokenException("Seller does not match the user in token or user is not active.");
+        }
+        return ResponseEntity.ok(saleItemService.findAllSaleItemsPageBySeller(page, size, sortField, sortDirection, id));
     }
 
 }

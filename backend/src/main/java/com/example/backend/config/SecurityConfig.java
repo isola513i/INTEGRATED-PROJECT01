@@ -45,12 +45,14 @@ public class SecurityConfig {
                         // Allow auth/public endpoints & preflight
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/itb-mshop/v2/auth/**").permitAll()
-                        .requestMatchers("/itb-mshop/v2/sale-items").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/itb-mshop/v2/sale-items").permitAll()
                         .requestMatchers(HttpMethod.POST, "/itb-mshop/v2/auth/logout").authenticated()
 
                         // SELLER-only endpoints
                         .requestMatchers(HttpMethod.GET,  "/itb-mshop/v2/sellers/*/sale-items").hasAuthority("SELLER")
                         .requestMatchers(HttpMethod.POST, "/itb-mshop/v2/saleItems").hasAuthority("SELLER")
+                        .requestMatchers(HttpMethod.POST,  "/itb-mshop/v2/sellers/*/sale-items").hasAuthority("SELLER")
+
 
                         // everything else needs authentication
                         .anyRequest().authenticated()

@@ -13,12 +13,12 @@ import java.util.List;
 public class SaleItemV2Dto {
 
     // ---------- REQUEST ----------
-    @Data
-    @NoArgsConstructor
-    public static class SaleItemWithImageInfo {
-        private SaleItemDto.GetCreateSaleItemDto saleItem;
-        private List<SaleItemImageRequest> imageInfos;
-    }
+        @Data
+        @NoArgsConstructor
+        public static class SaleItemWithImageInfo {
+            private SaleItemDto.GetCreateSaleItemDto saleItem;
+            private List<SaleItemImageRequest> imageInfos;
+        }
 
     // ---------- RESPONSE ----------
     @Data
@@ -46,6 +46,7 @@ public class SaleItemV2Dto {
         }
     }
     @Data
+    @NoArgsConstructor
     public static class SaleItemV2SellerResponse {
         private Integer id;
         private String model;
@@ -56,14 +57,15 @@ public class SaleItemV2Dto {
         private String color;
         private SellerDto seller;
 
-        public void setSaleItemImages(Object o) {
-        }
 
         @Data
         public static class SellerDto {
             private Integer id;
-            private String email;
-
+            private String username;
+            public SellerDto(Integer id, String username) {
+                this.id = id;
+                this.username = username;
+            }
         }
     }
 

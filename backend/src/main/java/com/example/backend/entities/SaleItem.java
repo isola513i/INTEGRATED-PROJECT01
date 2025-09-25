@@ -64,12 +64,12 @@ public class SaleItem {
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
-    @NotNull
-    @Column(name = "createdOn", nullable = false)
+
+    @Column(name = "createdOn", nullable = false , insertable = false)
     private Instant createdOn;
 
-    @NotNull
-    @Column(name = "updatedOn", nullable = false)
+
+    @Column(name = "updatedOn", nullable = false , insertable = false, updatable = false)
     private Instant updatedOn;
 
     @OneToMany(mappedBy = "saleItem", cascade = CascadeType.ALL, orphanRemoval = true)

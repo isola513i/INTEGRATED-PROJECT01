@@ -100,7 +100,7 @@ public class UserController {
     @Value("${app.cookies.secure:true}")   // true in HTTPS; set to false for plain HTTP in local dev
     private boolean cookieSecure;
 
-    @Value("${app.cookies.same-site:None}") // None|Lax|Strict (None required for cross-site)
+    @Value("${app.cookies.same-site:Strict}") // None|Lax|Strict (None required for cross-site)
     private String cookieSameSite;
 
     // Path that should send the cookie ("/" is simplest if multiple endpoints need it)
