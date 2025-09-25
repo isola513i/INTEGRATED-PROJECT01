@@ -4,7 +4,7 @@ import { ref, computed } from "vue";
 
 const props = defineProps({
   isStillSubmit: Boolean,
-})
+});
 
 const isDisabled = computed(() => {
   return (
@@ -101,11 +101,14 @@ const togglePassword = () => {
             v-model.trim="buyerForm.email"
             class="itbms-email w-full border border-gray-300 px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
             @keydown.enter="focusNext('password')"
-            />
+          />
         </div>
 
-         <!-- Password -->
-         <label for="password" class="col-span-4 flex items-center font-medium text-gray-700">
+        <!-- Password -->
+        <label
+          for="password"
+          class="col-span-4 flex items-center font-medium text-gray-700"
+        >
           Password
         </label>
         <div class="col-span-8 relative">
@@ -113,19 +116,27 @@ const togglePassword = () => {
             id="password"
             :type="showPassword ? 'text' : 'password'"
             v-model.trim="buyerForm.password"
+            minlength="8"
             class="itbms-password w-full border border-gray-300 px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition pr-12"
           />
+          <p
+          v-if="buyerForm.password && buyerForm.password.length < 8"
+          class="text-red-500 text-sm mt-1"
+        >
+          Password must be at least 8 characters
+        </p>
+
           <!-- toggle button -->
           <button
             type="button"
             @click="togglePassword"
             class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
           >
-            {{ showPassword ? '🙈' : '👁️' }}
+            {{ showPassword ? "🙈" : "👁️" }}
           </button>
         </div>
       </div>
-
+      
       <!-- Buttons -->
       <div class="flex justify-end gap-4 mt-8">
         <button
@@ -152,6 +163,4 @@ const togglePassword = () => {
   </div>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

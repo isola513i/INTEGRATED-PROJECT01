@@ -1,17 +1,20 @@
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useSearchStore } from "@/store/useSearchStore";
-import { useAuthStore } from "@/store/useAuthStore";   
+import { useAuthStore } from "@/store/useAuthStore";
 import router from "@/router";
 
-const auth = useAuthStore();  // state management                           
+const auth = useAuthStore(); // state management
 const isOpen = ref(false);
+
 const searchStore = useSearchStore();
-const searchQuery = ref(searchStore.search); 
+const searchQuery = ref(searchStore.search);
+
+const isSignedIn = computed(() => auth.isAuthenticated);
 
 const handleSearch = () => {
   const trimmed = searchQuery.value.trim();
-  searchStore.setSearch(trimmed); 
+  searchStore.setSearch(trimmed);
   isOpen.value = false;
 };
 
@@ -19,17 +22,32 @@ const clearSearch = () => {
   searchQuery.value = "";
   searchStore.setSearch("");
 };
-const handleLogOut = () =>{
-  auth.logout()
-  router.push('sale-items')
-}
+
+const goToProfile = () => {
+  router.push({ name: "ProfileView" });
+  isOpen.value = false;
+};
+
+const goToSignIn = () => {
+  router.push({ name: "signin" });
+  isOpen.value = false;
+};
+
+const goToRegister = () => {
+  router.push({ name: "register" });
+  isOpen.value = false;
+};
+
+const handleLogOut = () => {
+  auth.logout();
+  // ใช้ชื่อรูทให้ตรงกับโปรเจกต์ (ถ้าใช้ path ให้เปลี่ยนเป็น router.push('/sale-items'))
+  router.push({ name: "SaleItemsV2" });
+};
 </script>
 
 <template>
   <nav class="bg-[#171717] w-full z-50 text-white py-3">
-    <div
-      class="w-full relative flex items-center justify-between px-4 sm:px-6 lg:px-8"
-    >
+    <div class="w-full relative flex items-center justify-between px-4 sm:px-6 lg:px-8">
       <!-- Logo -->
       <div class="flex-shrink-0">
         <router-link to="/">
@@ -38,29 +56,31 @@ const handleLogOut = () =>{
       </div>
 
       <!-- Desktop Navigation Menu -->
-      <div
-        class="absolute left-1/2 transform -translate-x-1/2 hidden md:flex space-x-6 lg:space-x-10"
-      >
+      <div class="absolute left-1/2 transform -translate-x-1/2 hidden md:flex space-x-6 lg:space-x-10">
         <router-link
           to="/sale-items"
           class="relative font-semibold tracking-wide text-white hover:text-gray-300 transition duration-300"
-          >Store</router-link
         >
+          Store
+        </router-link>
         <router-link
           to="/"
           class="relative font-semibold tracking-wide text-white hover:text-gray-300 transition duration-300"
-          >Support</router-link
         >
+          Support
+        </router-link>
         <router-link
           to="/"
           class="relative font-semibold tracking-wide text-white hover:text-gray-300 transition duration-300"
-          >Categories</router-link
         >
+          Categories
+        </router-link>
         <router-link
           to="/"
           class="relative font-semibold tracking-wide text-white hover:text-gray-300 transition duration-300"
-          >Promotions</router-link
         >
+          Promotions
+        </router-link>
       </div>
 
       <!-- Right Side Actions -->
@@ -82,13 +102,10 @@ const handleLogOut = () =>{
             stroke-width="2"
             viewBox="0 0 24 24"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"
-            />
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
           </svg>
-          <!-- Clear Button (อยู่ตลอด) -->
+          <!-- Clear Button -->
           <button
             v-if="searchQuery"
             @click="clearSearch"
@@ -101,86 +118,57 @@ const handleLogOut = () =>{
         <!-- Action Buttons - Desktop & Tablet -->
         <div class="hidden md:flex items-center space-x-4">
           <!-- Cart Icon -->
-          <button
-            class="hover:text-gray-400 transition-colors duration-200"
-            aria-label="Cart"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke-width="1.5"
-              stroke="currentColor"
-              class="w-6 h-6"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
-              />
+          <button class="hover:text-gray-400 transition-colors duration-200" aria-label="Cart">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+              stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
             </svg>
           </button>
-          <!-- User Icon -->
-          <button
-            class="hover:text-gray-400 transition-colors duration-200"
-            aria-label="User"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke-width="1.5"
-              stroke="currentColor"
-              class="w-6 h-6"
+
+          <!-- Auth block -->
+          <template v-if="isSignedIn">
+            <router-link
+              :to="{ name: 'ProfileView' }"
+              class="hover:text-gray-300 transition-colors duration-200 font-medium"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
-              />
-            </svg>
-          </button>
-          <div v-if="auth.isAuthenticated" class="hidden md:block font-medium">
-          Hi, {{ auth.nickname }}
-        </div>
-        <div><button v-if="auth.isAuthenticated" @click="handleLogOut">log out</button></div>
+              Profile
+            </router-link>
+            <div class="hidden md:block font-medium">
+              Hi, {{ auth.nickname ?? auth.user?.nickName }}
+            </div>
+            <button
+              @click="handleLogOut"
+              class="hover:text-gray-300 transition-colors duration-200 cursor-pointer"
+            >
+              Log out
+            </button>
+          </template>
+          <template v-else>
+            <button @click="goToSignIn" class="hover:text-gray-300 transition-colors duration-200 cursor-pointer">
+              Sign in
+            </button>
+            <button @click="goToRegister" class="hover:text-gray-300 transition-colors duration-200 cursor-pointer">
+              Register
+            </button>
+          </template>
         </div>
 
         <!-- Mobile Menu Button -->
         <button
           class="md:hidden p-2 rounded-md hover:bg-gray-700 transition-colors duration-200"
-          @click="isOpen = !isOpen"
-          aria-label="Menu"
+          @click="isOpen = !isOpen" aria-label="Menu"
         >
-          <svg
-            class="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            viewBox="0 0 24 24"
-          >
-            <path
-              v-if="!isOpen"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-            <path
-              v-else
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M6 18L18 6M6 6l12 12"
-            />
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path v-if="!isOpen" stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            <path v-else stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       </div>
     </div>
 
     <!-- Mobile Menu -->
-    <div
-      v-if="isOpen"
-      class="md:hidden px-4 sm:px-6 lg:px-8 mt-3 space-y-1 pb-3 border-t border-gray-600"
-    >
+    <div v-if="isOpen" class="md:hidden px-4 sm:px-6 lg:px-8 mt-3 space-y-1 pb-3 border-t border-gray-600">
       <!-- Mobile Search -->
       <div class="relative py-2">
         <input
@@ -189,25 +177,13 @@ const handleLogOut = () =>{
           placeholder="Search"
           class="pl-10 pr-10 py-2 w-full rounded-full bg-white text-black text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        <!-- Search Icon -->
-        <svg
-          class="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"
-          />
+        <svg class="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+          fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
         </svg>
-        <!-- Clear Button -->
-        <button
-          @click="searchQuery = ''"
-          class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-black"
-        >
+        <button @click="clearSearch"
+          class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-black">
           ✖
         </button>
       </div>
@@ -217,32 +193,60 @@ const handleLogOut = () =>{
         to="/sale-items"
         class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700 transition-colors duration-200"
         @click="isOpen = false"
-        >Store</router-link
       >
+        Store
+      </router-link>
       <router-link
         to="/"
         class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700 transition-colors duration-200"
         @click="isOpen = false"
-        >Support</router-link
       >
+        Support
+      </router-link>
       <router-link
         to="/"
         class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700 transition-colors duration-200"
         @click="isOpen = false"
-        >Categories</router-link
       >
+        Categories
+      </router-link>
       <router-link
         to="/"
         class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700 transition-colors duration-200"
         @click="isOpen = false"
-        >Promotions</router-link
       >
-      <router-link
-        to="/"
-        class="block px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700 transition-colors duration-200"
-        @click="isOpen = false"
-        >Collection</router-link
-      >
+        Promotions
+      </router-link>
+
+      <!-- Mobile: auth block -->
+      <template v-if="isSignedIn">
+        <button
+          @click="goToProfile"
+          class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700 transition-colors duration-200"
+        >
+          Profile
+        </button>
+        <button
+          @click="handleLogOut"
+          class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700 transition-colors duration-200"
+        >
+          Log out
+        </button>
+      </template>
+      <template v-else>
+        <button
+          @click="goToSignIn"
+          class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700 transition-colors duration-200"
+        >
+          Sign in
+        </button>
+        <button
+          @click="goToRegister"
+          class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-white hover:bg-gray-700 transition-colors duration-200"
+        >
+          Register
+        </button>
+      </template>
     </div>
   </nav>
 </template>
