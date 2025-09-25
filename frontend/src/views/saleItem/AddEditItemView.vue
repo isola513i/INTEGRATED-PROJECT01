@@ -11,7 +11,8 @@ import {
 import { fetchBrands } from "@/services/brandService";
 import { useFlashStore } from "@/store/useFlashStore";
 import { useSaleItemValidator } from "@/validators/useValidation";
-import {previewBinaryFile} from "@/services/previewBinary.js";
+import { previewBinaryFile } from "@/services/previewBinary.js";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const route = useRoute();
 const router = useRouter();
@@ -41,6 +42,7 @@ const form = reactive({
 });
 
 const formData = new FormData();
+const auth = useAuthStore();
 
 const requiredFields = ["brandId", "model", "price", "quantity", "description"];
 
@@ -94,7 +96,7 @@ onMounted(async () => {
         if (!res.ok) return null;
         const blob = await res.blob(); // convert response to Blob
         const file = new File([blob], image.fileName, { type: blob.type }); // create a File object
-        const url = previewBinaryFile(file)
+        const url = previewBinaryFile(file);
         return {
           fileName: image.fileName,
           file,
@@ -205,7 +207,7 @@ const handleSubmit = async (imageFiles) => {
         "m-4 p-4 bg-green-100 text-green-800 shadow itbms-message"
       );
     } else {
-      await addSaleItem(formData);
+      await addSaleItem(formData, auth.user.id);
       flash.setMessage(
         "✅ The sale item has been successfully added.",
         "m-4 p-4 bg-green-100 text-green-800 shadow itbms-message"
@@ -248,7 +250,7 @@ const checkImageUpdate = (images) => {
     return {
       fileName: image.fileName,
       file: image.file,
-      url:image.url,
+      url: image.url,
       imageViewOrder: image.imageViewOrder + 1,
       status: image.status,
     };
