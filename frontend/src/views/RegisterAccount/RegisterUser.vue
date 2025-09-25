@@ -13,77 +13,84 @@ const isStillSubmiting = ref(false);
 
 // ฟังก์ชันรับข้อมูลจากฟอร์ม
 async function handleFormSubmit(data) {
-  const formData = new FormData();
+	const formData = new FormData();
 
-  // map key และ value เข้าไปใน formData
-  Object.entries(data).forEach(([key, value]) => {
-    formData.append(key, value);
-  });
+	// normalize เฉพาะฟิลด์ที่ต้องเป็นตัวเลขล้วน
+	if (data.phoneNumber != null) {
+		data.phoneNumber = String(data.phoneNumber).replace(/\D/g, "");
+	}
+	if (data.bankAccount != null) {
+		data.bankAccount = String(data.bankAccount).replace(/\D/g, "");
+	}
 
-  try {
-    isStillSubmiting.value = true;
-    const response = await registerUser(formData);
-    if (response) {
-      flash.setMessage(
-        "The user account has been successfully registered.",
-        "itbms-message m-4 p-4 bg-green-100 text-green-800 shadow"
-      );
-      router.push("/sale-items");
-    }
-  } catch (error) {
-    console.error("Failed to register user:", error);
-  } finally {
-    isStillSubmiting.value = false;
-  }
+	Object.entries(data).forEach(([key, value]) => {
+		formData.append(key, value);
+	});
+
+	try {
+		isStillSubmiting.value = true;
+		const response = await registerUser(formData);
+		if (response) {
+			flash.setMessage(
+				"The user account has been successfully registered.",
+				"itbms-message m-4 p-4 bg-green-100 text-green-800 shadow"
+			);
+			router.push("/sale-items");
+		}
+	} catch (error) {
+		console.error("Failed to register user:", error);
+	} finally {
+		isStillSubmiting.value = false;
+	}
 }
 </script>
 
 <template>
-  <div
-    class="flex justify-center items-start min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 p-6 pt-12"
-  >
-    <div
-      class="w-full max-w-2xl bg-white p-8 rounded-2xl shadow-lg border border-gray-100 min-h-[750px] flex flex-col"
-    >
-      <!-- ปุ่มสลับ -->
-      <div class="flex justify-center gap-4 mb-6">
-        <button
-          @click="activeForm = 'buyer'"
-          :class="[
-            'px-6 py-2 rounded-lg font-medium shadow-md transition',
-            activeForm === 'buyer'
-              ? 'bg-blue-500 text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300',
-          ]"
-        >
-          Buyer
-        </button>
-        <button
-          @click="activeForm = 'seller'"
-          :class="[
-            'px-6 py-2 rounded-lg font-medium shadow-md transition',
-            activeForm === 'seller'
-              ? 'bg-blue-500 text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300',
-          ]"
-        >
-          Seller
-        </button>
-      </div>
+	<div
+		class="flex justify-center items-start min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 p-6 pt-12"
+	>
+		<div
+			class="w-full max-w-2xl bg-white p-8 rounded-2xl shadow-lg border border-gray-100 min-h-[750px] flex flex-col"
+		>
+			<!-- ปุ่มสลับ -->
+			<div class="flex justify-center gap-4 mb-6">
+				<button
+					@click="activeForm = 'buyer'"
+					:class="[
+						'px-6 py-2 rounded-lg font-medium shadow-md transition',
+						activeForm === 'buyer'
+							? 'bg-blue-500 text-white'
+							: 'bg-gray-200 text-gray-700 hover:bg-gray-300',
+					]"
+				>
+					Buyer
+				</button>
+				<button
+					@click="activeForm = 'seller'"
+					:class="[
+						'px-6 py-2 rounded-lg font-medium shadow-md transition',
+						activeForm === 'seller'
+							? 'bg-blue-500 text-white'
+							: 'bg-gray-200 text-gray-700 hover:bg-gray-300',
+					]"
+				>
+					Seller
+				</button>
+			</div>
 
-      <!-- ฟอร์ม -->
-      <div class="flex-1">
-        <BuyerForm
-          v-if="activeForm === 'buyer'"
-          :isStillSubmit="isStillSubmiting"
-          @submitForm="handleFormSubmit"
-        />
-        <SellerForm
-          v-else
-          @submitForm="handleFormSubmit"
-          :isStillSubmit="isStillSubmiting"
-        />
-      </div>
-    </div>
-  </div>
+			<!-- ฟอร์ม -->
+			<div class="flex-1">
+				<BuyerForm
+					v-if="activeForm === 'buyer'"
+					:isStillSubmit="isStillSubmiting"
+					@submitForm="handleFormSubmit"
+				/>
+				<SellerForm
+					v-else
+					@submitForm="handleFormSubmit"
+					:isStillSubmit="isStillSubmiting"
+				/>
+			</div>
+		</div>
+	</div>
 </template>
