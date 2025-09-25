@@ -1,11 +1,11 @@
 <script setup>
 import { previewBinaryFile } from "@/services/previewBinary";
-import { ref, watch ,computed } from "vue";
+import { ref, watch, computed } from "vue";
 import { useRouter } from "vue-router";
 
 const props = defineProps({
   isStillSubmit: Boolean,
-})
+});
 
 const sellerForm = ref({
   nickName: "",
@@ -24,23 +24,22 @@ const sellerForm = ref({
 const previewFront = ref(null);
 const previewBack = ref(null);
 
-
 const emit = defineEmits(["submitForm"]);
 const router = useRouter();
 
 // refs สำหรับ input file
-const inputRefsFront = ref(null)
-const inputRefsBack = ref(null)
+const inputRefsFront = ref(null);
+const inputRefsBack = ref(null);
 
 function removeFile(side) {
   if (side === "front") {
-    sellerForm.value.idCardImageFront = null
-    previewFront.value = null
-    if (inputRefsFront.value) inputRefsFront.value.value = null
+    sellerForm.value.idCardImageFront = null;
+    previewFront.value = null;
+    if (inputRefsFront.value) inputRefsFront.value.value = null;
   } else if (side === "back") {
-    sellerForm.value.idCardImageBack = null
-    previewBack.value = null
-    if (inputRefsBack.value) inputRefsBack.value.value = null
+    sellerForm.value.idCardImageBack = null;
+    previewBack.value = null;
+    if (inputRefsBack.value) inputRefsBack.value.value = null;
   }
 }
 
@@ -63,7 +62,6 @@ watch(
     }
   }
 );
-
 watch(
   () => sellerForm.value.idCardImageBack,
   (file) => {
@@ -124,7 +122,7 @@ const togglePassword = () => {
             type="text"
             class="w-full border px-4 py-2.5 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
             @keydown.enter="focusNext('fullname')"
-            />
+          />
         </div>
 
         <!-- Fullname -->
@@ -138,7 +136,7 @@ const togglePassword = () => {
             type="text"
             class="w-full border px-4 py-2.5 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
             @keydown.enter="focusNext('email')"
-            />
+          />
         </div>
 
         <!-- Email -->
@@ -152,29 +150,47 @@ const togglePassword = () => {
             type="email"
             class="itbms-email w-full border border-gray-300 px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition pr-12"
             @keydown.enter="focusNext('password')"
-            />
+          />
         </div>
 
-         <!-- Password -->
-         <label for="password" class="col-span-4 flex items-center font-medium text-gray-700">
+        <!-- Password -->
+        <label
+          for="password"
+          class="col-span-4 flex items-center font-medium text-gray-700"
+        >
           Password
         </label>
-        <div class="col-span-8 relative">
-          <input
-            id="password"
-            :type="showPassword ? 'text' : 'password'"
-            v-model.trim="sellerForm.password"
-            class="itbms-password w-full border border-gray-300 px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition pr-12"
-            @keydown.enter="focusNext('phoneNumber')"
+        <div class="col-span-8">
+          <!-- กล่องเฉพาะ input: มีความสูงคงที่ และเป็น relative -->
+          <div class="relative h-12">
+            <input
+              id="password"
+              :type="showPassword ? 'text' : 'password'"
+              v-model.trim="sellerForm.password"
+              minlength="8"
+              autocomplete="new-password"
+              class="itbms-password h-full w-full border border-gray-300 rounded-lg px-4 pr-12 text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition shadow-sm hover:shadow-md"
+              @keydown.enter="focusNext('phoneNumber')"
             />
-          <!-- toggle button -->
-          <button
-            type="button"
-            @click="togglePassword"
-            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+
+            <!-- toggle button: จัดกึ่งกลางตามความสูงช่อง input เสมอ -->
+            <button
+              type="button"
+              @click="togglePassword"
+              class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+              aria-label="Toggle password visibility"
+            >
+              {{ showPassword ? "🙈" : "👁️" }}
+            </button>
+          </div>
+
+          <!-- error แยกออกมา ไม่ให้ดันความสูงของกล่อง input -->
+          <p
+            v-if="sellerForm.password && sellerForm.password.length < 8"
+            class="text-red-500 text-sm mt-1"
           >
-            {{ showPassword ? '🙈' : '👁️' }}
-          </button>
+            Password must be at least 8 characters
+          </p>
         </div>
 
         <!-- Mobile -->
@@ -187,8 +203,8 @@ const togglePassword = () => {
             v-model.trim="sellerForm.phoneNumber"
             type="text"
             class="w-full border px-4 py-2.5 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-          @keydown.enter="focusNext('BankAccountNo')"
-            />
+            @keydown.enter="focusNext('BankAccountNo')"
+          />
         </div>
 
         <!-- Bank Account No -->
@@ -202,7 +218,7 @@ const togglePassword = () => {
             type="text"
             class="w-full border px-4 py-2.5 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
             @keydown.enter="focusNext('bankName')"
-            />
+          />
         </div>
 
         <!-- Bank Name -->
@@ -216,7 +232,7 @@ const togglePassword = () => {
             type="text"
             class="w-full border px-4 py-2.5 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
             @keydown.enter="focusNext('NationalCardNo')"
-            />
+          />
         </div>
 
         <!-- National Card No -->
@@ -228,7 +244,7 @@ const togglePassword = () => {
             id="NationalCardNo"
             v-model.trim="sellerForm.idCardNumber"
             type="text"
-            class="w-full border px-4 py-2.5 border-gray-300  rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
+            class="w-full border px-4 py-2.5 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
           />
         </div>
 

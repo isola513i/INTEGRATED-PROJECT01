@@ -111,32 +111,41 @@ const togglePassword = () => {
         >
           Password
         </label>
-        <div class="col-span-8 relative">
-          <input
-            id="password"
-            :type="showPassword ? 'text' : 'password'"
-            v-model.trim="buyerForm.password"
-            minlength="8"
-            class="itbms-password w-full border border-gray-300 px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition pr-12"
-          />
-          <p
-          v-if="buyerForm.password && buyerForm.password.length < 8"
-          class="text-red-500 text-sm mt-1"
-        >
-          Password must be at least 8 characters
-        </p>
+        <div class="col-span-8">
+          <!-- กล่องเฉพาะ input -->
+          <div class="relative h-12">
+            <input
+              id="password"
+              :type="showPassword ? 'text' : 'password'"
+              v-model.trim="buyerForm.password"
+              minlength="8"
+              maxlength="14"
+              required
+              dir="ltr"
+              class="itbms-password h-full w-full border border-gray-300 rounded-lg px-4 pr-12 text-left focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition shadow-sm hover:shadow-md"
+              @keydown.enter.prevent
+              autocomplete="new-password"
+            />
+            <button
+              type="button"
+              @click="togglePassword"
+              class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+              aria-label="Toggle password visibility"
+            >
+              {{ showPassword ? "🙈" : "👁️" }}
+            </button>
+          </div>
 
-          <!-- toggle button -->
-          <button
-            type="button"
-            @click="togglePassword"
-            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+          <!-- error เป็น sibling ไม่ให้ดันตำแหน่งปุ่ม -->
+          <p
+            v-if="buyerForm.password && buyerForm.password.length < 8"
+            class="text-red-500 text-sm mt-1"
           >
-            {{ showPassword ? "🙈" : "👁️" }}
-          </button>
+            Password must be at least 8 characters
+          </p>
         </div>
       </div>
-      
+
       <!-- Buttons -->
       <div class="flex justify-end gap-4 mt-8">
         <button

@@ -1,4 +1,4 @@
-<script setup>
+<!-- <script setup>
 import { ref, computed } from "vue";
 
 const form = ref({ email: "", password: "" });
@@ -35,7 +35,6 @@ const focusNext = (nextId) => {
 				Welcome To ITB-MShop
 			</h2>
 
-			<!-- Error alert -->
 			<div
 				v-if="props.errorMessage"
 				class="rounded-md border border-red-300 bg-red-50 text-red-700 text-sm p-3 flex items-start gap-2"
@@ -44,7 +43,6 @@ const focusNext = (nextId) => {
 				<span>{{ props.errorMessage }}</span>
 			</div>
 
-			<!-- Email -->
 			<div>
 				<label for="email" class="block mb-2 font-medium text-gray-700"
 					>Email</label
@@ -58,8 +56,6 @@ const focusNext = (nextId) => {
 					@keydown.enter="focusNext('password')"
 				/>
 			</div>
-
-			<!-- Password -->
 			<div>
 				<label for="password" class="block mb-2 font-medium text-gray-700"
 					>Password</label
@@ -80,8 +76,6 @@ const focusNext = (nextId) => {
 					</button>
 				</div>
 			</div>
-
-			<!-- Submit -->
 			<div class="pt-1">
 				<button
 					type="submit"
@@ -98,4 +92,4 @@ const focusNext = (nextId) => {
 			</div>
 		</form>
 	</div>
-</template>
+</template> -->

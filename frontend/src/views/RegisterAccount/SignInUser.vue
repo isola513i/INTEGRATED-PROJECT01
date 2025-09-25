@@ -62,7 +62,8 @@ const validateEmail = (email) => {
 // Watch for changes in email or password
 watch(
   () => [form.value.email, form.value.password],
-  ([newEmail,newPassword]) => { //
+  ([newEmail, newPassword]) => {
+    //
     if (!newEmail || !newPassword) {
       errorMessage.value = "Email and password are required.";
       buttonDisabled.value = true;
@@ -72,8 +73,7 @@ watch(
     } else if (newEmail.length > 50) {
       errorMessage.value = "Invalid email format.";
       buttonDisabled.value = true;
-    }
-	else {
+    } else {
       errorMessage.value = "";
       buttonDisabled.value = false;
     }
@@ -114,41 +114,49 @@ watch(
           </div>
 
           <!-- Email -->
-          <div class="flex flex-col">
-            <label for="email" class="mb-2 text-black font-medium">Email</label>
-            <input
-              id="email"
-              type="email"
-              v-model.trim="form.email"
-              required
-			  maxlength="50"
-              placeholder="Enter your email"
-              @keydown.enter="focusNext('password')"
-              class="itbms-email px-4 py-3 border border-gray-300 rounded-lg text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition shadow-sm hover:shadow-md"
-            />
+          <!-- Email -->
+          <div class="space-y-2">
+            <label for="email" class="text-black font-medium">Email</label>
+            <div class="relative">
+              <input
+                id="email"
+                type="email"
+                v-model.trim="form.email"
+                required
+                maxlength="50"
+                placeholder="Enter your email"
+                @keydown.enter="focusNext('password')"
+                autocomplete="email"
+                class="itbms-email h-12 w-full px-4 border border-gray-300 rounded-lg text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition shadow-sm hover:shadow-md"
+              />
+            </div>
           </div>
 
           <!-- Password -->
-          <div class="flex flex-col relative">
-            <label for="password" class="mb-2 text-black font-medium"
+          <div class="space-y-2">
+            <label for="password" class="text-black font-medium"
               >Password</label
             >
-            <input
-              id="password"
-              :type="showPassword ? 'text' : 'password'"
-              v-model="form.password"
-			  required
-			  maxlength="14"
-              placeholder="Enter your password"
-              class="itbms-password px-4 py-3 border border-gray-300 rounded-lg text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition shadow-sm hover:shadow-md pr-12"
-            />
-            <button
-              type="button"
-              @click="togglePassword"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-black hover:text-gray-700 focus:outline-none"
-            >
-              {{ showPassword ? "🙈" : "👁️" }}
-            </button>
+            <div class="relative">
+              <input
+                id="password"
+                :type="showPassword ? 'text' : 'password'"
+                v-model="form.password"
+                required
+                maxlength="14"
+                placeholder="Enter your password"
+                autocomplete="current-password"
+                class="itbms-password h-12 w-full px-4 pr-12 border border-gray-300 rounded-lg text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition shadow-sm hover:shadow-md"
+              />
+              <button
+                type="button"
+                @click="togglePassword"
+                class="absolute inset-y-0 right-3 flex items-center text-black hover:text-gray-700 focus:outline-none"
+                aria-label="Toggle password visibility"
+              >
+                {{ showPassword ? "🙈" : "👁️" }}
+              </button>
+            </div>
           </div>
 
           <!-- Submit -->

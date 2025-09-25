@@ -1,8 +1,8 @@
 <script setup>
-//import FilterBrand from "./FilterBrand.vue";
 import FilterBrands from "./FilterBrands.vue";
 import FilterPrice from "./FilterPrice.vue";
 import FilterStorageSize from "./FilterStorageSize.vue";
+import PageSize from "../Pagination/PageSize.vue"; // 👈 import ใหม่
 import { nextTick, ref } from "vue";
 
 const emit = defineEmits([
@@ -11,9 +11,10 @@ const emit = defineEmits([
   "update:storage",
   "update:pageSize",
 ]);
-const clearAllFlag = ref(false);
 
+const clearAllFlag = ref(false);
 const pageSize = ref(parseInt(sessionStorage.getItem("pageSize")) || 10);
+
 function clearAll() {
   sessionStorage.removeItem("selectedPrice");
   sessionStorage.removeItem("filterStorage");
@@ -26,49 +27,52 @@ function clearAll() {
   emit("update:brands", []);
   emit("update:price", null);
   emit("update:storage", []);
+  emit("update:pageSize", 10);
 }
 </script>
 
 <template>
-  <div class="flex items-center">
-    <div
-      class="flex items-center justify-between flex-wrap gap-3 bg-gray-100 rounded-full shadow px-4 py-2 w-full max-w-4xl mt-6 mx-auto"
-    >
-      <FilterBrands
-        :clearAllTrigger="clearAllFlag"
-        @update:brands="emit('update:brands', $event)"
-      />
-      <FilterPrice
-        :clearAllTrigger="clearAllFlag"
-        @update:price="emit('update:price', $event)"
-      />
-      <FilterStorageSize
-        :clearAllTrigger="clearAllFlag"
-        @update:storage="emit('update:storage', $event)"
-      />
-
-      <button
-        @click="clearAll"
-        class="text-black bg-gray-200 hover:bg-gray-300 rounded-full p-2 flex-shrink-0"
-      >
-        Clear
-      </button>
+  <div class="flex flex-col md:flex-row w-full gap-3">
+    <!-- แถบฟิลเตอร์ -->
+    <div class="flex-1">
+      <div class="bg-gray-100 rounded-2xl shadow mt-6">
+        <div class="grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-300">
+          <div class="p-3 flex flex-col items-center justify-center">
+            <FilterBrands
+              :clearAllTrigger="clearAllFlag"
+              @update:brands="emit('update:brands', $event)"
+            />
+          </div>
+          <div class="p-3 flex flex-col items-center justify-center">
+            <FilterPrice
+              :clearAllTrigger="clearAllFlag"
+              @update:price="emit('update:price', $event)"
+            />
+          </div>
+          <div class="p-3 flex flex-col items-center justify-center">
+            <FilterStorageSize
+              :clearAllTrigger="clearAllFlag"
+              @update:storage="emit('update:storage', $event)"
+            />
+          </div>
+          <div class="p-3 flex items-center justify-center">
+            <button
+              @click="clearAll"
+              class="text-black  hover:bg-gray-200 rounded-full px-3 py-2"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="flex items-center gap-2 h-[42px]">
-      <label for="pageSize" class="text-gray-700 text-sm cursor-pointer"
-        >Show :</label
-      >
-      <select
-        id="pageSize"
+
+    <!-- PageSize -->
+    <div class="self-center md:self-start mt-3 md:mt-6 md:ml-auto">
+      <PageSize
         v-model="pageSize"
-        @change="emit('update:pageSize', Number(pageSize))"
-        class="border border-gray-300 px-3 h-full rounded-lg text-gray-700 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none cursor-pointer"
-      >
-        <option value="5">5</option>
-        <option value="10">10</option>
-        <option value="15">15</option>
-        <option value="20">20</option>
-      </select>
+        @update:modelValue="emit('update:pageSize', $event)"
+      />
     </div>
   </div>
 </template>
