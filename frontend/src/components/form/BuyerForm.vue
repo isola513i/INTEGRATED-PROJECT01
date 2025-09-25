@@ -11,7 +11,6 @@ const isDisabled = computed(() => {
     !buyerForm.value.nickName.trim() ||
     !buyerForm.value.fullName.trim() ||
     !buyerForm.value.email.trim() ||
-    !buyerForm.value.password.trim() ||
     buyerForm.value.password.length < 8 ||
     props.isStillSubmit
   );

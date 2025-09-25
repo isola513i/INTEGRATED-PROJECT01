@@ -9,10 +9,13 @@ export const getItem = async (path) => {
   return await response.json();
 };
 
-export const fetchSaleItems = async () => {
-  // const response = await fetch(`${API_BASE_URL}/v1/sale-items`);
-
-  const response = await apiClient.get(`/v1/sale-items`);
+// export const fetchSaleItems = async () => {
+//   const response = await fetch(`${API_BASE_URL}/v1/sale-items`);
+//   if (!response.ok) throw new Error("Failed to fetch sale items");
+//   return await response.json();
+// };
+export const fetchSaleItems = async (sellerId) => {
+  const response = await apiClient.get(`${API_BASE_URL}/v2/sellers/${sellerId}/sale-items`);
   if (!response.ok) throw new Error("Failed to fetch sale items");
   return await response.json();
 };
