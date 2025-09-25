@@ -1,30 +1,38 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import { apiClient } from "./httpClient";
+
+// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const getItem = async (path) => {
-  const response = await fetch(`${API_BASE_URL}/${path}`);
+  // const response = await fetch(`${API_BASE_URL}/${path}`);
+  const response = await apiClient.get(`/${path}`);
   if (!response.ok) throw new Error("Failed to fetch sale items");
   return await response.json();
 };
 
 export const fetchSaleItems = async () => {
-  const response = await fetch(`${API_BASE_URL}/v1/sale-items`);
+  // const response = await fetch(`${API_BASE_URL}/v1/sale-items`);
+
+  const response = await apiClient.get(`/v1/sale-items`);
   if (!response.ok) throw new Error("Failed to fetch sale items");
   return await response.json();
 };
 
 export const fetchItemById = async (saleItemId) => {
-  const response = await fetch(`${API_BASE_URL}/v1/sale-items/${saleItemId}`);
+  // const response = await fetch(`${API_BASE_URL}/v1/sale-items/${saleItemId}`);
+
+  const response = await apiClient.get(`/v1/sale-items/${saleItemId}`);
   if (!response.ok) throw new Error("Failed to fetch item");
   return await response.json();
 };
 
 export const addSaleItem = async (formData) => {
   try {
-    const res = await fetch(`${API_BASE_URL}/v2/sale-items`, {
-      method: "POST",
-      body: formData 
-    });
+    // const res = await fetch(`${API_BASE_URL}/v2/sale-items`, {
+    //   method: "POST",
+    //   body: formData
+    // });
 
+    const res = await apiClient.postForm(`/v2/sale-items`, formData);
     if (!res.ok) throw new Error("Failed to create new sale item");
 
     return await res.json();
@@ -34,23 +42,24 @@ export const addSaleItem = async (formData) => {
   }
 };
 
-
 //add user
-
-
 
 export const updateSaleItem = async (saleItemId, saleItemFormData) => {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10000);
 
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/v2/sale-items/${saleItemId}`,
-      {
-        method: "PUT",
-        body: saleItemFormData,
-        signal: controller.signal,
-      }
+    // const response = await fetch(
+    //   `${API_BASE_URL}/v2/sale-items/${saleItemId}`,
+    //   {
+    //     method: "PUT",
+    //     body: saleItemFormData,
+    //     signal: controller.signal,
+    //   }
+    // );
+    const response = await apiClient.putFormData(
+      `/v2/sale-items/${saleItemId}`,
+      saleItemFormData
     );
 
     if (response.status >= 500) throw new Error("Server error");
@@ -62,9 +71,10 @@ export const updateSaleItem = async (saleItemId, saleItemFormData) => {
 };
 
 export const deleteItemById = async (saleItemId) => {
-  const response = await fetch(`${API_BASE_URL}/v2/sale-items/${saleItemId}`, {
-    method: "DELETE",
-  });
+  // const response = await fetch(`${API_BASE_URL}/v2/sale-items/${saleItemId}`, {
+  //   method: "DELETE",
+  // });
+  const response = await apiClient.delete(`/v2/sale-items/${saleItemId}`);
   if (!response.ok) throw new Error("Failed to delete item");
   return true;
 };
@@ -78,7 +88,7 @@ export const fetchSaleItemsV2 = async (
   storageSizes = [],
   minPrice,
   maxPrice,
-  search 
+  search
 ) => {
   if (page === undefined || page === null) {
     throw new Error('Parameter "page" is required and cannot be undefined');
@@ -95,9 +105,11 @@ export const fetchSaleItemsV2 = async (
   storageSizes.forEach((size) => (searchParams += `&storageSizes=${size}`));
 
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/v2/sale-items${searchParams}`
-    );
+    // const response = await fetch(
+    //   `${API_BASE_URL}/v2/sale-items${searchParams}`
+    // );
+
+    const response = await apiClient.get(`/v2/sale-items${searchParams}`,);
     if (!response.ok) throw new Error("Failed to fetch sale items");
     return await response.json();
   } catch (error) {

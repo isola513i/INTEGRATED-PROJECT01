@@ -99,7 +99,7 @@ const routes = [
 	{
 		path: "/profile/edit",
 		name: "ProfileEditView",
-		component: ProfileEdit,
+		component: ProfileEdit	,
 		meta: { requiresAuth: true },
 	},
 ];
@@ -109,37 +109,34 @@ const router = createRouter({
 	routes,
 });
 
-router.beforeEach((to, from, next) => {
-	const auth = useAuthStore();
-
-	if (to.meta.requiresAuth && !auth.isAuthenticated) {
-		return next({ name: "signin" });
-	}
-
-	next();
-});
-
+// router/index.ts
 router.beforeEach(async (to, from, next) => {
-	const auth = useAuthStore();
+  const auth = useAuthStore();
 
-	if (to.meta.requiresAuth) {
-		await auth.fectchCheckUser();
+  // ไม่ต้องตรวจอะไรถ้า route นี้ไม่ต้องล็อกอิน
+  if (!to.meta?.requiresAuth) return next();
 
-		if (!auth.isAuthenticated) {
-			return next({ name: "signin" });
-		}
+  try {
+    // ✅ รอเช็กสถานะจากเซิร์ฟเวอร์/local ก่อน
+    // แก้ชื่อให้ตรงกับใน store: fetchCheckUser() หรือ fectchCheckUser()
+    await auth.fetchCheckUser?.() ?? auth.fectchCheckUser?.();
+  } catch (e) {
+    console.error("fetchCheckUser failed:", e);
+  }
 
-		try {
-			if (to.meta.roles && !to.meta.roles.includes(auth.user.userType)) {
-				return next({ name: "NotFound" });
-			}
-		} catch (e) {
-			console.error("Token invalid or expired", e);
-			return next({ name: "Landing" });
-		}
-	}
+  const signedIn = !!auth.isAuthenticated;
+  if (!signedIn) {
+    // ส่งกลับพร้อม redirect เป้าหมายเดิม
+    return next({ name: "signin", query: { redirect: to.fullPath } });
+  }
 
-	next();
+  // ถ้า route มี role จำกัด
+  if (to.meta?.roles && !to.meta.roles.includes(auth.user?.userType)) {
+    return next({ name: "NotFound" });
+  }
+
+  return next();
 });
+
 
 export default router;

@@ -77,54 +77,52 @@ function toggleDropdown() {
 
 <template>
   <div
-    class="text-center cursor-pointer relative w-full max-w-[25%]"
+    class="relative w-full text-center cursor-pointer"
     @click.stop="toggleDropdown"
   >
-    <p class="text-sm font-semibold text-black">Storage</p>
+    <p class="text-xs font-semibold text-gray-700 uppercase tracking-wide">Storage</p>
 
-    <div
-      class="flex flex-nowrap gap-1 mt-1 overflow-x-auto min-h-[28px] scrollbar-thin scrollbar-thumb-gray-300"
-    >
+    <!-- Selected chips -->
+    <div class="flex flex-nowrap overflow-x-auto gap-1 mt-1 max-w-full whitespace-nowrap items-center justify-center min-h-[28px]">
       <template v-if="selectedStorage.length">
         <span
           v-for="(s, index) in selectedStorage"
           :key="s"
-          class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-xs flex items-center gap-1 flex-shrink-0"
+          class="bg-slate-100 text-slate-800 px-2 py-0.5 rounded-full text-xs flex items-center gap-1 flex-shrink-0 border border-slate-200"
         >
           {{ formatStorage(s) }}
           <button
             @click.stop="removeStorage(index)"
-            class="text-purple-500 hover:text-red-500 font-bold"
+            class="text-slate-500 hover:text-red-500 font-bold leading-none"
+            aria-label="Remove storage"
           >
-            x
+            ×
           </button>
         </span>
       </template>
       <template v-else>
-        <span
-          class="text-gray-500 text-xs flex items-center justify-center w-full"
-        >
-          Select storage
-        </span>
+        <span class="text-gray-500 text-xs">Filter by storage</span>
       </template>
     </div>
 
+    <!-- Dropdown -->
     <div
-      v-show="showStorageDropdown"
-      class="absolute mt-2 bg-white border border-gray-300 rounded-lg shadow-lg z-50 w-full sm:w-64 max-h-60 overflow-auto"
+      v-if="showStorageDropdown"
+      class="absolute mt-2 bg-white text-black border border-gray-300 rounded-lg shadow-lg z-50 w-full sm:w-64 max-h-60 overflow-auto p-1"
+      @click.stop
     >
       <div
         v-for="option in storageOptions"
         :key="option.value"
-        class="px-4 py-2 text-black hover:bg-gray-100 flex items-center gap-2 cursor-pointer"
-        @click.stop="toggleStorage(option)"
+        class="px-3 py-2 hover:bg-gray-100 flex items-center gap-2 cursor-pointer rounded"
+        @click="toggleStorage(option)"
       >
         <input
           type="checkbox"
           :checked="isStorageChecked(option.value)"
-          @change="toggleStorage(option)"
+          @change.stop="toggleStorage(option)"
         />
-        <span>{{ option.label }}</span>
+        <span class="text-sm">{{ option.label }}</span>
       </div>
     </div>
   </div>
