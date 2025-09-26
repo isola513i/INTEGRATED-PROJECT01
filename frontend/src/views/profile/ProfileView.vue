@@ -85,47 +85,46 @@ onMounted(load);
             <!-- Display fields (match sample) -->
             <p class="text-sm text-black">
               <span class="font-semibold">Nickname : </span>
-              <span data-testid="itbms-nickname">{{ profile.nickName }}</span>
+              <span class="itbms-nickname">{{ profile.nickName }}</span>
             </p>
             <p class="text-sm mt-2 text-black">
               <span class="font-semibold">Email : </span>
-              <span data-testid="itbms-email">{{ profile.email }}</span>
+              <span class="itbms-email">{{ profile.email }}</span>
             </p>
             <p class="text-sm mt-2 text-black">
               <span class="font-semibold">Fullname : </span>
-              <span data-testid="itbms-fullname">{{ profile.fullName }}</span>
+              <span class="itbms-fullname">{{ profile.fullName }}</span>
             </p>
             <p class="text-sm mt-2 text-black">
               <span class="font-semibold">Type : </span>
-              <span data-testid="itbms-type">{{ profile.userType }}</span>
+              <span class="itbms-type">{{ profile.userType }}</span>
             </p>
 
             <!-- Seller extra (masked from BE) -->
             <template v-if="isSeller">
               <p class="text-sm mt-2 text-black">
                 <span class="font-semibold">Mobile : </span>
-                <span data-testid="itbms-mobile">{{
+                <span class="itbms-mobile">{{
                   profile.phoneNumber
                 }}</span>
               </p>
               <p class="text-sm mt-2 text-black">
                 <span class="font-semibold">Bank Account No : </span>
-                <span data-testid="itbms-bankAccount">{{
+                <span class="itbms-bankAccount">{{
                   profile.bankAccount
                 }}</span>
               </p>
               <p class="text-sm mt-2 text-black">
                 <span class="font-semibold">Bank Name : </span>
-                <span data-testid="itbms-bankName">{{ profile.bankName }}</span>
+                <span class="itbms-bankName">{{ profile.bankName }}</span>
               </p>
             </template>
 
             <!-- Edit button -->
             <div class="mt-6">
               <button
-                data-testid="itbms-profile-button"
                 @click="goEdit"
-                class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 cursor-pointer"
+                class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 cursor-pointer itbms-profile-button""
               >
                 Edit Profile
               </button>
