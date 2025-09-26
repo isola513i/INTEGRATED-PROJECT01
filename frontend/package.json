@@ -8,7 +8,7 @@
 		"build": "vite build",
 		"preview": "vite preview",
 		"format": "prettier --write src/",
-		"cy:open": "start-server-and-test dev:test http://localhost:5173 cypress open",
+		"cypress:open": "cypress open",
 		"cy:run": "start-server-and-test dev:test http://localhost:5173 cypress run"
 	},
 	"dependencies": {
@@ -24,7 +24,7 @@
 	"devDependencies": {
 		"@vitejs/plugin-vue": "^5.2.3",
 		"autoprefixer": "^10.4.21",
-		"cypress": "^14.3.3",
+		"cypress": "^14.3.2",
 		"daisyui": "^5.0.35",
 		"postcss": "^8.5.6",
 		"prettier": "3.5.3",

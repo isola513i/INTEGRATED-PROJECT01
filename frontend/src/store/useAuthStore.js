@@ -1,6 +1,6 @@
 // src/store/useAuthStore.js
 import { defineStore } from 'pinia';
-import { fetchProfile, signInUser } from '@/services/userService';
+import { fetchProfile, signInUser,logOut } from '@/services/userService';
 
 // decode JWT
 function decodeJWT(token) {
@@ -48,14 +48,30 @@ export const useAuthStore = defineStore('auth', {
       this.user = user;
       localStorage.setItem('user', JSON.stringify(this.user));
     },
-
-    logout() {
-      this.$reset();
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('user');
+    // logout() {
+    //   this.$reset();
+    //   localStorage.removeItem('accessToken');
+    //   localStorage.removeItem('refreshToken');
+    //   localStorage.removeItem('user');
+    // },
+    async logout() {
+      try {
+        if (this.isAuthenticated) {
+          await logOut(); // ถ้า 401/403 จะ throw ตามที่คุณเขียนไว้
+        }
+      } catch (err) {
+        // เงียบได้ ไม่จำเป็นต้องแจ้งผู้ใช้ (เราเคลียร์ local เสมอ)
+        // console.error("Logout API failed:", err);
+      } finally {
+        // เคลียร์ local state/Storage เสมอ
+        this.accessToken = "";
+        this.refreshToken = "";
+        this.user = null;
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+      }
     },
-
     // ย้ายเข้ามาใน actions และแก้ไข syntax
     async fectchCheckUser() {
       try {
