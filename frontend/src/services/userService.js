@@ -53,7 +53,14 @@ export const signInUser = async (email, password) => {
 // GET PROFILE
 export const getUserProfile = async (userId) => {
   const res = await apiClient.get(`/v2/users/${userId}`);
+  if (res.status === 401) throw new Error("Unauthorized");
+  if (res.status === 403) throw new Error("Forbidden");
+  if (!res.ok) throw new Error((await res.text()) || "Failed to load profile");
+  return await res.json();
+};
 
+export const logOut = async () => {
+  const res = await apiClient.postJson(`/v2/auth/logout`);
   if (res.status === 401) throw new Error("Unauthorized");
   if (res.status === 403) throw new Error("Forbidden");
   if (!res.ok) throw new Error((await res.text()) || "Failed to load profile");

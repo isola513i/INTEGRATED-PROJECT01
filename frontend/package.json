@@ -8,8 +8,7 @@
 		"build": "vite build",
 		"preview": "vite preview",
 		"format": "prettier --write src/",
-		"cy:open": "start-server-and-test dev:test http://localhost:5173 cypress open",
-		"cy:run": "start-server-and-test dev:test http://localhost:5173 cypress run"
+		"cypress:open": "cypress open"
 	},
 	"dependencies": {
 		"@heroicons/vue": "^2.2.0",

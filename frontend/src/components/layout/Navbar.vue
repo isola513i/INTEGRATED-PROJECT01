@@ -53,7 +53,9 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown));
 // Nav active state helper
 function linkClasses(toPath) {
   const isActive =
-    route.name === toPath || route.path === toPath || route.matched.some(m => m.path === toPath);
+    route.name === toPath ||
+    route.path === toPath ||
+    route.matched.some((m) => m.path === toPath);
   return [
     "relative font-semibold tracking-wide transition-colors duration-300",
     isActive ? "text-white" : "text-gray-300 hover:text-white",
@@ -81,19 +83,27 @@ function handleLogOut() {
 
 <template>
   <!-- Sticky, backdrop, subtle border -->
-  <nav class="sticky top-0 z-50 w-full bg-[#111112]/90 backdrop-blur border-b border-white/10">
+  <nav
+    class="sticky top-0 z-50 w-full bg-[#111112]/90 backdrop-blur border-b border-white/10"
+  >
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="flex h-14 items-center justify-between">
         <!-- Left: Logo -->
         <div class="flex items-center gap-2 pl-0">
           <router-link to="/" class="inline-flex items-center">
-            <img class="h-9 w-auto" src="/image/ITBM_SHOP.png" alt="ITBM Shop logo" />
+            <img
+              class="h-9 w-auto"
+              src="/image/ITBM_SHOP.png"
+              alt="ITBM Shop logo"
+            />
           </router-link>
         </div>
 
         <!-- Center: Desktop Nav -->
         <div class="hidden md:flex items-center gap-8">
-          <router-link to="/sale-items" :class="linkClasses('/sale-items')">Store</router-link>
+          <router-link to="/sale-items" :class="linkClasses('/sale-items')"
+            >Store</router-link
+          >
           <router-link to="/" :class="linkClasses('/')">Support</router-link>
           <router-link to="/" :class="linkClasses('/')">Categories</router-link>
           <router-link to="/" :class="linkClasses('/')">Promotions</router-link>
@@ -116,11 +126,17 @@ function handleLogOut() {
             <!-- Search icon -->
             <svg
               class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500"
-              fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
               aria-hidden="true"
             >
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"
+              />
             </svg>
             <!-- Clear -->
             <button
@@ -138,13 +154,21 @@ function handleLogOut() {
             class="relative hidden md:inline-flex items-center justify-center rounded-full p-2 text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             aria-label="Cart"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-              stroke-width="1.5" stroke="currentColor" class="h-6 w-6">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="h-6 w-6"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
+              />
             </svg>
             <!-- badge -->
-            
           </button>
 
           <!-- Auth: Desktop -->
@@ -157,7 +181,7 @@ function handleLogOut() {
                 Profile
               </router-link>
               <div class="hidden lg:block text-sm">
-                Hi, {{ auth.nickname ?? auth.user?.nickName }}
+                Hi, {{ auth.user.nickName }}
               </div>
               <button
                 @click="handleLogOut"
@@ -189,9 +213,25 @@ function handleLogOut() {
             aria-label="Toggle menu"
             :aria-expanded="isOpen"
           >
-            <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path v-if="!isOpen" stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-              <path v-else stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            <svg
+              class="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                v-if="!isOpen"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+              <path
+                v-else
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -213,10 +253,19 @@ function handleLogOut() {
           class="w-full rounded-xl bg-white/95 py-2 pl-10 pr-10 text-sm text-black outline-none ring-0 focus:ring-2 focus:ring-blue-500"
           aria-label="Search products"
         />
-        <svg class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500"
-          fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round"
-            d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
+        <svg
+          class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"
+          />
         </svg>
         <button
           v-if="searchQuery"
@@ -234,22 +283,26 @@ function handleLogOut() {
           to="/sale-items"
           class="block rounded-md px-3 py-2 text-base font-medium hover:bg-white/10"
           @click="isOpen = false"
-        >Store</router-link>
+          >Store</router-link
+        >
         <router-link
           to="/"
           class="block rounded-md px-3 py-2 text-base font-medium hover:bg-white/10"
           @click="isOpen = false"
-        >Support</router-link>
+          >Support</router-link
+        >
         <router-link
           to="/"
           class="block rounded-md px-3 py-2 text-base font-medium hover:bg-white/10"
           @click="isOpen = false"
-        >Categories</router-link>
+          >Categories</router-link
+        >
         <router-link
           to="/"
           class="block rounded-md px-3 py-2 text-base font-medium hover:bg-white/10"
           @click="isOpen = false"
-        >Promotions</router-link>
+          >Promotions</router-link
+        >
       </div>
 
       <!-- Mobile auth -->
@@ -258,21 +311,29 @@ function handleLogOut() {
           <button
             @click="goToProfile"
             class="block w-full rounded-md px-3 py-2 text-left text-base font-medium text-white hover:bg-white/10"
-          >Profile</button>
+          >
+            Profile
+          </button>
           <button
             @click="handleLogOut"
             class="block w-full rounded-md px-3 py-2 text-left text-base font-medium text-white hover:bg-white/10"
-          >Log out</button>
+          >
+            Log out
+          </button>
         </template>
         <template v-else>
           <button
             @click="goToSignIn"
             class="block w-full rounded-md px-3 py-2 text-left text-base font-medium text-white hover:bg-white/10"
-          >Sign in</button>
+          >
+            Sign in
+          </button>
           <button
             @click="goToRegister"
             class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-left text-base font-medium text-black hover:bg-gray-100"
-          >Register</button>
+          >
+            Register
+          </button>
         </template>
       </div>
     </div>
