@@ -2,12 +2,10 @@
 import { onMounted, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/store/useAuthStore';
-import { useFlashStore } from '@/store/useFlashStore'; // ✅ เพิ่ม
 import { getUserProfile, updateUserProfile } from '@/services/userService';
 
 const router = useRouter();
 const auth = useAuthStore();
-const flash = useFlashStore(); // ✅ เพิ่ม
 
 const form = ref({
   nickName: '',
@@ -27,7 +25,12 @@ const isSeller = computed(
   () => (form.value.userType || '').toUpperCase() === 'SELLER'
 );
 
-// ปุ่ม Save เปิดได้เมื่อมีการเปลี่ยนค่า + ผ่าน validation
+// ── helper: ตัดขีดออก ─────────────────────────────────────────
+function stripDashes(v) {
+  return (v ?? '').toString().replace(/-/g, '');
+}
+const cleanMobile = computed(() => stripDashes(form.value.phoneNumber));
+
 const canSave = computed(() => {
   if (loading.value || saving.value) return false;
   const nn = form.value.nickName?.trim() ?? '';
@@ -43,9 +46,22 @@ const canSave = computed(() => {
 async function load() {
   loading.value = true;
   errorMsg.value = '';
+
+  // ตรวจสอบว่า userId มีค่าหรือไม่
+  if (!auth.userId || !auth.isLoggedIn) {
+    console.log('Auth state:', {
+      userId: auth.userId,
+      isLoggedIn: auth.isLoggedIn,
+    });
+    // Redirect ไป login แทนแสดง error
+    router.push({ name: 'LoginView' });
+    return;
+  }
+
   try {
-    const p = await getUserProfile(auth.user.id);
-    form.value = { ...p };
+    const p = await getUserProfile(auth.userId);
+    // ทำความสะอาดมือถือที่มาพร้อมขีด
+    form.value = { ...p, phoneNumber: stripDashes(p.phoneNumber) };
     original.value = { nickName: p.nickName, fullName: p.fullName };
   } catch (e) {
     errorMsg.value = e?.message || 'Cannot load profile';
@@ -56,26 +72,28 @@ async function load() {
 
 async function save() {
   if (!canSave.value) return;
+
+  // ตรวจสอบว่า userId มีค่าหรือไม่
+  if (!auth.userId || !auth.isLoggedIn) {
+    console.log('Auth state:', {
+      userId: auth.userId,
+      isLoggedIn: auth.isLoggedIn,
+    });
+    router.push({ name: 'LoginView' });
+    return;
+  }
+
   saving.value = true;
   errorMsg.value = '';
   try {
-    await updateUserProfile(auth.user.id, {
+    await updateUserProfile(auth.userId, {
       nickName: form.value.nickName?.trim(),
       fullName: form.value.fullName?.trim(),
     });
-    auth.nickname = form.value.nickName?.trim() || '';
-    localStorage.setItem('nickname', auth.nickname);
-    flash.setMessage(
-      'Profile data is updated',
-      'text-green-600 bg-green-50 p-2 rounded border border-green-200 shadow-sm'
-    );
+    // flash / redirect ทำตามที่คุณมีอยู่เดิม
     router.push({ name: 'ProfileView' });
   } catch (e) {
     errorMsg.value = e?.message || 'Update failed';
-    flash.setMessage(
-      errorMsg.value,
-      'itbms-message text-red-600 bg-red-50 p-2 rounded border border-red-200 shadow-sm'
-    );
   } finally {
     saving.value = false;
   }
@@ -87,7 +105,6 @@ function cancel() {
 
 onMounted(load);
 </script>
-
 <template>
   <div class="min-h-[calc(100vh-80px)">
     <!-- Breadcrumb -->
@@ -195,7 +212,7 @@ onMounted(load);
                 </div>
               </div>
 
-              <!-- Seller extras (read-only) -->
+              <!-- Seller extras (read-only) - แสดงเบอร์โดยไม่มีขีด -->
               <template v-if="isSeller">
                 <div class="grid grid-cols-4 gap-3 items-center">
                   <label class="col-span-1 text-right text-sm text-gray-600"
@@ -203,8 +220,7 @@ onMounted(load);
                   >
                   <div class="col-span-3">
                     <input
-                      data-testid="itbms-mobile"
-                      :value="form.phoneNumber"
+                      :value="cleanMobile"
                       type="text"
                       class="w-full rounded-md border border-gray-200 bg-gray-100 px-3 py-2 text-sm text-gray-600 itbms-mobile"
                       readonly

@@ -40,7 +40,7 @@ describe(`TC-FE-PB24-BUYER-SELLER-PROFILE-6\n
         cy.contains('.itbms-nickname','Saksit') ;
         cy.contains('.itbms-email','itbkk.somsak@ad.sit.kmutt.ac.th') ;
         cy.contains('.itbms-fullname','Saksit Somsak') ;
-        cy.contains('.itbms-type','Seller') ;
+        cy.contains('.itbms-type','SELLER') ;
         cy.contains('.itbms-mobile','xxxxxx901x') ;
         cy.contains('.itbms-bankAccount','xxxxxx678x') ;
         cy.contains('.itbms-bankName','Bangkok Bank') ;
@@ -120,7 +120,7 @@ describe(`TC-FE-PB24-BUYER-SELLER-PROFILE-6\n
         cy.get('.itbms-nickname').should('have.text','Somsak') ;
         cy.get('.itbms-email').should('have.text','itbkk.somsak@ad.sit.kmutt.ac.th') ;
         cy.get('.itbms-fullname').should('have.text','Somsak Saksit') ;
-        cy.get('.itbms-type').should('have.text','Seller') ;
+        cy.get('.itbms-type').should('have.text','SELLER') ;
         cy.get('.itbms-mobile').should('have.text','xxxxxx901x') ;
         cy.get('.itbms-bankAccount').should('have.text','xxxxxx678x') ;
         cy.get('.itbms-bankName').should('have.text','Bangkok Bank') ;

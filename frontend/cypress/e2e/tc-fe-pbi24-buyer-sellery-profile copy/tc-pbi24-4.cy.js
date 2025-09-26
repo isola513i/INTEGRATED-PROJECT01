@@ -1,7 +1,7 @@
-describe(`TC-FE-PB24-BUYER-SELLER-PROFILE-5\n 
+describe(`TC-FE-PB24-BUYER-SELLER-PROFILE-4\n 
     Test Scenario : normal - seller\n
                            - view and edit the profile\n
-                           - save the action`, () => {
+                           - cancel the action`, () => {
 
     let resource = '/signin'
     let baseAPI = Cypress.config('baseAPI')
@@ -30,16 +30,13 @@ describe(`TC-FE-PB24-BUYER-SELLER-PROFILE-5\n
     it(`[step 3] should have "Profile" button and click to open the profile page.\n
         should show the profile data: nickname, email, fullname and account type.\n
         should have "Edit Profile" button".\n`,()=>{
-        // cy.get('.itbms-profile').should('exist').as('profileButton'); 
-        // cy.get('@profileButton').click();
-        // cy.wait(100)
         cy.visit('/profile') ;  
         cy.wait(100) ;
 
         cy.contains('.itbms-nickname','Somsak') ;
         cy.contains('.itbms-email','itbkk.somsak@ad.sit.kmutt.ac.th') ;
         cy.contains('.itbms-fullname','Somsak Saksit') ;
-        cy.contains('.itbms-type','Seller') ;
+        cy.contains('.itbms-type','SELLER') ;
         cy.contains('.itbms-mobile','xxxxxx901x') ;
         cy.contains('.itbms-bankAccount','xxxxxx678x') ;
         cy.contains('.itbms-bankName','Bangkok Bank') ;
@@ -52,7 +49,7 @@ describe(`TC-FE-PB24-BUYER-SELLER-PROFILE-5\n
         should disable the "Save" button.\n
         [step 5] should change nickname and fullname.\n
         should enable the "Save" button.
-        should click the "Save" button`,()=>{
+        should click the "Cancel" button`,()=>{
         cy.visit('/profile') ;  
         cy.wait(100) ;
 
@@ -103,23 +100,23 @@ describe(`TC-FE-PB24-BUYER-SELLER-PROFILE-5\n
             expect($btn.is(':disabled') || $btn.hasClass('disabled')).to.be.false
         })
 
-        cy.get('.itbms-save-button').as('save') ;
-        cy.get('@save').click();
+        cy.get('.itbms-cancel-button').as('cancel') ;
+        cy.get('@cancel').click();
         cy.wait(100) ;
     })
 
-    it(`[step 6] should redirect to the profile page after saving the edit.\n
-        should change the profile data.`,()=>{
+    it(`[step 6] should redirect to the profile page after canceling the edit.\n
+        should not change the profile data.`,()=>{
         // cy.get('.itbms-profile').should('exist').as('profileButton'); 
         // cy.get('@profileButton').click();
         // cy.wait(100)
         cy.visit('/profile') ;  
         cy.wait(100) ;
 
-        cy.contains('.itbms-nickname','Saksit') ;
+        cy.contains('.itbms-nickname','Somsak') ;
         cy.contains('.itbms-email','itbkk.somsak@ad.sit.kmutt.ac.th') ;
-        cy.contains('.itbms-fullname','Saksit Somsak') ;
-        cy.contains('.itbms-type','Seller') ;
+        cy.contains('.itbms-fullname','Somsak Saksit') ;
+        cy.contains('.itbms-type','SELLER') ;
         cy.contains('.itbms-mobile','xxxxxx901x') ;
         cy.contains('.itbms-bankAccount','xxxxxx678x') ;
         cy.contains('.itbms-bankName','Bangkok Bank') ;
