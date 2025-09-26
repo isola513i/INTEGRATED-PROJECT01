@@ -46,6 +46,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/itb-mshop/v2/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/itb-mshop/v2/sale-items").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/itb-mshop/v1/brands").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/itb-mshop/v1/storage").permitAll()
                         .requestMatchers(HttpMethod.POST, "/itb-mshop/v2/auth/logout").authenticated()
 
                         // SELLER-only endpoints

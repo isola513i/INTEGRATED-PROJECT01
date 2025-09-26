@@ -17,14 +17,17 @@ async function handleFormSubmit() {
   errorMessage.value = "";
   loading.value = true;
   try {
-    await auth.login(form.value.email.trim(), form.value.password);
-
+    const data = await auth.login(form.value.email.trim(), form.value.password);
     flash.setMessage(
       "Login successful!",
       "text-green-600 bg-green-50 p-2 rounded border border-green-200 shadow-sm"
     );
-
-    router.replace("/sale-items");
+    const user = JSON.parse(localStorage.getItem("user"));
+  if(user.userType === "SELLER"){
+        router.replace("/sale-items/list");
+      } else {
+        router.replace("/sale-items");
+    }
   } catch (e) {
     const required403 = "You need to activate your accout before signing in.";
     const raw = e?.message || "";

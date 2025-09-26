@@ -174,7 +174,7 @@ public class SaleItemService {
                     var seller = saleItem.getSeller();
                     dto.setSeller(new SaleItemV2Dto.SaleItemV2SellerResponse.SellerDto(
                             seller != null ? seller.getId() : null,
-                            seller != null ? seller.getEmail() : null
+                            seller != null ? seller.getNickName() : null
                     ));
                     return dto;
                 });
@@ -266,11 +266,11 @@ public class SaleItemService {
         item.setBrand(brand);
         item.setDescription(s.getDescription());
         item.setPrice(s.getPrice());
-        item.setRamGb(s.getRamGb());
-        item.setScreenSizeInch(s.getScreenSizeInch());
+        item.setRamGb(s.getRamGb()!=null ? s.getRamGb() : null);
+        item.setScreenSizeInch(s.getScreenSizeInch()!=null ? s.getScreenSizeInch() : null);
         item.setQuantity(s.getQuantity());
-        item.setStorageGb(s.getStorageGb());
-        item.setColor(s.getColor());
+        item.setStorageGb(s.getStorageGb()!=null ? s.getStorageGb() : null);
+        item.setColor(s.getColor()!=null ? s.getColor() : null);
         item.setSeller(user);
         item = saleItemRepo.saveAndFlush(item);
 
