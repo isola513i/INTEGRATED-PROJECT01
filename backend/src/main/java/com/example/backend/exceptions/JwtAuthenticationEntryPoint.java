@@ -15,7 +15,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
             , AuthenticationException authException) throws IOException {
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.getWriter().println("{\"message\":\"Unauthorized\"" +
+        response.getWriter().println("{\"message\":\"You are not allow at this path\"" +
                 ",\"status\":401"+
                 ", \"path\":\"" + response.getHeader("request-uri")+"\"}");
         response.getWriter().flush();

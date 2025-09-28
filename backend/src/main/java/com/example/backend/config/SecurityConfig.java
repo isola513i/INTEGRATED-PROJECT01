@@ -1,5 +1,6 @@
 package com.example.backend.config;
 
+import com.example.backend.exceptions.JsonAccessDeniedHandler;
 import com.example.backend.exceptions.JwtAuthenticationEntryPoint;
 import com.example.backend.filters.JwtAuthFilter;
 
@@ -37,7 +38,9 @@ public class SecurityConfig {
     }
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
-                                                   JwtAuthFilter jwtAuthFilter) throws Exception {
+                                                   JwtAuthFilter jwtAuthFilter,
+                                                   JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
+                                                   JsonAccessDeniedHandler jsonAccessDeniedHandler) throws Exception {
         http
                 .headers(h -> h.frameOptions(f -> f.disable()))
                 .csrf(csrf -> csrf.disable())
@@ -46,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/itb-mshop/v2/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/itb-mshop/v2/sale-items").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/itb-mshop/v2/sale-items/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/itb-mshop/v1/brands").permitAll()
                         .requestMatchers(HttpMethod.GET, "/itb-mshop/v1/storage").permitAll()
                         .requestMatchers(HttpMethod.POST, "/itb-mshop/v2/auth/logout").authenticated()
@@ -60,7 +64,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint).accessDeniedHandler(jsonAccessDeniedHandler))
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();

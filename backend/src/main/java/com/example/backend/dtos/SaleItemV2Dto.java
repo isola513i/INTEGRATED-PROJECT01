@@ -1,5 +1,6 @@
 package com.example.backend.dtos;
 
+import com.example.backend.entities.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,6 +36,7 @@ public class SaleItemV2Dto {
         private Integer storageGb;
         private String color;
         private List<SaleItemImageDto> saleItemImages;
+        private SaleItemV2SellerResponse.SellerDto seller;
         private Instant createdOn;
         private Instant updatedOn;
 
