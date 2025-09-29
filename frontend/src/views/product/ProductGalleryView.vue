@@ -148,22 +148,23 @@ watch(
       {{ flash.message }}
     </div>
 
-    <!-- Product Cards -->
-    <div class="px-4 py-2">
+    <div class="px-8 py-2">
       <div
         v-if="saleItems.length > 0"
-        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4"
+        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 justify-center justify-items-center"
       >
         <SaleItemCard
           v-for="item in saleItems"
           :key="item.saleItemId"
           :item="item"
+          @add-to-cart="addToCart"
         />
       </div>
       <div v-else class="p-10 text-center text-gray-400 text-xl">
         No sale item
       </div>
     </div>
+
     <!-- Pagination -->
     <div class="flex justify-center py-4">
       <Pagination
