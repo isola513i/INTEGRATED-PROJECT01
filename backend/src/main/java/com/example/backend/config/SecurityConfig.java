@@ -3,7 +3,6 @@ package com.example.backend.config;
 import com.example.backend.exceptions.JsonAccessDeniedHandler;
 import com.example.backend.exceptions.JwtAuthenticationEntryPoint;
 import com.example.backend.filters.JwtAuthFilter;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,7 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-   @Autowired
+    @Autowired
     private JwtAuthFilter jwtAuthFilter;
     @Autowired
     private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
@@ -52,6 +51,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/itb-mshop/v2/sale-items/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/itb-mshop/v1/brands").permitAll()
                         .requestMatchers(HttpMethod.GET, "/itb-mshop/v1/storage").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/itb-mshop/v2/sale-items/*/images/*").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/itb-mshop/v2/sale-items/*/images").permitAll()
                         .requestMatchers(HttpMethod.POST, "/itb-mshop/v2/auth/logout").authenticated()
 
                         // SELLER-only endpoints
