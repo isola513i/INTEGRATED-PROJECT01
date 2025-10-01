@@ -1,39 +1,42 @@
 // src/store/useAuthStore.js
-import { defineStore } from "pinia";
-import { fetchProfile, signInUser } from "@/services/userService";
+import { defineStore } from 'pinia';
+import { fetchProfile, signInUser,logOut } from '@/services/userService';
+
 // decode JWT
 function decodeJWT(token) {
   if (!token) return {};
-  const base64Url = token.split(".")[1] || "";
-  const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+  const base64Url = token.split('.')[1] || '';
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
   const json = decodeURIComponent(
-    atob(base64 + "=".repeat((4 - (base64.length % 4)) % 4))
-      .split("")
-      .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-      .join("")
+    atob(base64 + '='.repeat((4 - (base64.length % 4)) % 4))
+      .split('')
+      .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+      .join('')
   );
-  return JSON.parse(json || "{}");
+  return JSON.parse(json || '{}');
 }
 
-export const useAuthStore = defineStore("auth", {
+export const useAuthStore = defineStore('auth', {
   state: () => ({
-    accessToken: localStorage.getItem("accessToken") || "",
-    refreshToken: localStorage.getItem("refreshToken") || "",
-    user: localStorage.getItem("user")
-      ? JSON.parse(localStorage.getItem("user"))
+    accessToken: localStorage.getItem('accessToken') || '',
+    refreshToken: localStorage.getItem('refreshToken') || '',
+    user: localStorage.getItem('user')
+      ? JSON.parse(localStorage.getItem('user'))
       : null,
   }),
 
   getters: {
     isAuthenticated: (s) => !!s.accessToken,
+    isLoggedIn: (s) => !!s.accessToken && !!s.user, // เพิ่ม isLoggedIn
+    userId: (s) => s.user?.id, // เพิ่ม userId getter
   },
 
   actions: {
     setTokens(access, refresh) {
-      this.accessToken = access || "";
-      this.refreshToken = refresh || "";
-      localStorage.setItem("accessToken", this.accessToken);
-      localStorage.setItem("refreshToken", this.refreshToken);
+      this.accessToken = access || '';
+      this.refreshToken = refresh || '';
+      localStorage.setItem('accessToken', this.accessToken);
+      localStorage.setItem('refreshToken', this.refreshToken);
     },
 
     async login(email, password) {
@@ -43,23 +46,43 @@ export const useAuthStore = defineStore("auth", {
       console.log(c);
       const user = await fetchProfile(c.id);
       this.user = user;
-      localStorage.setItem("user", JSON.stringify(this.user));
+      localStorage.setItem('user', JSON.stringify(this.user));
     },
-
-    logout() {
-      this.$reset();
-
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      localStorage.removeItem("user");
+    // logout() {
+    //   this.$reset();
+    //   localStorage.removeItem('accessToken');
+    //   localStorage.removeItem('refreshToken');
+    //   localStorage.removeItem('user');
+    // },
+    async logout() {
+      try {
+        if (this.isAuthenticated) {
+          await logOut(); // ถ้า 401/403 จะ throw ตามที่คุณเขียนไว้
+        }
+      } catch (err) {
+        // เงียบได้ ไม่จำเป็นต้องแจ้งผู้ใช้ (เราเคลียร์ local เสมอ)
+        // console.error("Logout API failed:", err);
+      } finally {
+        // เคลียร์ local state/Storage เสมอ
+        this.accessToken = "";
+        this.refreshToken = "";
+        this.user = null;
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
+      }
     },
-  },
-  async fectchCheckUser() {
-    try {
-      const res = await fetchProfile(this.user.id);
-      if (!res.ok) this.logout;
-    } catch (er) {
-      this.logout;
-    }
+    // ย้ายเข้ามาใน actions และแก้ไข syntax
+    async fectchCheckUser() {
+      try {
+        if (!this.user?.id) return;
+        const res = await fetchProfile(this.user.id);
+        if (!res || !res.id) {
+          this.logout(); // แก้ไขเพิ่ม ()
+        }
+      } catch (er) {
+        this.logout(); // แก้ไขเพิ่ม ()
+      }
+    },
   },
 });

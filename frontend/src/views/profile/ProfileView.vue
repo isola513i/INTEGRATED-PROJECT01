@@ -1,9 +1,9 @@
 <script setup>
-import { onMounted, ref, computed } from "vue";
-import { useRouter } from "vue-router";
-import { useAuthStore } from "@/store/useAuthStore";
-import { getUserProfile } from "@/services/userService";
-import { useFlashStore } from "@/store/useFlashStore";
+import { onMounted, ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/store/useAuthStore';
+import { getUserProfile } from '@/services/userService';
+import { useFlashStore } from '@/store/useFlashStore';
 
 const router = useRouter();
 const auth = useAuthStore();
@@ -11,27 +11,40 @@ const flash = useFlashStore();
 
 const profile = ref(null);
 const loading = ref(true);
-const errorMsg = ref("");
+const errorMsg = ref('');
 
 const isSeller = computed(
-  () => (profile.value?.userType || "").toUpperCase() === "SELLER"
+  () => (profile.value?.userType || '').toUpperCase() === 'SELLER'
 );
+
+// ── helper: ตัดขีดออก ─────────────────────────────────────────
+function stripDashes(v) {
+  return (v ?? '').toString().replace(/-/g, '');
+}
 
 async function load() {
   loading.value = true;
-  errorMsg.value = "";
+  errorMsg.value = '';
+
+  // ตรวจสอบว่า userId มีค่าหรือไม่
+  if (!auth.userId) {
+    errorMsg.value = 'User ID not found. Please login again.';
+    loading.value = false;
+    return;
+  }
+
   try {
-    const data = await getUserProfile(auth.user.id);
+    const data = await getUserProfile(auth.userId);
     profile.value = data;
   } catch (e) {
-    errorMsg.value = e?.message || "Cannot load profile";
+    errorMsg.value = e?.message || 'Cannot load profile';
   } finally {
     loading.value = false;
   }
 }
 
 function goEdit() {
-  router.push({ name: "ProfileEditView" });
+  router.push({ name: 'ProfileEditView' });
 }
 
 onMounted(load);
@@ -51,7 +64,7 @@ onMounted(load);
         </div>
       </div>
     </div>
-    i
+
     <!-- Content -->
     <div class="container mx-auto px-4 py-8">
       <!-- Flash message -->
@@ -85,47 +98,44 @@ onMounted(load);
             <!-- Display fields (match sample) -->
             <p class="text-sm text-black">
               <span class="font-semibold">Nickname : </span>
-              <span data-testid="itbms-nickname">{{ profile.nickName }}</span>
+              <span class="itbms-nickname">{{ profile.nickName }}</span>
             </p>
             <p class="text-sm mt-2 text-black">
               <span class="font-semibold">Email : </span>
-              <span data-testid="itbms-email">{{ profile.email }}</span>
+              <span class="itbms-email">{{ profile.email }}</span>
             </p>
             <p class="text-sm mt-2 text-black">
               <span class="font-semibold">Fullname : </span>
-              <span data-testid="itbms-fullname">{{ profile.fullName }}</span>
+              <span class="itbms-fullname">{{ profile.fullName }}</span>
             </p>
             <p class="text-sm mt-2 text-black">
               <span class="font-semibold">Type : </span>
-              <span data-testid="itbms-type">{{ profile.userType }}</span>
+              <span class="itbms-type">{{ profile.userType }}</span>
             </p>
 
-            <!-- Seller extra (masked from BE) -->
+            <!-- Seller extra (แสดงเบอร์โดยไม่มีขีด) -->
             <template v-if="isSeller">
               <p class="text-sm mt-2 text-black">
                 <span class="font-semibold">Mobile : </span>
-                <span data-testid="itbms-mobile">{{
-                  profile.phoneNumber
+                <span class="itbms-mobile">{{
+                  stripDashes(profile.phoneNumber)
                 }}</span>
               </p>
               <p class="text-sm mt-2 text-black">
                 <span class="font-semibold">Bank Account No : </span>
-                <span data-testid="itbms-bankAccount">{{
-                  profile.bankAccount
-                }}</span>
+                <span class="itbms-bankAccount">{{ profile.bankAccount }}</span>
               </p>
               <p class="text-sm mt-2 text-black">
                 <span class="font-semibold">Bank Name : </span>
-                <span data-testid="itbms-bankName">{{ profile.bankName }}</span>
+                <span class="itbms-bankName">{{ profile.bankName }}</span>
               </p>
             </template>
 
             <!-- Edit button -->
             <div class="mt-6">
               <button
-                data-testid="itbms-profile-button"
                 @click="goEdit"
-                class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 cursor-pointer"
+                class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400 cursor-pointer itbms-profile-button"
               >
                 Edit Profile
               </button>

@@ -1,8 +1,8 @@
 package com.example.backend.config;
 
+import com.example.backend.exceptions.JsonAccessDeniedHandler;
 import com.example.backend.exceptions.JwtAuthenticationEntryPoint;
 import com.example.backend.filters.JwtAuthFilter;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,7 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-   @Autowired
+    @Autowired
     private JwtAuthFilter jwtAuthFilter;
     @Autowired
     private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
@@ -37,7 +37,9 @@ public class SecurityConfig {
     }
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
-                                                   JwtAuthFilter jwtAuthFilter) throws Exception {
+                                                   JwtAuthFilter jwtAuthFilter,
+                                                   JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
+                                                   JsonAccessDeniedHandler jsonAccessDeniedHandler) throws Exception {
         http
                 .headers(h -> h.frameOptions(f -> f.disable()))
                 .csrf(csrf -> csrf.disable())
@@ -46,6 +48,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/itb-mshop/v2/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/itb-mshop/v2/sale-items").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/itb-mshop/v2/sale-items/*").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/itb-mshop/v1/brands").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/itb-mshop/v1/storage").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/itb-mshop/v2/sale-items/*/images/*").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/itb-mshop/v2/sale-items/*/images").permitAll()
                         .requestMatchers(HttpMethod.POST, "/itb-mshop/v2/auth/logout").authenticated()
 
                         // SELLER-only endpoints
@@ -58,7 +65,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint).accessDeniedHandler(jsonAccessDeniedHandler))
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();

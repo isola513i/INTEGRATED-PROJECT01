@@ -1,54 +1,70 @@
 <script setup>
-import { onMounted, ref, computed } from "vue";
-import { useRouter } from "vue-router";
-import { useAuthStore } from "@/store/useAuthStore";
-import { useFlashStore } from "@/store/useFlashStore"; // ✅ เพิ่ม
-import { getUserProfile, updateUserProfile } from "@/services/userService";
+import { onMounted, ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/store/useAuthStore';
+import { getUserProfile, updateUserProfile } from '@/services/userService';
 
 const router = useRouter();
 const auth = useAuthStore();
-const flash = useFlashStore(); // ✅ เพิ่ม
 
 const form = ref({
-  nickName: "",
-  email: "",
-  fullName: "",
-  userType: "",
-  phoneNumber: "",
-  bankAccount: "",
-  bankName: "",
+  nickName: '',
+  email: '',
+  fullName: '',
+  userType: '',
+  phoneNumber: '',
+  bankAccount: '',
+  bankName: '',
 });
 const original = ref({});
 const loading = ref(true);
 const saving = ref(false);
-const errorMsg = ref("");
+const errorMsg = ref('');
 
 const isSeller = computed(
-  () => (form.value.userType || "").toUpperCase() === "SELLER"
+  () => (form.value.userType || '').toUpperCase() === 'SELLER'
 );
 
-// ปุ่ม Save เปิดได้เมื่อมีการเปลี่ยนค่า + ผ่าน validation
+// ── helper: ตัดขีดออก ─────────────────────────────────────────
+function stripDashes(v) {
+  return (v ?? '').toString().replace(/-/g, '');
+}
+const cleanMobile = computed(() => stripDashes(form.value.phoneNumber));
+
 const canSave = computed(() => {
   if (loading.value || saving.value) return false;
-  const nn = form.value.nickName?.trim() ?? "";
-  const fn = form.value.fullName?.trim() ?? "";
+  const nn = form.value.nickName?.trim() ?? '';
+  const fn = form.value.fullName?.trim() ?? '';
   const nickValid = nn.length > 0 && nn.length <= 40;
   const fullValid = fn.length >= 4 && fn.length <= 40;
   const changed =
-    nn !== (original.value.nickName || "") ||
-    fn !== (original.value.fullName || "");
+    nn !== (original.value.nickName || '') ||
+    fn !== (original.value.fullName || '');
   return nickValid && fullValid && changed;
 });
 
 async function load() {
   loading.value = true;
-  errorMsg.value = "";
+  errorMsg.value = '';
+
+  // ตรวจสอบว่า userId มีค่าหรือไม่
+  if (!auth.userId || !auth.isLoggedIn) {
+    console.log('Auth state:', {
+      userId: auth.userId,
+      isLoggedIn: auth.isLoggedIn,
+    });
+    // Redirect ไป login แทนแสดง error
+    router.push({ name: 'LoginView' });
+    return;
+  }
+
   try {
-    const p = await getUserProfile(auth.user.id);
-    form.value = { ...p };
+    const p = await getUserProfile(auth.userId);
+    // ทำความสะอาดมือถือที่มาพร้อมขีด
+    form.value = { ...p, phoneNumber: stripDashes(p.phoneNumber) };
     original.value = { nickName: p.nickName, fullName: p.fullName };
   } catch (e) {
-    errorMsg.value = e?.message || "Cannot load profile";
+    errorMsg.value = e?.message || 'Cannot load profile';
   } finally {
     loading.value = false;
   }
@@ -56,38 +72,39 @@ async function load() {
 
 async function save() {
   if (!canSave.value) return;
+
+  // ตรวจสอบว่า userId มีค่าหรือไม่
+  if (!auth.userId || !auth.isLoggedIn) {
+    console.log('Auth state:', {
+      userId: auth.userId,
+      isLoggedIn: auth.isLoggedIn,
+    });
+    router.push({ name: 'LoginView' });
+    return;
+  }
+
   saving.value = true;
-  errorMsg.value = "";
+  errorMsg.value = '';
   try {
-    await updateUserProfile(auth.user.id, {
+    await updateUserProfile(auth.userId, {
       nickName: form.value.nickName?.trim(),
       fullName: form.value.fullName?.trim(),
     });
-    auth.nickname = form.value.nickName?.trim() || "";
-    localStorage.setItem("nickname", auth.nickname);
-    flash.setMessage(
-      "Profile data is updated",
-      "text-green-600 bg-green-50 p-2 rounded border border-green-200 shadow-sm"
-    );
-    router.push({ name: "ProfileView" });
+    // flash / redirect ทำตามที่คุณมีอยู่เดิม
+    router.push({ name: 'ProfileView' });
   } catch (e) {
-    errorMsg.value = e?.message || "Update failed";
-    flash.setMessage(
-      errorMsg.value,
-      "itbms-message text-red-600 bg-red-50 p-2 rounded border border-red-200 shadow-sm"
-    );
+    errorMsg.value = e?.message || 'Update failed';
   } finally {
     saving.value = false;
   }
 }
 
 function cancel() {
-  router.push({ name: "ProfileView" });
+  router.push({ name: 'ProfileView' });
 }
 
 onMounted(load);
 </script>
-
 <template>
   <div class="min-h-[calc(100vh-80px)">
     <!-- Breadcrumb -->
@@ -142,10 +159,9 @@ onMounted(load);
                 >
                 <div class="col-span-3 text-black">
                   <input
-                    data-testid="itbms-nickname"
                     v-model.trim="form.nickName"
                     type="text"
-                    class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 itbms-nickname"
                     :maxlength="40"
                   />
                 </div>
@@ -158,10 +174,9 @@ onMounted(load);
                 >
                 <div class="col-span-3">
                   <input
-                    data-testid="itbms-email"
                     :value="form.email"
                     type="text"
-                    class="w-full rounded-md border border-gray-200 bg-gray-100 px-3 py-2 text-sm text-gray-600"
+                    class="w-full rounded-md border border-gray-200 bg-gray-100 px-3 py-2 text-sm text-gray-600 itbms-email"
                     readonly
                   />
                 </div>
@@ -174,10 +189,9 @@ onMounted(load);
                 >
                 <div class="col-span-3">
                   <input
-                    data-testid="itbms-fullname"
                     v-model.trim="form.fullName"
                     type="text"
-                    class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 itbms-fullname"
                     :maxlength="40"
                   />
                 </div>
@@ -190,16 +204,15 @@ onMounted(load);
                 >
                 <div class="col-span-3">
                   <input
-                    data-testid="itbms-type"
                     :value="form.userType"
                     type="text"
-                    class="w-full rounded-md border border-gray-200 bg-gray-100 px-3 py-2 text-sm text-gray-600"
+                    class="w-full rounded-md border border-gray-200 bg-gray-100 px-3 py-2 text-sm text-gray-600 itbms-type"
                     readonly
                   />
                 </div>
               </div>
 
-              <!-- Seller extras (read-only) -->
+              <!-- Seller extras (read-only) - แสดงเบอร์โดยไม่มีขีด -->
               <template v-if="isSeller">
                 <div class="grid grid-cols-4 gap-3 items-center">
                   <label class="col-span-1 text-right text-sm text-gray-600"
@@ -207,10 +220,9 @@ onMounted(load);
                   >
                   <div class="col-span-3">
                     <input
-                      data-testid="itbms-mobile"
-                      :value="form.phoneNumber"
+                      :value="cleanMobile"
                       type="text"
-                      class="w-full rounded-md border border-gray-200 bg-gray-100 px-3 py-2 text-sm text-gray-600"
+                      class="w-full rounded-md border border-gray-200 bg-gray-100 px-3 py-2 text-sm text-gray-600 itbms-mobile"
                       readonly
                     />
                   </div>
@@ -222,10 +234,9 @@ onMounted(load);
                   >
                   <div class="col-span-3">
                     <input
-                      data-testid="itbms-bankAccount"
                       :value="form.bankAccount"
                       type="text"
-                      class="w-full rounded-md border border-gray-200 bg-gray-100 px-3 py-2 text-sm text-gray-600"
+                      class="w-full rounded-md border border-gray-200 bg-gray-100 px-3 py-2 text-sm text-gray-600 itbms-bankAccount"
                       readonly
                     />
                   </div>
@@ -237,10 +248,9 @@ onMounted(load);
                   >
                   <div class="col-span-3">
                     <input
-                      data-testid="itbms-bankName"
                       :value="form.bankName"
                       type="text"
-                      class="w-full rounded-md border border-gray-200 bg-gray-100 px-3 py-2 text-sm text-gray-600"
+                      class="w-full rounded-md border border-gray-200 bg-gray-100 px-3 py-2 text-sm text-gray-600 itbms-bankName"
                       readonly
                     />
                   </div>
@@ -251,17 +261,15 @@ onMounted(load);
             <!-- Actions -->
             <div class="mt-6 flex items-center justify-center gap-3">
               <button
-                data-testid="itbms-save-button"
                 :disabled="!canSave"
                 @click="save"
-                class="px-5 py-2 rounded-md text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                class="px-5 py-2 rounded-md text-white bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer itbms-save-button"
               >
                 Save
               </button>
               <button
-                data-testid="itbms-cancel-button"
                 @click="cancel"
-                class="px-5 py-2 rounded-md text-white bg-red-500 hover:bg-red-600 cursor-pointer"
+                class="px-5 py-2 rounded-md text-white bg-red-500 hover:bg-red-600 cursor-pointer itbms-cancel-button"
               >
                 Cancel
               </button>

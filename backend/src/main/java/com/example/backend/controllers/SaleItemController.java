@@ -48,14 +48,6 @@ public class SaleItemController {
     @Autowired
     private JwtUtils jwtUtils;
 
-//    public SaleItemController(SaleItemService saleItemService, ModelMapper modelMapper, ListMapper listMapper, SaleItemPictureRepository picRepo, FileStorage storage) {
-//        this.saleItemService = saleItemService;
-//        this.modelMapper = modelMapper;
-//        this.listMapper = listMapper;
-//        this.picRepo = picRepo;
-//        this.storage = storage;
-//    }
-
     // ========== V1 Endpoints ==========
     @GetMapping("/v1/sale-items")
     public ResponseEntity<List<SaleItemDto.GetAllSaleItemsDto>> getAllItems() {
@@ -78,35 +70,32 @@ public class SaleItemController {
         return ResponseEntity.ok(modelMapper.map(saleItemService.updateSaleItem(saleItemId, saleItemDto), SaleItemDto.GetSaleItemDto.class));
     }
 
-    @PostMapping("/v1/sale-items")
-    public ResponseEntity<SaleItemDto.GetSaleItemDto> addSaleItem(
-            @RequestBody SaleItemDto.GetCreateSaleItemDto saleItemDto) {
-        SaleItem saleItem = modelMapper.map(saleItemDto, SaleItem.class);
-        SaleItem savedItem = saleItemService.addSaleItem(saleItem);
-        SaleItemDto.GetSaleItemDto dto = modelMapper.map(savedItem, SaleItemDto.GetSaleItemDto.class);
-        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
-    }
+//    @PostMapping("/v1/sale-items")
+//    public ResponseEntity<SaleItemDto.GetSaleItemDto> addSaleItem(
+//            @RequestBody SaleItemDto.GetCreateSaleItemDto saleItemDto) {
+//        SaleItem saleItem = modelMapper.map(saleItemDto, SaleItem.class);
+//        SaleItem savedItem = saleItemService.addSaleItem(saleItem);
+//        SaleItemDto.GetSaleItemDto dto = modelMapper.map(savedItem, SaleItemDto.GetSaleItemDto.class);
+//        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
+//    }
 
-    @DeleteMapping("/v1/sale-items/{saleItemId}")
-    public ResponseEntity<Void> deleteSaleItem(@PathVariable Integer saleItemId) {
-        saleItemService.deleteSaleItem(saleItemId);
-        return ResponseEntity.noContent().build();
-    }
+//    @DeleteMapping("/v1/sale-items/{saleItemId}")
+//    public ResponseEntity<Void> deleteSaleItem(@PathVariable Integer saleItemId) {
+//        saleItemService.deleteSaleItem(saleItemId);
+//        return ResponseEntity.noContent().build();
+//    }
 
     // ========== V2 Endpoints ==========
-    // Create saleItem with images
-//    @PostMapping(value = "/v2/sale-items", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//    public ResponseEntity<SaleItemV2Dto.SaleItemV2Response> createSaleItemV2(
-//            @ModelAttribute SaleItemV2Dto.SaleItemWithImageInfo req) throws IOException {
-//        var res = saleItemService.createSaleItemWithImages(req);
-//        return ResponseEntity.status(HttpStatus.CREATED).body(res);
-//    }
     @PostMapping(value = "/v2/sellers/{id}/sale-items", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SaleItemV2Dto.SaleItemV2Response> createSaleItemV2(
-            @ModelAttribute SaleItemV2Dto.SaleItemWithImageInfo req,
+            @ModelAttribute SaleItemDto.GetCreateSaleItemDto newSaleItem,
+            @RequestParam(required = false) List<SaleItemV2Dto.SaleItemImageRequest> images,
             @PathVariable Integer id,
             HttpServletRequest request) throws IOException {
-        var res = saleItemService.createSaleItemWithImages(req , request , id);
+        SaleItemV2Dto.SaleItemWithImageInfo req = new SaleItemV2Dto.SaleItemWithImageInfo();
+        req.setSaleItem(newSaleItem);
+        req.setImageInfos(images);
+        var res = saleItemService.createSaleItemWithImages(newSaleItem,images,request,id);
         return ResponseEntity.status(HttpStatus.CREATED).body(res);
     }
 
