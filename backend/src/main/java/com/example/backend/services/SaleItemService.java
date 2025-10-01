@@ -247,38 +247,38 @@ public class SaleItemService {
     }
 
     @Transactional
-    public SaleItemV2Dto.SaleItemV2Response createSaleItemWithImages(SaleItemDto.GetCreateSaleItemDto newSaleItem, List<SaleItemV2Dto.SaleItemImageRequest> images , HttpServletRequest request , Integer sellerId) throws IOException {
+    public SaleItemV2Dto.SaleItemV2Response createSaleItemWithImages(SaleItemV2Dto.SaleItemWithImageInfo saleItem, HttpServletRequest request , Integer sellerId) throws IOException {
         Integer userIdInToken =  jwtUtils.extractUserId(request);
         User user = userService.getUserById(sellerId);
         if (userIdInToken == null || !userIdInToken.equals(sellerId) || !user.getIsActive()) {
             throw new SellerNotMatchInTokenException("Seller does not match the user in token or user is not active.");
         }
+        SaleItemDto.GetCreateSaleItemDto saleItemReq = saleItem.getSaleItem();
+        if (saleItemReq == null) throw new IllegalArgumentException("saleItem is required");
+        if (saleItemReq.getBrand() == null || saleItemReq.getBrand().getId() == null)
+            throw new IllegalArgumentException("Brand id is required");
 
-        if (newSaleItem == null) throw new IllegalArgumentException("saleItem is required");
-        if (newSaleItem.getBrand() == null || newSaleItem.getBrand().getId() == null)
-            throw new IllegalArgumentException("saleItem.brand.id is required");
-
-        var brand = brandRepo.findById(newSaleItem.getBrand().getId())
+        var brand = brandRepo.findById(saleItemReq.getBrand().getId())
                 .orElseThrow(() -> new ItemNotFoundException("Brand not found"));
 
         var item = new SaleItem();
-        item.setModel(newSaleItem.getModel());
+        item.setModel(saleItemReq.getModel());
         item.setBrand(brand);
-        item.setDescription(newSaleItem.getDescription());
-        item.setPrice(newSaleItem.getPrice());
-        item.setRamGb(newSaleItem.getRamGb()!=null ? newSaleItem.getRamGb() : null);
-        item.setScreenSizeInch(newSaleItem.getScreenSizeInch()!=null ? newSaleItem.getScreenSizeInch() : null);
-        item.setQuantity(newSaleItem.getQuantity());
-        item.setStorageGb(newSaleItem.getStorageGb()!=null ? newSaleItem.getStorageGb() : null);
-        item.setColor(newSaleItem.getColor()!=null ? newSaleItem.getColor() : null);
+        item.setDescription(saleItemReq.getDescription());
+        item.setPrice(saleItemReq.getPrice());
+        item.setRamGb(saleItemReq.getRamGb()!=null ? saleItemReq.getRamGb() : null);
+        item.setScreenSizeInch(saleItemReq.getScreenSizeInch()!=null ? saleItemReq.getScreenSizeInch() : null);
+        item.setQuantity(saleItemReq.getQuantity());
+        item.setStorageGb(saleItemReq.getStorageGb()!=null ? saleItemReq.getStorageGb() : null);
+        item.setColor(saleItemReq.getColor()!=null ? saleItemReq.getColor() : null);
         item.setSeller(user);
         item = saleItemRepo.saveAndFlush(item);
 
-        if(images == null || images.isEmpty()) images = List.of();
-        if (images.size() > 4) throw new IllegalArgumentException("Maximum 4 pictures are allowed.");
+        List<SaleItemV2Dto.SaleItemImageRequest> imagesReq = saleItem.getImageInfos() != null && !saleItem.getImageInfos().isEmpty() ? saleItem.getImageInfos() : List.of();
+        if (imagesReq.size() > 4) throw new IllegalArgumentException("Maximum 4 pictures are allowed.");
 
         int position = 0;
-        for (var info : images.stream()
+        for (var info : imagesReq.stream()
                 .sorted(Comparator.comparing(i -> Optional.ofNullable(i.getOrder()).orElse(999)))
                 .toList()) {
 

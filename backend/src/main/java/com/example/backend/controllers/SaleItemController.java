@@ -86,16 +86,12 @@ public class SaleItemController {
 //    }
 
     // ========== V2 Endpoints ==========
-    @PostMapping(value = "/v2/sellers/{id}/sale-items", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/v2/sellers/{id}/sale-items",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SaleItemV2Dto.SaleItemV2Response> createSaleItemV2(
-            @ModelAttribute SaleItemDto.GetCreateSaleItemDto newSaleItem,
-            @RequestParam(required = false) List<SaleItemV2Dto.SaleItemImageRequest> images,
+            @ModelAttribute SaleItemV2Dto.SaleItemWithImageInfo saleItem,
             @PathVariable Integer id,
             HttpServletRequest request) throws IOException {
-        SaleItemV2Dto.SaleItemWithImageInfo req = new SaleItemV2Dto.SaleItemWithImageInfo();
-        req.setSaleItem(newSaleItem);
-        req.setImageInfos(images);
-        var res = saleItemService.createSaleItemWithImages(newSaleItem,images,request,id);
+        SaleItemV2Dto.SaleItemV2Response res = saleItemService.createSaleItemWithImages(saleItem,request,id);
         return ResponseEntity.status(HttpStatus.CREATED).body(res);
     }
 
