@@ -15,6 +15,7 @@ import VerifyEmail from "@/views/RegisterAccount/VerifyEmail.vue";
 import SignInUser from "@/views/RegisterAccount/SignInUser.vue";
 import ProfileView from "@/views/profile/ProfileView.vue";
 import ProfileEdit from "@/views/profile/ProfileEdit.vue";
+import ShoppingCart from "@/views/cart/ShoppingCart.vue";
 const routes = [
   {
     path: "/",
@@ -103,6 +104,11 @@ const routes = [
     component: ProfileEdit,
     meta: { requiresAuth: true },
   },
+  {
+    path: "/cart",
+    name: "Cart",
+    component: ShoppingCart,
+  },
 ];
 
 const router = createRouter({
@@ -112,10 +118,8 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
   const auth = useAuthStore();
-
+  auth.fectchCheckUser;
   if (to.meta.requiresAuth) {
-    await auth.fectchCheckUser;
-
     if (!auth.isAuthenticated) {
       return next({ name: "signin" });
     }
