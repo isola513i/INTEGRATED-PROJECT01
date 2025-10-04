@@ -1,16 +1,31 @@
-<!-- CartView.vue -->
 <script setup>
-import { computed } from "vue";
+import { ref, computed } from "vue";
 import { useCartStore } from "@/store/useCartStore";
 
 const cart = useCartStore();
 
-// ---- helpers ----
+// modal state
+const showModal = ref(false);
+const pendingDeleteId = ref(null);
 
+function confirmDelete(id) {
+  pendingDeleteId.value = id;
+  showModal.value = true;
+}
+
+function deleteItem() {
+  if (pendingDeleteId.value !== null) {
+    cart.remove(pendingDeleteId.value);
+  }
+  pendingDeleteId.value = null;
+  showModal.value = false;
+}
+
+// ---- helpers ----
 const fmt = (n) =>
   Number(n || 0).toLocaleString("en-US", { minimumFractionDigits: 0 });
 
-// group ตามผู้ขาย (nickname / username)
+// group ตามผู้ขาย
 const groups = computed(() => {
   const map = new Map();
   for (const it of cart.items) {
@@ -25,7 +40,7 @@ const groups = computed(() => {
   return Array.from(map.entries()).map(([name, items]) => ({ name, items }));
 });
 
-// select-all (ดูจากทุกรายการ)
+// select-all
 const isAllSelected = computed(
   () => cart.items.length > 0 && cart.items.every((i) => i.selected)
 );
@@ -37,12 +52,9 @@ function toggleAll() {
 }
 
 function toggleSeller(name) {
-  // flip state ของกลุ่มนั้นตาม item แรก
   const group = groups.value.find((g) => g.name === name);
   if (!group) return;
-  const next = !(
-    group.items.length > 0 && group.items.every((i) => i.selected)
-  );
+  const next = !(group.items.length > 0 && group.items.every((i) => i.selected));
   group.items.forEach((i) => (i.selected = next));
   cart.save();
 }
@@ -51,17 +63,29 @@ function toggleItem(id) {
   cart.toggleSelect(id);
 }
 
-function decQty(id) {
-  cart.dec(id, 1);
+// ลดจำนวน: ถ้าเหลือ 1 แล้วกดลด -> เปิดยืนยันลบ
+function decQtyByItem(it) {
+  const q = Number(it.quantity || 1);
+  if (q <= 1) {
+    confirmDelete(it.id);
+  } else {
+    cart.dec(it.id, 1);
+  }
 }
+
 function incQty(id) {
   cart.inc(id, 1);
 }
 function onQtyInput(id, e) {
   const v = Number(e.target.value);
-  cart.setQty(id, v);
+  if (Number.isFinite(v) && v <= 0) {
+    confirmDelete(id);
+  } else {
+    cart.setQty(id, v);
+  }
 }
 </script>
+
 
 <template>
   <section class="max-w-3xl mx-auto">
@@ -126,7 +150,7 @@ function onQtyInput(id, e) {
               >
                 <img
                   :src="
-                    it.thumbnailUrl || it.imageUrl || '/image/placeholder.png'
+                    it.thumbnailUrl || it.imageUrl 
                   "
                   :alt="it.model || it.brandName || 'item'"
                   class="max-w-full max-h-full object-contain"
@@ -153,9 +177,9 @@ function onQtyInput(id, e) {
               <div class="itbms-item-quantity flex items-center gap-2">
                 <button
                   class="itbms-dec-qty-button inline-flex items-center justify-center w-8 h-8 rounded border border-gray-300 text-gray-700 hover:bg-gray-50 active:scale-95"
-                  @click="decQty(it.id)"
+                  @click="decQtyByItem(it)"
                   aria-label="decrease"
-                  :disabled="(it.quantity || 1) <= 1"
+                  :title="(it.quantity || 1) <= 1 ? 'Remove item' : 'decrease'"
                 >
                   -
                 </button>
@@ -191,6 +215,16 @@ function onQtyInput(id, e) {
                   {{ fmt((it.price || 0) * (it.quantity || 0)) }}
                 </div>
               </div>
+
+              <!-- delete button -->
+              <div class="itbms-item-delete w-16 text-right">
+                <button
+                  class="px-2 py-1 text-sm text-red-600 hover:text-red-800"
+                  @click="confirmDelete(it.id)"
+                >
+                  Remove
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -205,4 +239,31 @@ function onQtyInput(id, e) {
       </div>
     </div>
   </section>
+  <div
+    v-if="showModal"
+    class="fixed inset-0 bg-[#ffffff8f] bg-opacity-50 flex items-center justify-center z-50"
+  >
+    <div
+      class="itbms-message bg-white rounded-lg p-6 shadow-lg max-w-sm w-full"
+    >
+      <h2 class="text-xl font-semibold mb-4 text-gray-800">
+        Delete Confirmation
+      </h2>
+      <p class="mb-6 text-gray-800">Do you want to delete this sale item from cart?</p>
+      <div class="flex justify-end space-x-4">
+        <button
+          @click="deleteItem"
+          class="itbms-confirm-button bg-[#5eb238] text-white px-4 py-2 rounded hover:bg-[#58914c] cursor-pointer"
+        >
+          Confirm
+        </button>
+        <button
+          @click="showModal = false"
+          class="itbms-cancel-button bg-[#cc3535] text-white px-4 py-2 rounded hover:bg-[#6d3e3e] cursor-pointer"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
