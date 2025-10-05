@@ -41,7 +41,6 @@ const form = reactive({
   quantity: null,
 });
 
-const formData = new FormData();
 const auth = useAuthStore();
 
 const requiredFields = ["brandId", "model", "price", "quantity", "description"];
@@ -105,11 +104,10 @@ onMounted(async () => {
           status: "ONLINE",
         };
       });
-      // Wait for all images
       const results = await Promise.all(imagePromises);
       retriveImageFiles.value = results;
       imageFiles.value = [...retriveImageFiles.value];
-      isAlreadyFetchData.value = true; // use for delayed to load form component
+      isAlreadyFetchData.value = true;
     } else {
       isAlreadyFetchData.value = true;
       Object.assign(initialForm, JSON.parse(JSON.stringify(form)));
@@ -162,35 +160,39 @@ const updateForm = (updatedForm) => {
 
 const handleSubmit = async (imageFiles) => {
   validateAll();
-
   if (!isFormValid.value) {
     errorMessage.value = "Please correct the form errors";
     return;
   }
-
   isSubmitting.value = true;
   errorMessage.value = "";
-
   try {
     const brandId = Number(form.brandId);
     const selectedBrand = brands.value.find(
       (b) => Number(b.brandId) === brandId
     );
     if (!selectedBrand) throw new Error("Selected brand not found");
-    formData.append("saleItem.model", form.model.trim());
-    formData.append("saleItem.brand.id", brandId); // required
-    formData.append("saleItem.description", form.description.trim());
-    formData.append("saleItem.ramGb", String(form.ramGb || null));
-    formData.append(
-      "saleItem.screenSizeInch",
-      String(form.screenSizeInch || null)
-    );
-    formData.append("saleItem.price", String(form.price || 0));
-    formData.append("saleItem.quantity", String(form.quantity || 1));
-    formData.append("saleItem.storageGb", String(form.storageGb || 0));
-    formData.append("saleItem.color", form.color?.trim() || "");
 
-    // === Image files ===
+    // สร้างใหม่ทุกครั้ง
+    const formData = new FormData();
+
+    // ------ ฟิลด์ของ SaleItemDto.GetCreateSaleItemDto ------
+    formData.append("model", form.model.trim());
+    formData.append("brand.id", String(selectedBrand.brandId));
+    formData.append("brand.name", selectedBrand.name);
+
+    formData.append("description", form.description.trim()); // ต้องไม่ว่าง!
+    formData.append("price", String(form.price)); // ต้องมีค่า
+    formData.append("quantity", String(form.quantity)); // ต้องมีค่า
+
+    if (form.ramGb != null) formData.append("ramGb", String(form.ramGb));
+    if (form.screenSizeInch != null)
+      formData.append("screenSizeInch", String(form.screenSizeInch));
+    if (form.storageGb != null)
+      formData.append("storageGb", String(form.storageGb));
+    if (form.color && form.color.trim())
+      formData.append("color", form.color.trim());
+
     imageFiles.forEach((file, index) => {
       formData.append(`imageInfos[${index}].fileName`, file.fileName);
       formData.append(`imageInfos[${index}].status`, file.status);
@@ -200,6 +202,8 @@ const handleSubmit = async (imageFiles) => {
       ); // backend expects 1,2,...
       formData.append(`imageInfos[${index}].imageFile`, file.file); // file = File/Blob
     });
+
+
     if (isEditMode.value) {
       await updateSaleItem(route.params.id, formData);
       flash.setMessage(
