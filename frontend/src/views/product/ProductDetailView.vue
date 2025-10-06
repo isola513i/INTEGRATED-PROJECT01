@@ -300,20 +300,6 @@ const deleteItem = async () => {
           </button>
         </div>
 
-        <div class="flex space-x-4 mt-6">
-          <router-link
-            :to="`/sale-items/${route.params.id}/edit`"
-            class="itbms-edit-button px-6 py-2 bg-[#4180d1] text-white rounded-md hover:bg-[#0E3971]"
-          >
-            Edit
-          </router-link>
-          <button
-            class="itbms-delete-button px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 cursor-pointer"
-            @click="showModal = true"
-          >
-            Delete
-          </button>
-        </div>
 
         <div class="mt-5">
           <h2 class="text-md font-semibold mb-2 text-black">Description</h2>

@@ -18,15 +18,16 @@ async function handleFormSubmit() {
   loading.value = true;
   try {
     const data = await auth.login(form.value.email.trim(), form.value.password);
+    console.log(data);
     flash.setMessage(
       "Login successful!",
       "text-green-600 bg-green-50 p-2 rounded border border-green-200 shadow-sm"
     );
     const user = JSON.parse(localStorage.getItem("user"));
-  if(user.userType === "SELLER"){
-        router.replace("/sale-items/list");
-      } else {
-        router.replace("/sale-items");
+    if (user.userType === "SELLER") {
+      router.replace("/sale-items/list");
+    } else {
+      router.replace("/sale-items");
     }
   } catch (e) {
     const required403 = "You need to activate your accout before signing in.";
@@ -80,7 +81,7 @@ watch(
       errorMessage.value = "";
       buttonDisabled.value = false;
     }
-  },
+  }
   // { immediate: true }
 );
 </script>
