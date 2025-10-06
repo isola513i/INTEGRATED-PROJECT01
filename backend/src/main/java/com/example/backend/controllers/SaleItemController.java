@@ -177,20 +177,35 @@ public class SaleItemController {
                 .body(meta.body());
     }
 
-    // UPDATE saleItem
-    @PutMapping(value = "/v2/sale-items/{saleItemId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    // UPDATE saleItem - edit
+    @PutMapping(value = "/v2/sellers/{id}/sale-items/{saleItemId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SaleItemV2Dto.SaleItemV2Response> updateSaleItemWithImages(
+            @PathVariable("id") Integer sellerId,
             @PathVariable("saleItemId") Integer itemId,
-            @ModelAttribute SaleItemV2Dto.SaleItemWithImageInfo request
+            @ModelAttribute SaleItemV2Dto.SaleItemWithImageInfo request,
+            HttpServletRequest requestHttp
     ) throws IOException {
-        var result = saleItemService.updateSaleItemWithImages(itemId, request);
+        Integer userIdInToken =  jwtUtils.extractUserId(requestHttp);
+        User user = userService.getUserById(sellerId);
+        if (userIdInToken == null || !userIdInToken.equals(sellerId) || !user.getIsActive()) {
+            throw new SellerNotMatchInTokenException("Seller does not match the user in token or user is not active.");
+        }
+        var result = saleItemService.updateSaleItemWithImages(itemId, request , sellerId);
         return ResponseEntity.ok(result);
     }
 
-    // DELETE saleItem
-    @DeleteMapping("/v2/sale-items/{saleItemId}")
-    public ResponseEntity<Void> deleteSaleItemV2(@PathVariable Integer saleItemId) {
-        saleItemService.deleteSaleItemAndImages(saleItemId);
+    // DELETE saleItem edit
+    @DeleteMapping("/v2/sellers/{id}/sale-items/{saleItemId}")
+    public ResponseEntity<Void> deleteSaleItemV2(
+            @PathVariable("saleItemId") Integer saleItemId,
+            @PathVariable("id") Integer sellerId ,
+            HttpServletRequest request ) {
+        Integer userIdInToken =  jwtUtils.extractUserId(request);
+        User user = userService.getUserById(sellerId);
+        if (userIdInToken == null || !userIdInToken.equals(sellerId) || !user.getIsActive()) {
+            throw new SellerNotMatchInTokenException("Seller does not match the user in token or user is not active.");
+        }
+        saleItemService.deleteSaleItemAndImages(saleItemId, sellerId);
         return ResponseEntity.noContent().build();
     }
 

@@ -59,6 +59,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,  "/itb-mshop/v2/sellers/*/sale-items").hasAuthority("SELLER")
                         .requestMatchers(HttpMethod.POST, "/itb-mshop/v2/saleItems").hasAuthority("SELLER")
                         .requestMatchers(HttpMethod.POST,  "/itb-mshop/v2/sellers/*/sale-items").hasAuthority("SELLER")
+                        .requestMatchers(HttpMethod.PUT,  "/itb-mshop/v2/sellers/*/sale-items/*").hasAuthority("SELLER")
+                        .requestMatchers(HttpMethod.DELETE,  "/itb-mshop/v2/sellers/*/sale-items/*").hasAuthority("SELLER")
 
                         // BUYER-only (เติมใหม่)
                         .requestMatchers(HttpMethod.POST, "/itb-mshop/v2/orders").hasAuthority("BUYER")

@@ -308,11 +308,16 @@ public class SaleItemService {
     @Transactional
     public SaleItemV2Dto.SaleItemV2Response updateSaleItemWithImages(
             Integer itemId,
-            SaleItemV2Dto.SaleItemWithImageInfo req
+            SaleItemV2Dto.SaleItemWithImageInfo req,
+            Integer sellerId
     ) throws IOException {
 
         var s = req.getSaleItem();
         if (s != null) {
+            User seller = userService.getUserById(sellerId);
+            if(seller == null || !seller.getIsActive()){
+                throw new SellerNotMatchInTokenException("Seller does not match with sale item owner or user is not active.");
+            }
             var item = saleItemRepo.findById(itemId)
                     .orElseThrow(() -> new ItemNotFoundException("SaleItem not found"));
             if (s.getBrand() != null && s.getBrand().getId() != null) {
@@ -379,7 +384,8 @@ public class SaleItemService {
     public record ImageMeta(Resource body, MediaType mediaType, String etag) {}
 
     @Transactional
-    public void deleteSaleItemAndImages(Integer itemId) {
+    public void deleteSaleItemAndImages(Integer itemId , Integer sellerId) {
+
         var pics = pictureRepo.findBySaleItemIdOrderByPositionAsc(itemId);
 
         for (var p : pics) {
@@ -390,13 +396,11 @@ public class SaleItemService {
             pictureRepo.deleteAllInBatch(pics);
             pictureRepo.flush();
         }
-
-        if (saleItemRepo.existsById(itemId)) {
-            saleItemRepo.deleteById(itemId);
-        } else {
-            throw new ItemNotFoundException("SaleItem not found for this id :: " + itemId);
+        SaleItem item = saleItemRepo.findById(itemId).orElseThrow(() -> new ItemNotFoundException("SaleItem not found for this id :: " + itemId));
+        if(!item.getSeller().getId().equals(sellerId)){
+            throw new SellerNotMatchInTokenException("Seller does not match with sale item owner.");
         }
-
+        saleItemRepo.deleteById(itemId);
         fileStorage.deleteItemDirectory(itemId);
     }
 
