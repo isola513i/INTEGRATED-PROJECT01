@@ -3,20 +3,32 @@ package com.example.backend.repositories;
 import com.example.backend.entities.SaleItem;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
+
+@Transactional
 public interface SaleItemRepository extends JpaRepository<SaleItem, Integer>, JpaSpecificationExecutor<SaleItem> {
     @Query("select s from SaleItem s join fetch s.brand order by s.createdOn asc, s.id asc")
     List<SaleItem> findAllWithBrandOrderByCreatedOnAscIdAsc();
     boolean existsByBrand_Id(Integer brandId);
     int countByBrandId(Integer brandId);
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Transactional
+    @Query("""
+    update SaleItem s
+       set s.quantity = s.quantity - :qty
+     where s.id = :id
+       and s.quantity >= :qty
+""")
+    int deductStock(@Param("id") Integer saleItemId, @Param("qty") int qty);
     @Query(
             value = """
             select s

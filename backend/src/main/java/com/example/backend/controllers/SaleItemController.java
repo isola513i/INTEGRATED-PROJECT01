@@ -86,12 +86,16 @@ public class SaleItemController {
 //    }
 
     // ========== V2 Endpoints ==========
-    @PostMapping(value = "/v2/sellers/{id}/sale-items",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/v2/sellers/{id}/sale-items", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SaleItemV2Dto.SaleItemV2Response> createSaleItemV2(
-            @ModelAttribute SaleItemV2Dto.SaleItemWithImageInfo saleItem,
+            @ModelAttribute SaleItemDto.GetCreateSaleItemDto newSaleItem,
+            @RequestParam(required = false) List<SaleItemV2Dto.SaleItemImageRequest> images,
             @PathVariable Integer id,
             HttpServletRequest request) throws IOException {
-        SaleItemV2Dto.SaleItemV2Response res = saleItemService.createSaleItemWithImages(saleItem,request,id);
+        SaleItemV2Dto.SaleItemWithImageInfo req = new SaleItemV2Dto.SaleItemWithImageInfo();
+        req.setSaleItem(newSaleItem);
+        req.setImageInfos(images);
+        var res = saleItemService.createSaleItemWithImages(newSaleItem,images,request,id);
         return ResponseEntity.status(HttpStatus.CREATED).body(res);
     }
 
@@ -174,19 +178,34 @@ public class SaleItemController {
     }
 
     // UPDATE saleItem - edit
-    @PutMapping(value = "/v2/sale-items/{saleItemId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value = "/v2/sellers/{id}/sale-items/{saleItemId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SaleItemV2Dto.SaleItemV2Response> updateSaleItemWithImages(
+            @PathVariable("id") Integer sellerId,
             @PathVariable("saleItemId") Integer itemId,
-            @ModelAttribute SaleItemV2Dto.SaleItemWithImageInfo request
+            @ModelAttribute SaleItemV2Dto.SaleItemWithImageInfo request,
+            HttpServletRequest requestHttp
     ) throws IOException {
-        var result = saleItemService.updateSaleItemWithImages(itemId, request);
+        Integer userIdInToken =  jwtUtils.extractUserId(requestHttp);
+        User user = userService.getUserById(sellerId);
+        if (userIdInToken == null || !userIdInToken.equals(sellerId) || !user.getIsActive()) {
+            throw new SellerNotMatchInTokenException("Seller does not match the user in token or user is not active.");
+        }
+        var result = saleItemService.updateSaleItemWithImages(itemId, request , sellerId);
         return ResponseEntity.ok(result);
     }
 
     // DELETE saleItem edit
-    @DeleteMapping("/v2/sale-items/{saleItemId}")
-    public ResponseEntity<Void> deleteSaleItemV2(@PathVariable Integer saleItemId) {
-        saleItemService.deleteSaleItemAndImages(saleItemId);
+    @DeleteMapping("/v2/sellers/{id}/sale-items/{saleItemId}")
+    public ResponseEntity<Void> deleteSaleItemV2(
+            @PathVariable("saleItemId") Integer saleItemId,
+            @PathVariable("id") Integer sellerId ,
+            HttpServletRequest request ) {
+        Integer userIdInToken =  jwtUtils.extractUserId(request);
+        User user = userService.getUserById(sellerId);
+        if (userIdInToken == null || !userIdInToken.equals(sellerId) || !user.getIsActive()) {
+            throw new SellerNotMatchInTokenException("Seller does not match the user in token or user is not active.");
+        }
+        saleItemService.deleteSaleItemAndImages(saleItemId, sellerId);
         return ResponseEntity.noContent().build();
     }
 
