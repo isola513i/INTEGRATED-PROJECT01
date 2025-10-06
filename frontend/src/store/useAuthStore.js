@@ -17,14 +17,6 @@ function decodeJWT(token) {
   return JSON.parse(json || "{}");
 }
 
-let expiryTimer = null;
-function clearExpiryTimer() {
-  if (expiryTimer) {
-    clearTimeout(expiryTimer);
-    expiryTimer = null;
-  }
-}
-
 export const useAuthStore = defineStore("auth", {
   state: () => ({
     accessToken: localStorage.getItem("accessToken") || "",
@@ -59,45 +51,17 @@ export const useAuthStore = defineStore("auth", {
       this.refreshToken = refresh || "";
       localStorage.setItem("accessToken", this.accessToken);
       localStorage.setItem("refreshToken", this.refreshToken);
-
-      // ตั้ง timer ง่าย ๆ ให้ logout เมื่อถึงเวลา (ลบ 10 วินาทีเผื่อ)
-      clearExpiryTimer();
-      const payload = decodeJWT(this.accessToken);
-      const expMs = payload?.exp ? payload.exp * 1000 : 0;
-      const remain = expMs - Date.now() - 10_000;
-      if (remain > 0) {
-        expiryTimer = setTimeout(() => {
-          // หมดอายุแล้ว → logout อัตโนมัติ
-          this.logout();
-        }, remain);
-      }
-    },
-
-    // ✅ เรียกตอนบูตแอป: เคลียร์ token ที่หมดอายุแล้วทันที
-    hydrate() {
-      if (!this.isTokenValid) {
-        this.accessToken = "";
-        this.refreshToken = "";
-        this.user = null;
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("refreshToken");
-        localStorage.removeItem("user");
-        clearExpiryTimer();
-      } else {
-        // ถ้ายัง valid ให้ตั้ง timer ตาม setTokens()
-        this.setTokens(this.accessToken, this.refreshToken);
-      }
     },
 
     async login(email, password) {
       const res = await signInUser(email, password);
       this.setTokens(res.access_token, res.refresh_token);
       const c = decodeJWT(res.access_token);
+      console.log(c);
       const user = await fetchProfile(c.id);
       this.user = user;
       localStorage.setItem("user", JSON.stringify(this.user));
 
-      // ✅ เคลียร์ตะกร้าทุกครั้งที่ login สำเร็จ
       const cart = useCartStore();
       cart.clear();
     },
@@ -110,7 +74,6 @@ export const useAuthStore = defineStore("auth", {
       } catch (err) {
         // ignore
       } finally {
-        clearExpiryTimer();
         this.accessToken = "";
         this.refreshToken = "";
         this.user = null;
@@ -123,16 +86,12 @@ export const useAuthStore = defineStore("auth", {
       }
     },
 
-    // (สะกดเดิมไว้ให้ ใช้ได้เหมือนเดิม)
-    async fectchCheckUser() {
+    async fetchCheckUser() {
       try {
-        if (!this.user?.id) return;
-        const res = await fetchProfile(this.user.id);
-        if (!res || !res.id) {
-          this.logout();
-        }
-      } catch (er) {
-        this.logout();
+        if (!this.isAuthenticated || !this.user?.id) return false;
+        await fetchProfile(this.user.id);
+      } catch {
+        await this.logout();
       }
     },
   },

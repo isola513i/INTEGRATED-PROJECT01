@@ -203,9 +203,8 @@ const handleSubmit = async (imageFiles) => {
       formData.append(`imageInfos[${index}].imageFile`, file.file); // file = File/Blob
     });
 
-
     if (isEditMode.value) {
-      await updateSaleItem(route.params.id, formData);
+      await updateSaleItem(auth.user.id, route.params.id, formData);
       flash.setMessage(
         "✅ The sale item has been successfully updated.",
         "m-4 p-4 bg-green-100 text-green-800 shadow itbms-message"
