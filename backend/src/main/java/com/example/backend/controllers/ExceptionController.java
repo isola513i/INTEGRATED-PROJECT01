@@ -166,6 +166,17 @@ public class ExceptionController {
                 ex.getMessage(), req.getRequestURI());
         return ResponseEntity.status(403).body(body);
     }
+    @ExceptionHandler(QuantityNotEnoughException.class)
+    public ResponseEntity<MyErrorResponse> handleQty(QuantityNotEnoughException ex,
+                                                     HttpServletRequest req) {
+        var body = new MyErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                HttpStatus.CONFLICT.name(),
+                ex.getMessage(),            // "Quantity Not Enough" จาก service
+                req.getRequestURI());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
 
-    
+
+
 }

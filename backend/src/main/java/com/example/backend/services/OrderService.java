@@ -76,7 +76,10 @@ public class OrderService {
                     throw new QuantityNotEnoughException("Quantity Not Enough");
                 }
 
-                saleItem.setQuantity(saleItem.getQuantity() - it.getQuantity());
+                int updated = saleItemRepo.deductStock(saleItem.getId(), it.getQuantity());
+                if (updated == 0) {
+                    throw new QuantityNotEnoughException("Quantity Not Enough");
+                }
 
                 OrderItem oi = new OrderItem();
                 oi.setOrder(order);
@@ -132,5 +135,6 @@ public class OrderService {
         s.setOrderItems(itemBriefs);
         return s;
     }
+
 }
 
