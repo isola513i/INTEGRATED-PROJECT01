@@ -173,7 +173,7 @@ public class SaleItemController {
                 .body(meta.body());
     }
 
-    // UPDATE saleItem
+    // UPDATE saleItem - edit
     @PutMapping(value = "/v2/sale-items/{saleItemId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SaleItemV2Dto.SaleItemV2Response> updateSaleItemWithImages(
             @PathVariable("saleItemId") Integer itemId,
@@ -183,7 +183,7 @@ public class SaleItemController {
         return ResponseEntity.ok(result);
     }
 
-    // DELETE saleItem
+    // DELETE saleItem edit
     @DeleteMapping("/v2/sale-items/{saleItemId}")
     public ResponseEntity<Void> deleteSaleItemV2(@PathVariable Integer saleItemId) {
         saleItemService.deleteSaleItemAndImages(saleItemId);

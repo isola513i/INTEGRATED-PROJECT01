@@ -1,12 +1,18 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { fetchItemById, deleteItemById , getItem} from "@/services/saleItemService";
+import { useAuthStore } from "@/store/useAuthStore";
+import {
+  fetchItemById,
+  deleteItemById,
+  getItem,
+} from "@/services/saleItemService";
 import { useFlashStore } from "@/store/useFlashStore";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-const route = useRoute();
-const router = useRouter();
+import { useCartStore } from "@/store/useCartStore";
+const images = ref([]);
+const selectedIndex = ref(0);
+const auth = useAuthStore();
 const product = ref({});
 const quantity = ref(1);
 const showModal = ref(false);
@@ -14,6 +20,34 @@ const showFullDescription = ref(false);
 const successMessage = ref("");
 const successMessageStyle = ref("");
 const flash = useFlashStore();
+const cart = useCartStore();
+const route = useRoute(); // ใช้อ่าน params/query
+const router = useRouter(); // ใช้นำทาง
+
+const onAdd = () => {
+  if (!auth.isLoggedIn) {
+    router.push("/signin");
+    return;
+  }
+  const stock = Number(product.value.quantity || 0);
+  const want = Number(quantity.value || 1);
+  const qty = Math.min(Math.max(1, want), stock);
+
+  cart.add(product.value, qty); // ✅ ส่งจำนวนที่เลือกจริง
+  flash.setMessage(
+    "Added to cart",
+    "fixed top-6 left-1/2 -translate-x-1/2 z-50 px-5 py-2 rounded-lg bg-green-500 text-white text-sm shadow-lg"
+  );
+};
+
+const mainImage = computed(() => {
+  return (
+    images.value[selectedIndex.value] ||
+    product.value.thumbnailUrl ||
+    product.value.imageUrl ||
+    ""
+  );
+});
 
 onMounted(async () => {
   if (route.query.successMessage) {
@@ -39,7 +73,7 @@ onMounted(async () => {
 
       if (!res.ok) return null;
 
-      return res.url
+      return res.url;
     });
 
     // Wait for all images
@@ -47,28 +81,27 @@ onMounted(async () => {
 
     // Filter out nulls and assign to images
     images.value = results.filter(Boolean);
-
-  } catch(err) {
-    console.log("error :" , err)
+  } catch (err) {
+    console.log("error :", err);
     router.push("/sale-items");
   }
 });
 
-const images = ref('');
-const selectedIndex = ref(0);
-
-
-const handleSelectedIndex = (index) =>{
-  selectedIndex.value = index
-}
+const handleSelectedIndex = (index) => {
+  selectedIndex.value = index;
+};
 
 const prev = () => {
+  const len = images.value.length; // ✅ ใช้ .value
+  if (len <= 1) return;
   selectedIndex.value =
-    selectedIndex.value === 0 ? images.length - 1 : selectedIndex.value - 1;
+    selectedIndex.value === 0 ? len - 1 : selectedIndex.value - 1;
 };
 const next = () => {
+  const len = images.value.length; // ✅ ใช้ .value
+  if (len <= 1) return;
   selectedIndex.value =
-    selectedIndex.value === images.length - 1 ? 0 : selectedIndex.value + 1;
+    selectedIndex.value === len - 1 ? 0 : selectedIndex.value + 1;
 };
 
 const increaseQty = () => {
@@ -80,7 +113,7 @@ const decreaseQty = () => {
 const handleInput = () => {
   quantity.value = Math.min(
     Math.max(1, quantity.value),
-    product.value.quantity,
+    product.value.quantity
   );
 };
 
@@ -94,13 +127,13 @@ const deleteItem = async () => {
     await deleteItemById(route.params.id);
     flash.setMessage(
       "✅ The sale item has been deleted.",
-      "m-4 p-4 bg-green-100 text-green-800 shadow itbms-message",
+      "m-4 p-4 bg-green-100 text-green-800 shadow itbms-message"
     );
     router.back();
   } catch (error) {
     flash.setMessage(
       "❌ The requested sale item does not exist.",
-      "m-4 p-4 bg-red-100 text-red-800 shadow itbms-message",
+      "m-4 p-4 bg-red-100 text-red-800 shadow itbms-message"
     );
     router.back();
   }
@@ -108,7 +141,7 @@ const deleteItem = async () => {
 </script>
 
 <template>
-  <div class="pt-[55px] bg-white">
+  <div class="pt-[20px] bg-white">
     <div v-if="flash.message" :class="flash.style">
       {{ flash.message }}
     </div>
@@ -130,11 +163,12 @@ const deleteItem = async () => {
           class="relative bg-gray-100 rounded-xl flex justify-center items-center overflow-hidden h-[500px]"
         >
           <img
-            :src="images[selectedIndex]"
+            :src="mainImage"
             alt="Product image"
             class="w-full h-full object-cover"
           />
           <button
+            v-if="images.length > 1"
             @click="prev"
             class="absolute left-4 top-1/2 -translate-y-1/2 text-3xl z-10 text-gray-700 hover:text-black"
             aria-label="Previous"
@@ -142,6 +176,7 @@ const deleteItem = async () => {
             ‹
           </button>
           <button
+            v-if="images.length > 1"
             @click="next"
             class="absolute right-4 top-1/2 -translate-y-1/2 text-3xl z-10 text-gray-700 hover:text-black"
             aria-label="Next"
@@ -224,30 +259,44 @@ const deleteItem = async () => {
 
         <div class="mt-5 text-sm text-gray-500">
           Available Quantity:
-          <span class="itbms-quantity">{{ product.quantity }}></span
-          ><span class="itbms-quantity-unit">units</span>
+          <span class="itbms-quantity">{{ product.quantity }}</span
+          ><span class="itbms-quantity-unit"> units</span>
         </div>
-        <div class="flex items-center space-x-4 mt-2">
-          <span class="text-gray-700">Quantity</span>
+        <div class="flex items-center space-x-3 mt-4">
+          <span class="text-black font-medium">Quantity</span>
+
+          <!-- ปุ่มลด -->
           <button
             @click="decreaseQty"
-            class="w-5 h-5 border rounded flex items-center justify-center text-gray-500"
+            class="itbms-dec-qty-button w-8 h-8 border rounded-lg flex items-center justify-center text-gray-600 hover:bg-gray-100 transition"
           >
             -
           </button>
+
+          <!-- input -->
           <input
             type="number"
-            v-model="quantity"
+            v-model.number="quantity"
             @input="handleInput"
             :min="1"
             :max="product.quantity"
-            class="w-12 border text-center rounded text-gray-500 border-gray-500"
+            class="itbms-add-to-cart-quantity w-14 border text-center rounded-lg text-gray-700 border-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none"
           />
+
+          <!-- ปุ่มเพิ่ม -->
           <button
             @click="increaseQty"
-            class="w-5 h-5 border rounded flex items-center justify-center text-gray-500"
+            class="itbms-inc-qty-button w-8 h-8 border rounded-lg flex items-center justify-center text-gray-600 hover:bg-gray-100 transition"
           >
             +
+          </button>
+
+          <!-- ปุ่ม Add to Cart -->
+          <button
+            @click="onAdd"
+            class="itbms-add-to-cart-button ml-3 flex items-center gap-2 px-4 py-2 bg-white text-black font-medium rounded-lg border border-gray-300 hover:bg-gray-400 hover:text-white transition duration-200"
+          >
+            Add to Cart
           </button>
         </div>
 
