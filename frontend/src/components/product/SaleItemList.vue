@@ -2,7 +2,8 @@
 import { deleteItemById } from "@/services/saleItemService";
 import { ref } from "vue";
 import { useFlashStore } from "@/store/useFlashStore";
-
+import { useAuthStore } from "@/store/useAuthStore";
+const auth = useAuthStore();
 const flash = useFlashStore();
 const showModal = ref(false);
 const saleItemId = ref(0);
@@ -27,23 +28,45 @@ const fields = [
   "Price",
   "Action",
 ];
-async function deleteItem(id) {
+// async function deleteItem(id) {
+//   try {
+//     await deleteItemById(id);
+//     const index = props.items.findIndex((item) => item.id === id);
+//     props.items.splice(index, 1);
+//     flash.setMessage(
+//       "✅ The sale item has been deleted.",
+//       "m-4 p-4 bg-green-100 text-green-800 shadow itbms-message"
+//     );
+//     handleModal();
+//   } catch (error) {
+//     flash.setMessage(
+//       "❌ The requested sale item does not exist.",
+//       "m-4 p-4 bg-red-100 text-red-800 shadow itbms-message"
+//     );
+//   }
+// }
+async function deleteItem(saleItemId) {
   try {
-    await deleteItemById(id);
-    const index = props.items.findIndex((item) => item.id === id);
-    props.items.splice(index, 1);
+    // ✅ ดึง sellerId จาก user ที่ล็อกอิน
+    const sellerId = auth.user?.id; 
+    if (!sellerId) throw new Error("Seller not found");
+    await deleteItemById(sellerId, saleItemId);
+    const index = props.items.findIndex((item) => item.id === saleItemId);
+    if (index !== -1) props.items.splice(index, 1);
+
     flash.setMessage(
       "✅ The sale item has been deleted.",
-      "m-4 p-4 bg-green-100 text-green-800 shadow itbms-message",
+      "m-4 p-4 bg-green-100 text-green-800 shadow itbms-message"
     );
     handleModal();
   } catch (error) {
     flash.setMessage(
       "❌ The requested sale item does not exist.",
-      "m-4 p-4 bg-red-100 text-red-800 shadow itbms-message",
+      "m-4 p-4 bg-red-100 text-red-800 shadow itbms-message"
     );
   }
 }
+
 </script>
 
 <template>
