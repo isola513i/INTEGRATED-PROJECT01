@@ -1,28 +1,28 @@
 // src/store/useAuthStore.js
-import { defineStore } from 'pinia';
-import { fetchProfile, signInUser, logOut } from '@/services/userService';
-import { useCartStore } from './useCartStore';
+import { defineStore } from "pinia";
+import { fetchProfile, signInUser, logOut } from "@/services/userService";
+import { useCartStore } from "./useCartStore";
 
 // decode JWT
 function decodeJWT(token) {
   if (!token) return {};
-  const base64Url = token.split('.')[1] || '';
-  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  const base64Url = token.split(".")[1] || "";
+  const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
   const json = decodeURIComponent(
-    atob(base64 + '='.repeat((4 - (base64.length % 4)) % 4))
-      .split('')
-      .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-      .join('')
+    atob(base64 + "=".repeat((4 - (base64.length % 4)) % 4))
+      .split("")
+      .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+      .join("")
   );
-  return JSON.parse(json || '{}');
+  return JSON.parse(json || "{}");
 }
 
-export const useAuthStore = defineStore('auth', {
+export const useAuthStore = defineStore("auth", {
   state: () => ({
-    accessToken: localStorage.getItem('accessToken') || '',
-    refreshToken: localStorage.getItem('refreshToken') || '',
-    user: localStorage.getItem('user')
-      ? JSON.parse(localStorage.getItem('user'))
+    accessToken: localStorage.getItem("accessToken") || "",
+    refreshToken: localStorage.getItem("refreshToken") || "",
+    user: localStorage.getItem("user")
+      ? JSON.parse(localStorage.getItem("user"))
       : null,
   }),
 
@@ -37,7 +37,6 @@ export const useAuthStore = defineStore('auth', {
       const now = Date.now();
       return s.tokenExpMs > now; // ยังไม่หมดอายุ
     },
-
     // ✅ ปรับให้ดูวันหมดอายุจริง ๆ
     isAuthenticated: (s) => !!s.accessToken && s.isTokenValid,
     isLoggedIn: (s) => !!s.accessToken && s.isTokenValid && !!s.user,
@@ -47,10 +46,10 @@ export const useAuthStore = defineStore('auth', {
 
   actions: {
     setTokens(access, refresh) {
-      this.accessToken = access || '';
-      this.refreshToken = refresh || '';
-      localStorage.setItem('accessToken', this.accessToken);
-      localStorage.setItem('refreshToken', this.refreshToken);
+      this.accessToken = access || "";
+      this.refreshToken = refresh || "";
+      localStorage.setItem("accessToken", this.accessToken);
+      localStorage.setItem("refreshToken", this.refreshToken);
     },
 
     async login(email, password) {
@@ -60,7 +59,7 @@ export const useAuthStore = defineStore('auth', {
       console.log(c);
       const user = await fetchProfile(c.id);
       this.user = user;
-      localStorage.setItem('user', JSON.stringify(this.user));
+      localStorage.setItem("user", JSON.stringify(this.user));
 
       const cart = useCartStore();
       cart.clear();
@@ -74,12 +73,12 @@ export const useAuthStore = defineStore('auth', {
       } catch (err) {
         // ignore
       } finally {
-        this.accessToken = '';
-        this.refreshToken = '';
+        this.accessToken = "";
+        this.refreshToken = "";
         this.user = null;
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
 
         const cart = useCartStore();
         cart.clear();

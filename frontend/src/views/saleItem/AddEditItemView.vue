@@ -175,7 +175,6 @@ const handleSubmit = async (imageFiles) => {
 
     // สร้างใหม่ทุกครั้ง
     const formData = new FormData();
-
     // ------ ฟิลด์ของ SaleItemDto.GetCreateSaleItemDto ------
     formData.append("model", form.model.trim());
     formData.append("brand.id", String(selectedBrand.brandId));
@@ -203,8 +202,36 @@ const handleSubmit = async (imageFiles) => {
       formData.append(`imageInfos[${index}].imageFile`, file.file); // file = File/Blob
     });
 
+
     if (isEditMode.value) {
-      await updateSaleItem(auth.user.id, route.params.id, formData);
+      const editformData = new FormData();
+      editformData.append("saleItem.model", form.model.trim());
+      editformData.append("saleItem.brand.id", String(selectedBrand.brandId));
+      editformData.append("saleItem.brand.name", selectedBrand.name);
+
+      editformData.append("saleItem.description", form.description.trim()); // ต้องไม่ว่าง!
+      editformData.append("saleItem.price", String(form.price)); // ต้องมีค่า
+      editformData.append("saleItem.quantity", String(form.quantity)); // ต้องมีค่า
+
+      if (form.ramGb != null) editformData.append("saleItem.ramGb", String(form.ramGb));
+      if (form.screenSizeInch != null)
+        editformData.append("saleItem.screenSizeInch", String(form.screenSizeInch));
+      if (form.storageGb != null)
+        editformData.append("saleItem.storageGb", String(form.storageGb));
+      if (form.color && form.color.trim())
+        editformData.append("saleItem.color", form.color.trim());
+
+      imageFiles.forEach((file, index) => {
+        editformData.append(`imageInfos[${index}].fileName`, file.fileName);
+        editformData.append(`imageInfos[${index}].status`, file.status);
+        editformData.append(
+          `imageInfos[${index}].order`,
+          file.status !== "DELETE" ? String(index + 1) : -1
+        ); // backend expects 1,2,...
+        editformData.append(`imageInfos[${index}].imageFile`, file.file); // file = File/Blob
+      });
+
+      await updateSaleItem(auth.user.id, route.params.id, editformData);
       flash.setMessage(
         "✅ The sale item has been successfully updated.",
         "m-4 p-4 bg-green-100 text-green-800 shadow itbms-message"
