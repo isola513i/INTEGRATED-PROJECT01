@@ -312,7 +312,10 @@ public class SaleItemService {
             Integer sellerId
     ) throws IOException {
 
+        System.out.println(req.toString());
+
         var s = req.getSaleItem();
+        System.out.println(s.getModel());
         if (s != null) {
             User seller = userService.getUserById(sellerId);
             if(seller == null || !seller.getIsActive()){

@@ -190,6 +190,7 @@ public class SaleItemController {
         if (userIdInToken == null || !userIdInToken.equals(sellerId) || !user.getIsActive()) {
             throw new SellerNotMatchInTokenException("Seller does not match the user in token or user is not active.");
         }
+        //System.out.println(request.toString());
         var result = saleItemService.updateSaleItemWithImages(itemId, request , sellerId);
         return ResponseEntity.ok(result);
     }

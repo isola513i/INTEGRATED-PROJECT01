@@ -1,7 +1,5 @@
 import { apiClient } from "./httpClient";
 
-// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
 export const getItem = async (path) => {
   // const response = await fetch(`${API_BASE_URL}/${path}`);
   const response = await apiClient.get(`/${path}`);
@@ -9,17 +7,12 @@ export const getItem = async (path) => {
   return await response.json();
 };
 
-// export const fetchSaleItems = async () => {
-//   const response = await fetch(`${API_BASE_URL}/v1/sale-items`);
-//   if (!response.ok) throw new Error("Failed to fetch sale items");
-//   return await response.json();
-// };
 export const fetchSaleItems = async ({
   sellerId,
   page = 0,
   size = 10,
   sortField,
-  sortDirection = "asc"
+  sortDirection = "asc",
 }) => {
   if (page === undefined || page === null) {
     throw new Error('Parameter "page" is required and cannot be undefined');
@@ -43,13 +36,8 @@ export const fetchItemById = async (saleItemId) => {
   return await response.json();
 };
 
-export const addSaleItem = async (formData,id) => {
+export const addSaleItem = async (formData, id) => {
   try {
-    // const res = await fetch(`${API_BASE_URL}/v2/sale-items`, {
-    //   method: "POST",
-    //   body: formData
-    // });
-
     const res = await apiClient.postForm(
       `/v2/sellers/${id}/sale-items`,
       formData
@@ -64,14 +52,16 @@ export const addSaleItem = async (formData,id) => {
 };
 
 //add user
-
-export const updateSaleItem = async (saleItemId, saleItemFormData) => {
+export const updateSaleItem = async (
+  sellerId,
+  saleItemId,
+  saleItemFormData
+) => {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10000);
-
   try {
     const response = await apiClient.putFormData(
-      `/v2/sale-items/${saleItemId}`,
+      `/v2/sellers/${sellerId}/sale-items/${saleItemId}`,
       saleItemFormData
     );
 
@@ -82,9 +72,10 @@ export const updateSaleItem = async (saleItemId, saleItemFormData) => {
     clearTimeout(timeout);
   }
 };
-
-export const deleteItemById = async (saleItemId) => {
-  const response = await apiClient.delete(`/v2/sale-items/${saleItemId}`);
+export const deleteItemById = async (sellerId, saleItemId) => {
+  const response = await apiClient.delete(
+    `/v2/sellers/${sellerId}/sale-items/${saleItemId}`
+  );
   if (!response.ok) throw new Error("Failed to delete item");
   return true;
 };

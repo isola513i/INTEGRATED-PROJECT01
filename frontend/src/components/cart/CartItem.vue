@@ -249,7 +249,7 @@ function onQtyInput(id, e) {
 				Delete Confirmation
 			</h2>
 			<p class="mb-6 text-gray-800">
-				Do you want to delete this sale item from cart?
+				Do you want to remove the sale item from the cart?
 			</p>
 			<div class="flex justify-end space-x-4">
 				<button

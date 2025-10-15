@@ -17,6 +17,7 @@ const shipNote = ref("");
 const placing = ref(false);
 
 onMounted(() => {
+
 	try {
 		const saved = JSON.parse(localStorage.getItem(PREF_KEY) || "{}");
 		shipAddress.value = saved?.address || "";
