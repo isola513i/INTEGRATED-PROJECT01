@@ -1,0 +1,132 @@
+package com.example.backend.services;
+
+import com.example.backend.dtos.CartItemDto;
+import com.example.backend.entities.Cart;
+import com.example.backend.entities.CartItem;
+import com.example.backend.entities.SaleItem;
+import com.example.backend.entities.User;
+import com.example.backend.repositories.CartItemRepository;
+import com.example.backend.repositories.CartRepository;
+import com.example.backend.repositories.SaleItemRepository;
+import com.example.backend.repositories.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
+public class CartService {
+    @Autowired
+    private CartItemRepository cartItemRepository;
+    @Autowired
+    private CartRepository cartRepository;
+    @Autowired
+    private SaleItemRepository saleItemRepository;
+    @Autowired
+    private UserRepository userRepository;
+
+
+    @Transactional
+    public Cart addToCart(Integer userId, Integer saleItemId, int quantity) {
+        User buyer = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Cart cart = cartRepository.findByBuyerId(userId)
+                .orElseGet(() -> {
+                    Cart newCart = new Cart();
+                    newCart.setBuyer(buyer);
+                    return cartRepository.save(newCart);
+                });
+
+        SaleItem saleItem = saleItemRepository.findById(saleItemId)
+                .orElseThrow(() -> new RuntimeException("SaleItem not found"));
+
+        Optional<CartItem> existingItemOpt = cartItemRepository.findByCartAndSaleItem(cart, saleItem);
+
+        CartItem cartItem;
+        if (existingItemOpt.isPresent()) {
+            // ถ้ามีอยู่แล้ว ให้เพิ่มจำนวน
+            cartItem = existingItemOpt.get();
+            cartItem.setQuantity(cartItem.getQuantity() + quantity);
+        } else {
+            cartItem = new CartItem();
+            cartItem.setCart(cart);
+            cartItem.setSaleItem(saleItem);
+            cartItem.setQuantity(quantity);
+            cart.getItems().add(cartItem);
+        }
+
+        cartItemRepository.save(cartItem);
+        return cartRepository.save(cart);
+    }
+
+    public Cart setQuantity(Integer userId, Integer saleItemId, int quantity) {
+        User buyer = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Cart cart = cartRepository.findByBuyer(buyer)
+                .orElseThrow(() -> new RuntimeException("Cart not found"));
+
+        SaleItem saleItem = saleItemRepository.findById(saleItemId)
+                .orElseThrow(() -> new RuntimeException("SaleItem not found"));
+
+        CartItem cartItem = cartItemRepository.findByCartAndSaleItem(cart, saleItem)
+                .orElseThrow(() -> new RuntimeException("Item not found in cart"));
+
+        if (quantity <= 0) {
+            cartItemRepository.delete(cartItem);
+        } else {
+            cartItem.setQuantity(quantity);
+            cartItemRepository.save(cartItem);
+        }
+
+        return cartRepository.findByBuyer(buyer).get();
+    }
+
+    @Transactional
+    public List<CartItemDto> getCartItemsByUser(Integer userId) {
+        User buyer = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Cart cart = cartRepository.findByBuyerId(userId)
+                .orElseGet(() -> {
+                    Cart newCart = new Cart();
+                    newCart.setBuyer(buyer);
+                    return cartRepository.save(newCart);
+                });
+
+
+        return cart.getItems().stream().map(item -> {
+            SaleItem sale = item.getSaleItem();
+
+            CartItemDto dto = new CartItemDto();
+            dto.setId(item.getId());
+            dto.setModel(sale.getModel());
+            dto.setBrandName(sale.getBrand() != null ? sale.getBrand().getName() : null);
+            dto.setDescription(sale.getDescription());
+            dto.setPrice(sale.getPrice());
+            dto.setRamGb(sale.getRamGb());
+            dto.setStorageGb(sale.getStorageGb());
+            dto.setScreenSizeInch(sale.getScreenSizeInch());
+            dto.setColor(sale.getColor());
+            dto.setSellerId(sale.getSeller().getId());
+            dto.setSellerUsername(sale.getSeller().getFullName());
+
+            int available = sale.getQuantity();
+            int cartQty = item.getQuantity();
+            dto.setQuantity(Math.min(cartQty, available));
+            if (cartQty > available) {
+                item.setQuantity(available);
+                cartItemRepository.save(item);
+            }
+
+            return dto;
+        }).collect(Collectors.toList());
+    }
+}
