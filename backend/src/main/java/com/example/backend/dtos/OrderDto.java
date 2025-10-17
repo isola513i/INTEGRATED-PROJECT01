@@ -12,7 +12,6 @@ import java.util.List;
 public class OrderDto {
 
     // =====================  REQUEST  =====================
-    /** Payload หลักที่ FE ส่งมา (กลุ่มตาม seller) */
     @Data @NoArgsConstructor
     public static class PlaceOrderRequest {
         @NotNull
@@ -21,12 +20,10 @@ public class OrderDto {
         private String shippingAddress;
         @Size(max = 255)
         private String orderNote;
-        /** หนึ่งกลุ่ม = หนึ่งผู้ขาย -> สร้าง 1 ใบออเดอร์ */
         @NotNull @Size(min = 1)
         private List<SellerOrderGroup> sellerGroups = new ArrayList<>();
     }
 
-    /** กลุ่มรายการของ “ผู้ขาย” คนเดียว */
     @Data @NoArgsConstructor
     public static class SellerOrderGroup {
         @NotNull
@@ -35,7 +32,6 @@ public class OrderDto {
         private List<SelectedCartItem> items = new ArrayList<>();
     }
 
-    /** รายการที่ผู้ใช้ติ๊กเลือกจากตะกร้า */
     @Data @NoArgsConstructor
     public static class SelectedCartItem {
         @NotNull
@@ -44,44 +40,81 @@ public class OrderDto {
         private Integer quantity;
     }
 
-    // =====================  RESPONSE  =====================
-    /** 201 Created: คืน "array of orders" */
+    // ===================== Place Order RESPONSE  =====================
     @Data @NoArgsConstructor
     public static class PlaceOrderResponse {
         @NotNull
-        private List<OrderSummary> orders = new ArrayList<>();
-        public PlaceOrderResponse(List<OrderSummary> orders){ this.orders = orders; }
-    }
-
-    /** สรุปออเดอร์ 1 ใบตามที่สไลด์กำหนด */
-    @Data @NoArgsConstructor
-    public static class OrderSummary {
-        private Integer id;
-        private Long buyerId;
-        private SellerBrief seller;
-        private Instant orderDate;
-        private Instant paymentDate;
+        private String id;
+        private String buyerId;
+        private SellerDto seller;
+        private String orderDate;
         private String shippingAddress;
         private String orderNote;
-        private List<OrderItemBrief> orderItems = new ArrayList<>();
-        private String orderStatus;     // COMPLETED / CANCELED
+        private List<OrderItemDto> orderItems;
+        private String orderStatus;
+
+        @Data
+        public static class SellerDto {
+            private String id;
+            private String email;
+            private String fullName;
+            private String userType;
+            private String nickName;
+        }
+
+        @Data
+        public static class OrderItemDto {
+            private Integer no;
+            private Long itemId;
+            private Integer price;
+            private Integer quantity;
+            private String description;
+        }
     }
 
-    /** สรุปผู้ขายแบบสั้น ๆ ในออเดอร์ */
+    // =====================  View Order Response  =====================
     @Data @NoArgsConstructor
-    public static class SellerBrief {
+    public static class BuyerOrderSummary {
         private Integer id;
-        private String username;
+        private String orderNo;
+        private Instant orderDate;
+        private Instant paymentDate;
+        private Integer totalAmount;
+        private String orderStatus;
+
+        private SellerBrief seller;
+
+        private String shippingAddress;
+        private String orderNote;
+
+        private List<BuyerOrderItem> orderItems = new ArrayList<>();
+
+        @Data @NoArgsConstructor
+        public static class SellerBrief {
+            private Integer id;
+            private String userName;
+        }
+
+        @Data @NoArgsConstructor
+        public static class BuyerOrderItem {
+            private Integer no;
+            private Long saleItemId;
+            private Integer price;
+            private Integer quantity;
+            private String description;
+            private String imageUrl;
+        }
     }
 
-    /** รายการสินค้าในออเดอร์ (ตามกล่องเทาในสไลด์) */
     @Data @NoArgsConstructor
-    public static class OrderItemBrief {
-        private Integer no;
-        private Long saleItemId;
-        private Integer price;
-        private Integer quantity;
-        private String description;
+    class BuyerOrdersPage {
+        private List<BuyerOrderSummary> content = new ArrayList<>();
+        private boolean last;
+        private boolean first;
+        private int totalPages;
+        private long totalElements;
+        private int size;
+        private int page;
+        private String sort;
     }
-
 }

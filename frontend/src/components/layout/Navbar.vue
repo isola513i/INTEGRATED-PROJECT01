@@ -176,6 +176,12 @@ function handleLogOut() {
 					<div class="hidden md:flex items-center gap-3 text-gray-300">
 						<template v-if="isSignedIn">
 							<router-link
+								to="/your-orders"
+								class="rounded-md px-2 py-1 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+							>
+								Your Orders
+							</router-link>
+							<router-link
 								:to="{ name: 'ProfileView' }"
 								class="rounded-md px-2 py-1 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
 							>
@@ -309,6 +315,13 @@ function handleLogOut() {
 			<!-- Mobile auth -->
 			<div class="mt-2">
 				<template v-if="isSignedIn">
+					<router-link
+						to="/your-orders"
+						class="block w-full rounded-md px-3 py-2 text-left text-base font-medium text-white hover:bg-white/10"
+						@click="isOpen = false"
+					>
+						Your Orders
+					</router-link>
 					<button
 						@click="goToProfile"
 						class="block w-full rounded-md px-3 py-2 text-left text-base font-medium text-white hover:bg-white/10"
