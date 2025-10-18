@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 public class CartItemDto {
-    private Long id;
+    private Integer id;
     private String model;
     private String brandName;
     private String description;

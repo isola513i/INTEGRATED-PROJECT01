@@ -14,7 +14,7 @@ import java.util.List;
 
 @CrossOrigin("*")
 @RestController
-@RequestMapping("/itb-mshop/v1/cart")
+@RequestMapping("/itb-mshop")
 public class CartController {
 
     @Autowired
@@ -24,12 +24,12 @@ public class CartController {
     @Autowired
     private ListMapper listMapper;
 
-    @GetMapping("/{userId}")
+    @GetMapping("/v2/cart/{userId}")
     public ResponseEntity<List<CartItemDto>> getCart(@PathVariable Integer userId) {
         return ResponseEntity.ok(cartService.getCartItemsByUser(userId));
     }
 
-    @PostMapping("/{userId}")
+    @PostMapping("/v2/cart/{userId}")
     public ResponseEntity<Void> addToCart(
             @PathVariable Integer userId,
             @RequestParam Integer saleItemId,
@@ -39,11 +39,11 @@ public class CartController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PutMapping("/{userId}")
+    @PutMapping("/v2/cart/{userId}")
     public ResponseEntity<Void> setQuantity(
             @PathVariable Integer userId,
             @RequestParam Integer saleItemId,
-            @RequestParam int quantity) {
+            @RequestParam Integer quantity) {
         cartService.setQuantity(userId, saleItemId, quantity);
 
         return ResponseEntity.status(HttpStatus.OK).build();
