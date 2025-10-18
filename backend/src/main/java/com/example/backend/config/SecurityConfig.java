@@ -47,7 +47,7 @@ public class SecurityConfig {
                         // Allow auth/public endpoints & preflight
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/itb-mshop/v2/auth/**").permitAll()
-                        .requestMatchers("/itb-mshop/v1/cart/**").permitAll()
+                        .requestMatchers("/itb-mshop/v2/cart/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/itb-mshop/v2/sale-items").permitAll()
                         .requestMatchers(HttpMethod.GET, "/itb-mshop/v2/sale-items/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/itb-mshop/v1/brands").permitAll()

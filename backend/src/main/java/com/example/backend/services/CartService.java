@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -57,6 +58,7 @@ public class CartService {
         } else {
             cartItem = new CartItem();
             cartItem.setCart(cart);
+
             cartItem.setSaleItem(saleItem);
             cartItem.setQuantity(quantity);
             cart.getItems().add(cartItem);
@@ -66,7 +68,8 @@ public class CartService {
         return cartRepository.save(cart);
     }
 
-    public Cart setQuantity(Integer userId, Integer saleItemId, int quantity) {
+    @Transactional
+    public Cart setQuantity(Integer userId, Integer saleItemId, Integer quantity) {
         User buyer = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -84,6 +87,9 @@ public class CartService {
         } else {
             cartItem.setQuantity(quantity);
             cartItemRepository.save(cartItem);
+            System.out.println(cartItem);
+            System.out.println(cartItem.getQuantity());
+            System.out.println(cartItem.getSaleItem().getId());
         }
 
         return cartRepository.findByBuyer(buyer).get();
@@ -101,12 +107,28 @@ public class CartService {
                     return cartRepository.save(newCart);
                 });
 
+        List<CartItem> toDelete = new ArrayList<>();
+        List<CartItemDto> dtos = new ArrayList<>();
 
-        return cart.getItems().stream().map(item -> {
+        for (CartItem item : cart.getItems()) {
             SaleItem sale = item.getSaleItem();
+            int available = sale.getQuantity();
+            int cartQty = item.getQuantity();
+
+            // ✅ ถ้าสินค้าหมด (available == 0) → ลบ item นี้
+            if (available == 0) {
+                toDelete.add(item);
+                continue; // ข้ามไม่ใส่ใน dto list
+            }
+
+            // ✅ อัปเดต quantity ถ้ามากกว่า stock
+            if (cartQty > available) {
+                item.setQuantity(available);
+                cartItemRepository.save(item);
+            }
 
             CartItemDto dto = new CartItemDto();
-            dto.setId(item.getId());
+            dto.setId(sale.getId()); // ใช้ id ของ CartItem นะ
             dto.setModel(sale.getModel());
             dto.setBrandName(sale.getBrand() != null ? sale.getBrand().getName() : null);
             dto.setDescription(sale.getDescription());
@@ -117,16 +139,17 @@ public class CartService {
             dto.setColor(sale.getColor());
             dto.setSellerId(sale.getSeller().getId());
             dto.setSellerUsername(sale.getSeller().getFullName());
-
-            int available = sale.getQuantity();
-            int cartQty = item.getQuantity();
             dto.setQuantity(Math.min(cartQty, available));
-            if (cartQty > available) {
-                item.setQuantity(available);
-                cartItemRepository.save(item);
-            }
 
-            return dto;
-        }).collect(Collectors.toList());
+            dtos.add(dto);
+        }
+
+        // ✅ ลบทั้งหมดรวดเดียวหลัง loop (ปลอดภัย ไม่ชน constraint)
+        if (!toDelete.isEmpty()) {
+            cartItemRepository.deleteAllInBatch(toDelete);
+        }
+
+        return dtos;
     }
+
 }

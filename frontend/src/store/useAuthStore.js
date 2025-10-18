@@ -62,7 +62,7 @@ export const useAuthStore = defineStore("auth", {
       localStorage.setItem("user", JSON.stringify(this.user));
 
       const cart = useCartStore();
-      cart.clear();
+      cart.getItems();
     },
 
     async logout() {
