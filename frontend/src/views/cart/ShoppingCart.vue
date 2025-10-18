@@ -6,6 +6,8 @@ import { useFlashStore } from "@/store/useFlashStore";
 import { placeOrder } from "@/services/orderService";
 import CartItem from "@/components/cart/CartItem.vue";
 import CartSummary from "@/components/cart/CartSummary.vue";
+import { LinkIcon } from "@heroicons/vue/16/solid";
+import router from "@/router";
 
 const auth = useAuthStore();
 const cart = useCartStore();
@@ -17,7 +19,6 @@ const shipNote = ref("");
 const placing = ref(false);
 
 onMounted(() => {
-
 	try {
 		const saved = JSON.parse(localStorage.getItem(PREF_KEY) || "{}");
 		shipAddress.value = saved?.address || "";
@@ -69,7 +70,7 @@ async function handlePlaceOrder({ address, note }) {
 		sellerGroups,
 	};
 
-	console.log("[placeOrder] payload ->", JSON.stringify(payload, null, 2));
+	// console.log("[placeOrder] payload ->", JSON.stringify(payload, null, 2));
 
 	try {
 		const res = await placeOrder(payload, auth.userId);
@@ -173,7 +174,6 @@ function buildSellerGroups(items) {
 	</div>
 </template>
 <style scoped>
-/* ✅ Slide Down Animation */
 .slide-down-enter-active,
 .slide-down-leave-active {
 	transition: all 0.4s ease;
