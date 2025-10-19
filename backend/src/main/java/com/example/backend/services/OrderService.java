@@ -11,6 +11,8 @@ import com.example.backend.repositories.CartRepository;
 import com.example.backend.repositories.OrderRepository;
 import com.example.backend.repositories.SaleItemRepository;
 import com.example.backend.repositories.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,12 +22,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Service
 public class OrderService {
+    private static final Logger log = LoggerFactory.getLogger(OrderService.class);
+
     @Autowired
     private OrderRepository orderRepo;
     @Autowired
@@ -44,54 +46,108 @@ public class OrderService {
         }
         User buyer = userRepo.findById(req.getBuyerId().intValue())
                 .orElseThrow(() -> new ItemNotFoundException("Buyer not found with id: " + req.getBuyerId()));
+
         List<OrderDto.PlaceOrderResponse> responses = new ArrayList<>();
-        List<Integer> allSelectedSaleItemIds = new ArrayList<>();
+        List<Integer> successfullyOrderedSaleItemIds = new ArrayList<>();
+
         for (OrderDto.SellerOrderGroup group : req.getSellerGroups()) {
             User seller = userRepo.findById(group.getSellerId().intValue())
                     .orElseThrow(() -> new ItemNotFoundException("Seller not found with id: " + group.getSellerId()));
+
+            boolean hasInsufficientStock = false;
+            String insufficientItemModel = null;
+            Map<Long, SaleItem> fetchedSaleItems = new HashMap<>();
+
+            log.info("Checking stock for seller {}", seller.getId());
+            for (OrderDto.SelectedCartItem itemRequest : group.getItems()) {
+                SaleItem saleItem = fetchedSaleItems.computeIfAbsent(itemRequest.getSaleItemId(),
+                        id -> saleItemRepo.findById(id.intValue())
+                                .orElseThrow(() -> new ItemNotFoundException("Sale item not found with id: " + id))
+                );
+
+                if (!Objects.equals(saleItem.getSeller().getId(), seller.getId())) {
+                    log.warn("Item ID {} does not belong to seller ID {}. Skipping group.", saleItem.getId(), seller.getId());
+                    throw new IllegalArgumentException("Item ID " + saleItem.getId() + " is not owned by seller ID " + seller.getId());
+                }
+
+                if (saleItem.getQuantity() < itemRequest.getQuantity()) {
+                    hasInsufficientStock = true;
+                    insufficientItemModel = saleItem.getModel();
+                    log.warn("Insufficient stock for item: {} (ID: {}). Required: {}, Available: {}. Canceling order for seller {}.",
+                            saleItem.getModel(), saleItem.getId(), itemRequest.getQuantity(), saleItem.getQuantity(), seller.getId());
+                    break;
+                }
+            }
+
             Order order = new Order();
             order.setBuyer(buyer);
             order.setSeller(seller);
             order.setShippingAddress(req.getShippingAddress());
             order.setOrderNote(req.getOrderNote());
-            order.setOrderStatus(OrderStatus.COMPLETED);
             order.setTotalPrice(BigDecimal.ZERO);
-            for (OrderDto.SelectedCartItem itemRequest : group.getItems()) {
-                SaleItem saleItem = saleItemRepo.findById(itemRequest.getSaleItemId().intValue())
-                        .orElseThrow(() -> new ItemNotFoundException("Sale item not found with id: " + itemRequest.getSaleItemId()));
-                if (!Objects.equals(saleItem.getSeller().getId(), seller.getId())) {
-                    throw new IllegalArgumentException("Item ID " + saleItem.getId() + " is not owned by seller ID " + seller.getId());
-                }
-                if (saleItem.getQuantity() < itemRequest.getQuantity()) {
-                    throw new QuantityNotEnoughException("Not enough stock for item: " + saleItem.getModel());
-                }
-                int updatedRows = saleItemRepo.deductStock(saleItem.getId(), itemRequest.getQuantity());
-                if (updatedRows == 0) {
-                    throw new QuantityNotEnoughException("Failed to deduct stock for item: " + saleItem.getModel());
-                }
-                OrderItem orderItem = new OrderItem();
-                orderItem.setOrder(order);
-                orderItem.setSaleItem(saleItem);
-                orderItem.setPrice(BigDecimal.valueOf(saleItem.getPrice()));
-                orderItem.setQuantity(itemRequest.getQuantity());
-                orderItem.setDescription(saleItem.getModel());
-                order.getItems().add(orderItem);
-                order.setTotalPrice(
-                        order.getTotalPrice().add(orderItem.getPrice().multiply(BigDecimal.valueOf(orderItem.getQuantity())))
-                );
 
-                allSelectedSaleItemIds.add(saleItem.getId());
+            if (hasInsufficientStock) {
+                order.setOrderStatus(OrderStatus.CANCELED);
+                log.info("Order for seller {} is being canceled due to insufficient stock for item: {}", seller.getId(), insufficientItemModel);
+
+                for (OrderDto.SelectedCartItem itemRequest : group.getItems()) {
+                    SaleItem saleItem = fetchedSaleItems.get(itemRequest.getSaleItemId());
+                    if (saleItem == null) continue;
+
+                    OrderItem orderItem = createOrderItemEntity(order, saleItem, itemRequest.getQuantity());
+                    order.getItems().add(orderItem);
+                    // order.setTotalPrice(order.getTotalPrice().add(orderItem.getPrice().multiply(BigDecimal.valueOf(orderItem.getQuantity()))));
+                }
+            } else {
+                order.setOrderStatus(OrderStatus.COMPLETED);
+                log.info("Stock sufficient for seller {}. Proceeding with order.", seller.getId());
+
+                for (OrderDto.SelectedCartItem itemRequest : group.getItems()) {
+                    SaleItem saleItem = fetchedSaleItems.get(itemRequest.getSaleItemId());
+                    if (saleItem == null) continue;
+                    int updatedRows = saleItemRepo.deductStock(saleItem.getId(), itemRequest.getQuantity());
+                    if (updatedRows == 0) {
+                        log.error("Failed to deduct stock for item {} (ID: {}) unexpectedly. Throwing exception.", saleItem.getModel(), saleItem.getId());
+                        throw new QuantityNotEnoughException("Failed to deduct stock for item: " + saleItem.getModel() + " (Possibly due to concurrent update)");
+                    }
+
+                    OrderItem orderItem = createOrderItemEntity(order, saleItem, itemRequest.getQuantity());
+                    order.getItems().add(orderItem);
+
+                    order.setTotalPrice(
+                            order.getTotalPrice().add(orderItem.getPrice().multiply(BigDecimal.valueOf(orderItem.getQuantity())))
+                    );
+
+                    successfullyOrderedSaleItemIds.add(saleItem.getId());
+                }
             }
+
             Order savedOrder = orderRepo.save(order);
+            log.info("Saved order ID {} with status {}", savedOrder.getId(), savedOrder.getOrderStatus());
             responses.add(toPlaceOrderResponseDto(savedOrder));
         }
-        cartRepo.findByBuyerId(buyer.getId())
-                .ifPresent(cart -> {
-                    if (!allSelectedSaleItemIds.isEmpty()) {
-                        cartItemRepo.deleteSelected(cart.getId(), allSelectedSaleItemIds);
-                    }
-                });
+
+        if (!successfullyOrderedSaleItemIds.isEmpty()) {
+            cartRepo.findByBuyerId(buyer.getId())
+                    .ifPresent(cart -> {
+                        log.info("Deleting {} successfully ordered items from cart ID {}", successfullyOrderedSaleItemIds.size(), cart.getId());
+                        cartItemRepo.deleteSelected(cart.getId(), successfullyOrderedSaleItemIds);
+                    });
+        } else {
+            log.info("No items were successfully ordered, skipping cart deletion.");
+        }
+
         return responses;
+    }
+
+    private OrderItem createOrderItemEntity(Order order, SaleItem saleItem, int quantity) {
+        OrderItem orderItem = new OrderItem();
+        orderItem.setOrder(order);
+        orderItem.setSaleItem(saleItem);
+        orderItem.setPrice(BigDecimal.valueOf(saleItem.getPrice()));
+        orderItem.setQuantity(quantity);
+        orderItem.setDescription(saleItem.getModel());
+        return orderItem;
     }
 
     private OrderDto.PlaceOrderResponse toPlaceOrderResponseDto(Order order) {
@@ -137,7 +193,7 @@ public class OrderService {
     public Page<OrderDto.BuyerOrderSummary> getOrdersByBuyer(Integer buyerId, Pageable pageable) {
         Page<Order> orderPage = orderRepo.findByBuyer_IdAndOrderStatusIn(
                 buyerId,
-                List.of(OrderStatus.COMPLETED),
+                List.of(OrderStatus.COMPLETED, OrderStatus.CANCELED),
                 pageable
         );
         return orderPage.map(this::toBuyerOrderSummaryDto);

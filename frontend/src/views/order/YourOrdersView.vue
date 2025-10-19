@@ -1,22 +1,22 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed, watch } from "vue"; // เพิ่ม computed
 import { useAuthStore } from "@/store/useAuthStore";
 import { fetchOrdersByBuyer } from "@/services/orderService";
 import Pagination from "@/components/Pagination/Pagination.vue";
 
 const auth = useAuthStore();
-const orders = ref([]);
 const pagination = ref({ page: 0, totalPages: 1 });
 const loading = ref(true);
 const error = ref(null);
+const selectedTab = ref("Completed");
+const allOrders = ref([]);
 
-// ฟังก์ชันสำหรับโหลดข้อมูล
 const loadOrders = async (page = 0) => {
 	loading.value = true;
 	error.value = null;
 	try {
 		const response = await fetchOrdersByBuyer(auth.userId, { page });
-		orders.value = response.content;
+		allOrders.value = response.content;
 		pagination.value = {
 			page: response.page,
 			totalPages: response.totalPages,
@@ -28,7 +28,13 @@ const loadOrders = async (page = 0) => {
 	}
 };
 
-// ฟังก์ชันสำหรับจัดรูปแบบวันที่
+const filteredOrders = computed(() => {
+	const statusToFilter = selectedTab.value.toUpperCase();
+	return allOrders.value.filter(
+		(order) => order.orderStatus === statusToFilter
+	);
+});
+
 const formatDate = (isoString) => {
 	if (!isoString) return "-";
 	return new Date(isoString).toLocaleDateString("en-US", {
@@ -38,10 +44,13 @@ const formatDate = (isoString) => {
 	});
 };
 
-// ฟังก์ชันสำหรับจัดรูปแบบตัวเลข
 const formatNumber = (num) => {
 	return Number(num || 0).toLocaleString("en-US");
 };
+
+watch(selectedTab, () => {
+	loadOrders(0);
+});
 
 onMounted(() => {
 	if (auth.isLoggedIn) {
@@ -58,6 +67,33 @@ onMounted(() => {
 		<div class="max-w-4xl mx-auto px-4">
 			<h1 class="text-2xl font-bold text-gray-800 mb-6">Your Orders</h1>
 
+			<div class="mb-6 border-b border-gray-200">
+				<nav class="flex space-x-4" aria-label="Tabs">
+					<button
+						@click="selectedTab = 'Completed'"
+						:class="[
+							'itbms-completed-orders-button px-3 py-2 font-medium text-sm rounded-t-lg',
+							selectedTab === 'Completed'
+								? 'border-b-2 border-blue-600 text-blue-600'
+								: 'text-gray-500 hover:text-gray-700 hover:border-gray-300',
+						]"
+					>
+						Completed
+					</button>
+					<button
+						@click="selectedTab = 'Canceled'"
+						:class="[
+							'itbms-canceled-orders-button px-3 py-2 font-medium text-sm rounded-t-lg',
+							selectedTab === 'Canceled'
+								? 'border-b-2 border-blue-600 text-blue-600'
+								: 'text-gray-500 hover:text-gray-700 hover:border-gray-300',
+						]"
+					>
+						Canceled
+					</button>
+				</nav>
+			</div>
+
 			<div v-if="loading" class="text-center py-10 text-gray-500">
 				Loading your orders...
 			</div>
@@ -70,15 +106,15 @@ onMounted(() => {
 			</div>
 
 			<div
-				v-else-if="orders.length === 0"
+				v-else-if="filteredOrders.length === 0"
 				class="text-center py-10 text-gray-500"
 			>
-				You have no orders yet.
+				You have no {{ selectedTab.toLowerCase() }} orders.
 			</div>
 
 			<div v-else class="space-y-6">
 				<router-link
-					v-for="order in orders"
+					v-for="order in filteredOrders"
 					:key="order.id"
 					:to="`/your-orders/${order.id}`"
 					class="itbms-row block bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden hover:shadow-md hover:border-blue-300 transition-all duration-200"
@@ -172,12 +208,13 @@ onMounted(() => {
 						</div>
 					</div>
 				</router-link>
-
-				<Pagination
-					:current-page="pagination.page"
-					:total-pages="pagination.totalPages"
-					@update:page="loadOrders"
-				/>
+				<div class="flex flex-col items-center mt-8">
+					<Pagination
+						:current-page="pagination.page"
+						:total-pages="pagination.totalPages"
+						@update:page="loadOrders"
+					/>
+				</div>
 			</div>
 		</div>
 	</div>
