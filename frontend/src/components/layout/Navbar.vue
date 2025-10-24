@@ -70,13 +70,11 @@ function handleLogOut() {
 </script>
 
 <template>
-	<!-- Sticky, backdrop, subtle border -->
 	<nav
 		class="sticky top-0 z-50 w-full bg-[#111112]/90 backdrop-blur border-b border-white/10"
 	>
 		<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 			<div class="flex h-14 items-center justify-between">
-				<!-- Left: Logo -->
 				<div class="flex items-center gap-2 pl-0">
 					<router-link to="/" class="inline-flex items-center">
 						<img
@@ -87,7 +85,6 @@ function handleLogOut() {
 					</router-link>
 				</div>
 
-				<!-- Center: Desktop Nav -->
 				<div class="hidden md:flex items-center gap-8">
 					<router-link to="/sale-items" :class="linkClasses('/sale-items')"
 						>Store</router-link
@@ -97,9 +94,7 @@ function handleLogOut() {
 					<router-link to="/" :class="linkClasses('/')">Promotions</router-link>
 				</div>
 
-				<!-- Right: Actions -->
 				<div class="flex items-center gap-2">
-					<!-- Desktop Search -->
 					<div class="relative hidden lg:block">
 						<input
 							ref="searchInputRef"
@@ -111,7 +106,6 @@ function handleLogOut() {
 							class="peer pl-10 pr-10 py-2 w-72 xl:w-80 rounded-full bg-white/95 text-black text-sm outline-none ring-0 focus:ring-2 focus:ring-blue-500 placeholder:text-gray-500"
 							aria-label="Search products"
 						/>
-						<!-- Search icon -->
 						<svg
 							class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500"
 							fill="none"
@@ -126,7 +120,6 @@ function handleLogOut() {
 								d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"
 							/>
 						</svg>
-						<!-- Clear -->
 						<button
 							v-if="searchQuery"
 							@click="clearSearch"
@@ -137,7 +130,6 @@ function handleLogOut() {
 						</button>
 					</div>
 
-					<!-- ✅ ใหม่: ใช้ router-link custom slot เพื่อควบคุม navigate เอง -->
 					<router-link to="/cart" custom v-slot="{ navigate }">
 						<button
 							class="itbms-cart-quantity relative hidden md:inline-flex items-center justify-center rounded-full p-2 text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-40 disabled:cursor-not-allowed"
@@ -146,7 +138,6 @@ function handleLogOut() {
 							:title="isCartDisabled ? 'Your cart is empty' : 'Cart'"
 							@click="!isCartDisabled && navigate()"
 						>
-							<!-- icon -->
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
 								fill="none"
@@ -162,7 +153,6 @@ function handleLogOut() {
 								/>
 							</svg>
 
-							<!-- badge: โชว์เฉพาะตอนมีของ -->
 							<span
 								v-if="cart.count > 0"
 								class="absolute -top-1 -right-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-600 px-1 text-xs font-bold text-white"
@@ -172,15 +162,23 @@ function handleLogOut() {
 						</button>
 					</router-link>
 
-					<!-- Auth: Desktop -->
 					<div class="hidden md:flex items-center gap-3 text-gray-300">
 						<template v-if="isSignedIn">
 							<router-link
+								v-if="auth.user?.userType === 'BUYER'"
 								to="/your-orders"
 								class="rounded-md px-2 py-1 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
 							>
 								Your Orders
 							</router-link>
+							<router-link
+								v-else-if="auth.user?.userType === 'SELLER'"
+								to="/sale-orders"
+								class="rounded-md px-2 py-1 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+							>
+								Sale Orders
+							</router-link>
+
 							<router-link
 								:to="{ name: 'ProfileView' }"
 								class="rounded-md px-2 py-1 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -213,7 +211,6 @@ function handleLogOut() {
 						</template>
 					</div>
 
-					<!-- Mobile menu button -->
 					<button
 						class="md:hidden inline-flex items-center justify-center rounded-md p-2 text-gray-300 hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
 						@click="isOpen = !isOpen"
@@ -245,12 +242,10 @@ function handleLogOut() {
 			</div>
 		</div>
 
-		<!-- Mobile menu -->
 		<div
 			v-if="isOpen"
 			class="md:hidden border-t border-white/10 bg-[#111112] px-4 sm:px-6 lg:px-8 pb-4"
 		>
-			<!-- Mobile search -->
 			<div class="relative mt-3">
 				<input
 					v-model="searchQuery"
@@ -284,7 +279,6 @@ function handleLogOut() {
 				</button>
 			</div>
 
-			<!-- Mobile links -->
 			<div class="mt-3 space-y-1 text-white">
 				<router-link
 					to="/sale-items"
@@ -312,16 +306,25 @@ function handleLogOut() {
 				>
 			</div>
 
-			<!-- Mobile auth -->
 			<div class="mt-2">
 				<template v-if="isSignedIn">
 					<router-link
+						v-if="auth.user?.userType === 'BUYER'"
 						to="/your-orders"
 						class="block w-full rounded-md px-3 py-2 text-left text-base font-medium text-white hover:bg-white/10"
 						@click="isOpen = false"
 					>
 						Your Orders
 					</router-link>
+					<router-link
+						v-else-if="auth.user?.userType === 'SELLER'"
+						to="/sale-orders"
+						class="block w-full rounded-md px-3 py-2 text-left text-base font-medium text-white hover:bg-white/10"
+						@click="isOpen = false"
+					>
+						Sale Orders
+					</router-link>
+
 					<button
 						@click="goToProfile"
 						class="block w-full rounded-md px-3 py-2 text-left text-base font-medium text-white hover:bg-white/10"

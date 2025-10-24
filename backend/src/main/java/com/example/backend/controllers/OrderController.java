@@ -35,6 +35,7 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(responses);
     }
 
+    // View Buyer Order
     @GetMapping("/v2/users/{id}/orders")
     public ResponseEntity<Page<OrderDto.BuyerOrderSummary>> getBuyerOrders(
             @PathVariable("id") Integer buyerId,
@@ -59,4 +60,29 @@ public class OrderController {
         return ResponseEntity.ok(orderDetail);
     }
 
+    // View Seller Order
+    @GetMapping("/v2/sellers/{sid}/orders")
+    public ResponseEntity<Page<OrderDto.SellerOrderSummary>> getSellerOrders(
+            @PathVariable("sid") Integer sellerId,
+            @RequestParam(required = false, defaultValue = "all") String status,
+            @PageableDefault(sort = "orderDate", direction = Sort.Direction.DESC) Pageable pageable,
+            HttpServletRequest request
+    ) {
+        Integer tokenUserId = jwtUtils.extractUserId(request);
+        Page<OrderDto.SellerOrderSummary> orders = orderService.getOrdersBySeller(
+                sellerId, tokenUserId, status, pageable);
+        return ResponseEntity.ok(orders);
+    }
+
+    @GetMapping("/v2/sellers/{sid}/orders/{id}")
+    public ResponseEntity<OrderDto.SellerOrderSummary> getSellerOrderDetail(
+            @PathVariable("sid") Integer sellerId,
+            @PathVariable("id") Long orderId,
+            HttpServletRequest request
+    ) {
+        Integer tokenUserId = jwtUtils.extractUserId(request);
+        OrderDto.SellerOrderSummary orderDetail = orderService.getSellerOrderDetail(
+                sellerId, orderId, tokenUserId);
+        return ResponseEntity.ok(orderDetail);
+    }
 }
