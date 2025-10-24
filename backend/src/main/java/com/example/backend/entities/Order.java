@@ -46,4 +46,7 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items = new ArrayList<>();
+
+    @Column(name = "is_viewed_by_seller", nullable = false)
+    private Boolean viewedBySeller = false;
 }

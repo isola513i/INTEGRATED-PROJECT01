@@ -117,4 +117,34 @@ public class OrderDto {
         private int page;
         private String sort;
     }
+
+    // ===================== Seller View Order Response =====================
+    @Data @NoArgsConstructor
+    public static class SellerOrderSummary {
+        private String id;
+        private BuyerBrief buyer;
+        private String sellerId;
+        private Instant orderDate;
+        private Instant paymentDate;
+        private String shippingAddress;
+        private String orderNote;
+        private List<OrderItemBrief> orderItems;
+        private String orderStatus;
+        private Boolean viewedBySeller;
+
+        @Data @NoArgsConstructor
+        public static class BuyerBrief {
+            private String id;
+            private String username;
+        }
+
+        @Data @NoArgsConstructor
+        public static class OrderItemBrief {
+            private Integer no;
+            private Long saleItemId;
+            private Integer price;
+            private Integer quantity;
+            private String description;
+        }
+    }
 }

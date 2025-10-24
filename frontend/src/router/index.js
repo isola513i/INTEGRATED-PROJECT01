@@ -19,6 +19,9 @@ import ShoppingCart from "@/views/cart/ShoppingCart.vue";
 import { useCartStore } from "@/store/useCartStore";
 import YourOrdersView from "@/views/order/YourOrdersView.vue";
 import OrderDetailView from "@/views/order/OrderDetailView.vue";
+import SaleOrdersView from "@/views/order/SaleOrdersView.vue"; // Add import
+import SaleOrderDetailView from "@/views/order/SaleOrderDetailView.vue"; // Add import
+
 const routes = [
 	{
 		path: "/",
@@ -123,6 +126,18 @@ const routes = [
 		name: "OrderDetail",
 		component: OrderDetailView,
 		meta: { requiresAuth: true, roles: ["BUYER"] },
+	},
+	{
+		path: "/sale-orders",
+		name: "SaleOrders",
+		component: SaleOrdersView,
+		meta: { requiresAuth: true, roles: ["SELLER"] },
+	},
+	{
+		path: "/sale-orders/:orderId",
+		name: "SaleOrderDetail",
+		component: SaleOrderDetailView,
+		meta: { requiresAuth: true, roles: ["SELLER"] },
 	},
 ];
 

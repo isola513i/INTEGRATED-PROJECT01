@@ -254,4 +254,94 @@ public class OrderService {
         }
         return toBuyerOrderSummaryDto(order);
     }
+
+    @Transactional(readOnly = true)
+    public Page<OrderDto.SellerOrderSummary> getOrdersBySeller(
+            Integer sellerId,
+            Integer tokenUserId,
+            String statusFilter, // "new", "canceled", "all"
+            Pageable pageable
+    ) {
+
+        if (!Objects.equals(sellerId, tokenUserId)) {
+            log.warn("Forbidden access attempt: Token User ID {} tried to access Seller ID {}", tokenUserId, sellerId);
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User ID in access token not matched with resource ID");
+        }
+
+        userRepo.findById(sellerId)
+                .orElseThrow(() -> new ItemNotFoundException("Seller user not found with id: " + sellerId));
+
+        Page<Order> orderPage;
+        if ("new".equalsIgnoreCase(statusFilter)) {
+            log.info("Fetching new orders for seller {}", sellerId);
+            orderPage = orderRepo.findBySeller_IdAndViewedBySellerFalseAndOrderStatus(
+                    sellerId, OrderStatus.COMPLETED, pageable);
+        } else if ("canceled".equalsIgnoreCase(statusFilter)) {
+            log.info("Fetching canceled orders for seller {}", sellerId);
+            orderPage = orderRepo.findBySeller_IdAndOrderStatus(
+                    sellerId, OrderStatus.CANCELED, pageable);
+        } else {
+            log.info("Fetching all completed orders for seller {}", sellerId);
+            orderPage = orderRepo.findBySeller_IdAndOrderStatusIn(
+                    sellerId, List.of(OrderStatus.COMPLETED), pageable);
+        }
+        return orderPage.map(this::toSellerOrderSummaryDto);
+    }
+
+    @Transactional
+    public OrderDto.SellerOrderSummary getSellerOrderDetail(
+            Integer sellerId,
+            Long orderId,
+            Integer tokenUserId
+    ) {
+        if (!Objects.equals(sellerId, tokenUserId)) {
+            log.warn("Forbidden access attempt: Token User ID {} tried to access Seller ID {}'s order {}", tokenUserId, sellerId, orderId);
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User ID in access token not matched with resource ID");
+        }
+        Order order = orderRepo.findByIdAndSeller_Id(orderId, sellerId)
+                .orElseThrow(() -> new ItemNotFoundException("Order not found with id: " + orderId + " for seller: " + sellerId));
+        if (!Boolean.TRUE.equals(order.getViewedBySeller())) {
+            log.info("Marking order ID {} as viewed by seller {}", orderId, sellerId);
+            order.setViewedBySeller(true);
+            orderRepo.save(order);
+        }
+        return toSellerOrderSummaryDto(order);
+    }
+
+    private OrderDto.SellerOrderSummary toSellerOrderSummaryDto(Order order) {
+        OrderDto.SellerOrderSummary summary = new OrderDto.SellerOrderSummary();
+
+        summary.setId(String.valueOf(order.getId()));
+        summary.setSellerId(String.valueOf(order.getSeller().getId()));
+        summary.setOrderDate(order.getOrderDate());
+        summary.setPaymentDate(order.getPaymentDate());
+        summary.setShippingAddress(order.getShippingAddress());
+        summary.setOrderNote(order.getOrderNote());
+        summary.setOrderStatus(order.getOrderStatus().name());
+        summary.setViewedBySeller(order.getViewedBySeller());
+
+        // Buyer Info
+        OrderDto.SellerOrderSummary.BuyerBrief buyerBrief = new OrderDto.SellerOrderSummary.BuyerBrief();
+        buyerBrief.setId(String.valueOf(order.getBuyer().getId()));
+        buyerBrief.setUsername(order.getBuyer().getNickName());
+        summary.setBuyer(buyerBrief);
+
+        // Order Items
+        List<OrderDto.SellerOrderSummary.OrderItemBrief> itemBriefs = new ArrayList<>();
+        int itemNo = 1;
+        for (OrderItem oi : order.getItems()) {
+            OrderDto.SellerOrderSummary.OrderItemBrief ib = new OrderDto.SellerOrderSummary.OrderItemBrief();
+            SaleItem saleItem = oi.getSaleItem();
+
+            ib.setNo(itemNo++);
+            ib.setSaleItemId(Long.valueOf(saleItem.getId()));
+            ib.setPrice(oi.getPrice().intValue());
+            ib.setQuantity(oi.getQuantity());
+            ib.setDescription(oi.getDescription());
+            itemBriefs.add(ib);
+        }
+        summary.setOrderItems(itemBriefs);
+
+        return summary;
+    }
 }
