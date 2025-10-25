@@ -26,8 +26,6 @@ export const useOrderStore = defineStore("order", {
         this.loadingPending = false;
       }
     },
-
-    // เปลี่ยนจาก clearPending() -> decrementPending()
     decrementPending() {
       if (this.pendingCount > 0) {
         this.pendingCount = this.pendingCount - 1;
