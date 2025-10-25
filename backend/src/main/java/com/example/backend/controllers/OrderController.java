@@ -19,7 +19,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/itb-mshop")
-@CrossOrigin("*")
+//@CrossOrigin("*")
+@CrossOrigin(origins = "http://localhost:5173",allowCredentials = "true")
 public class OrderController {
     @Autowired
     private OrderService orderService;

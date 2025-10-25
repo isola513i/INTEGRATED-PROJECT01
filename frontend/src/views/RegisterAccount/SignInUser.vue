@@ -18,7 +18,6 @@ async function handleFormSubmit() {
   loading.value = true;
   try {
     const data = await auth.login(form.value.email.trim(), form.value.password);
-    console.log(data);
     flash.setMessage(
       "Login successful!",
       "text-green-600 bg-green-50 p-2 rounded border border-green-200 shadow-sm"

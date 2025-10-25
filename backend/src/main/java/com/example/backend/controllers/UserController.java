@@ -1,14 +1,15 @@
 package com.example.backend.controllers;
 
-import com.example.backend.dtos.JwtRequestUser;
-import com.example.backend.dtos.UserCreateRequestDto;
+import com.example.backend.dtos.*;
 
-import com.example.backend.dtos.UserCreateResponseDto;
 import com.example.backend.entities.User;
+import com.example.backend.exceptions.ItemNotFoundException;
+import com.example.backend.exceptions.SellerNotMatchInTokenException;
 import com.example.backend.services.EmailService;
 import com.example.backend.services.UserService;
 import com.example.backend.utils.JwtUtils;
 import com.nimbusds.jwt.JWTClaimsSet;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,8 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/itb-mshop")
-@CrossOrigin("*")
+//@CrossOrigin("*")
+@CrossOrigin(origins = "http://localhost:5173",allowCredentials = "true")
 public class UserController {
     @Autowired
     private UserService userService;
@@ -76,10 +78,9 @@ public class UserController {
         if ((provided == null || provided.isBlank()) && body != null) {
             provided = body.getOrDefault("refresh_token", body.get("refreshToken"));
         }
-        if (provided == null || provided.isBlank()) {
-            throw new IllegalArgumentException("refresh_token is required (cookie or body)");
-        }
-
+//        if (provided == null || provided.isBlank()) {
+//            throw new IllegalArgumentException("refresh_token is required (cookie or body)");
+//        }
         Map<String, String> newTokens = userService.refresh(provided); // rotates refresh + new access
         String newAccess  = newTokens.get("access_token");
         String newRefresh = newTokens.get("refresh_token");
@@ -91,20 +92,53 @@ public class UserController {
                 .body(Map.of("access_token", newAccess));
     }
 
+    @PostMapping("/v2/auth/{userId}/change-password")
+    public ResponseEntity<Boolean> changePassword(@PathVariable Integer userId,
+                                                  @RequestBody @Valid ChangePasswordRequestDto changePasswordRequestDto,
+                                                  HttpServletRequest request) {
+        Integer userIdInToken =  jwtUtils.extractUserId(request);
+        User user = userService.getUserById(userId);
+        if (userIdInToken == null || !userIdInToken.equals(userId) || !user.getIsActive()) {
+            throw new SellerNotMatchInTokenException("User does not match the user in token or user is not active.");
+        }
+        userService.changePassword(userId, changePasswordRequestDto, request);
+        return ResponseEntity.ok(true);
+    }
+    @PostMapping("/v2/auth/forget-password")
+    public ResponseEntity<Boolean> forgetPassword(@RequestParam("email") String email) {
+        User user = userService.getUserByEmail(email);
+        if(user != null && user.getIsActive()) {
+            emailService.sendResetPasswordEmail(user.getEmail(), email);
+        } else throw new ItemNotFoundException("User with the provided email does not exist or is not active.");
+        return ResponseEntity.ok(true);
+    }
+    @PostMapping("/v2/auth/reset-password")
+    public ResponseEntity<Boolean> resetPassword(@RequestParam("token") String token,
+                                                 @RequestBody @Valid ResetPasswordRequestDto resetPasswordRequestDto) {
+        userService.resetPassword(token, resetPasswordRequestDto);
+        return ResponseEntity.ok(true);
+    }
+
 
     // inject refresh lifetime to align cookie expiry with JWT expiry
     @Value("${jwt.refresh.hours}")
     private long refreshHours;
 
     // choose cookie attributes suitable for your environment
-    @Value("${app.cookies.secure:true}")   // true in HTTPS; set to false for plain HTTP in local dev
+//    @Value("${app.cookies.secure:true}")   // true in HTTPS; set to false for plain HTTP in local dev
+//    private boolean cookieSecure;
+
+    @Value("${app.cookies.secure:false}")   // true in HTTPS; set to false for plain HTTP in local dev
     private boolean cookieSecure;
 
-    @Value("${app.cookies.same-site:Strict}") // None|Lax|Strict (None required for cross-site)
-    private String cookieSameSite;
+
+    //    @Value("${app.cookies.same-site:Strict}") // None|Lax|Strict (None required for cross-site)
+//    private String cookieSameSite;
+@Value("${app.cookies.same-site:Lax}") // None|Lax|Strict (None required for cross-site)
+private String cookieSameSite;
 
     // Path that should send the cookie ("/" is simplest if multiple endpoints need it)
-    @Value("${app.cookies.refresh.path:/itb-mshop/v2/auth/login}")
+    @Value("${app.cookies.refresh.path:/itb-mshop/v2/auth")
     private String refreshCookiePath;
 
     private ResponseCookie buildRefreshCookie(String token) {

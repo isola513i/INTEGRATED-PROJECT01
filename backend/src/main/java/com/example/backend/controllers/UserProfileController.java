@@ -18,7 +18,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping(value = "/itb-mshop", produces = { "application/hal+json" })
-@CrossOrigin("*")
+//@CrossOrigin("*")
+@CrossOrigin(origins = "http://localhost:5173",allowCredentials = "true")
 public class UserProfileController {
 
     @Autowired

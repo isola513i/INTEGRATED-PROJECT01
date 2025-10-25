@@ -32,6 +32,7 @@ export const verfyByToken = async (token) => {
 export const signInUser = async (email, password) => {
   const res = await fetch(`${API_BASE_URL}/v2/auth/login`, {
     method: "POST",
+    credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
   });
