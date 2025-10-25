@@ -31,7 +31,7 @@ export const useCartStore = defineStore("cart", {
 
     selectedCount: (s) =>
       s.items
-        .filter((i) => i.selected === true)
+        .filter((i) => i.selected === true) 
         .reduce((sum, i) => sum + (Number(i.quantity) || 0), 0),
 
     // 👍 ดึงเฉพาะรายการที่ถูกเลือก (ต้องเป็น true)

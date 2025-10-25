@@ -56,7 +56,17 @@ const loadOrders = async (page = 0) => {
       page,
     });
 
-    orders.value = response.content;
+    orders.value = (response.content || []).map((o) => {
+      const totalAmount = (o.orderItems || []).reduce(
+        (sum, item) =>
+          sum + (Number(item.price) || 0) * (Number(item.quantity) || 0),
+        0
+      );
+      return {
+        ...o,
+        totalAmount,
+      };
+    });
     pagination.value = {
       page: response.page,
       totalPages: response.totalPages,
@@ -79,14 +89,8 @@ watch(selectedTab, () => {
 });
 
 onMounted(async () => {
-  // ดึงจำนวน new orders มาจาก backend เพื่อ sync badge เริ่มต้น
-  // (เผื่อ navbarยังไม่ได้ call เอง)
   await orderStore.refreshPendingCount();
-
-  // โหลดรายการของแท็บเริ่มต้น ("New Orders")
   await loadOrders(0);
-
-  // ❌ ห้าม clearPending() ตรงนี้
 });
 </script>
 
@@ -196,7 +200,9 @@ onMounted(async () => {
 
             <div>
               <div class="font-semibold text-gray-500">PAYMENT DATE</div>
-              <div class="text-gray-800">{{ formatDate(order.paymentDate) }}</div>
+              <div class="text-gray-800">
+                {{ formatDate(order.paymentDate) }}
+              </div>
             </div>
 
             <div>

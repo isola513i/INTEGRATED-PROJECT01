@@ -73,7 +73,7 @@ const orderStore = useOrderStore();
 const sellerOrderCount = computed(() => orderStore.pendingCount || 0);
 
 onMounted(() => {
-  // ถ้าเป็น seller ให้เช็คจำนวนออเดอร์ใหม่
+
   if (auth.user?.userType === "SELLER") {
     orderStore.refreshPendingCount();
   }
