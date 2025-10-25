@@ -1,7 +1,8 @@
 package com.example.backend.controllers;
 
+import com.example.backend.dtos.CartDetailRequest;
+import com.example.backend.dtos.CartDetailResponse;
 import com.example.backend.dtos.CartItemDto;
-import com.example.backend.entities.Cart;
 import com.example.backend.services.CartService;
 import com.example.backend.utils.ListMapper;
 import org.modelmapper.ModelMapper;
@@ -49,5 +50,18 @@ public class CartController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    
+    @PutMapping("/v2/cart/{userId}/detail")
+    public ResponseEntity<Void> setDetail(
+            @PathVariable Integer userId,
+            @RequestBody CartDetailRequest request
+    ) {
+        cartService.updateCartDetail(userId, request.getShippingAddress(), request.getNote());
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+    @GetMapping("/v2/cart/{userId}/detail")
+    public ResponseEntity<CartDetailResponse> getDetail(@PathVariable Integer userId) {
+        CartDetailResponse response = cartService.getCartDetail(userId);
+        return ResponseEntity.ok(response);
+    }
+
 }
