@@ -17,67 +17,9 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
+import java.text.ParseException;
 
-//import io.jsonwebtoken.*;
-//import io.jsonwebtoken.io.Decoders;
-//import io.jsonwebtoken.security.Keys;
-//import org.springframework.beans.factory.annotation.Value;
-//import org.springframework.stereotype.Component;
-//
-//import java.security.Key;
-//import java.time.Instant;
-//import java.util.Date;
-//import java.util.Map;
-//@Component
-//public class JwtUtils {
-//    @Value("${jwt.secret}") private String hmacSecretBase64;
-//    @Value("${jwt.issuer}") private String issuer;
-//    @Value("${jwt.access.minutes}") private long accessMinutes;
-//    @Value("${jwt.refresh.hours}") private long refreshHours;
-//    private Key hmacKey() {
-//        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(hmacSecretBase64));
-//    }
-//
-//    public String generateAccessToken(Map<String, Object> claims) {
-//        Instant now = Instant.now();
-//        Instant exp = now.plusSeconds(accessMinutes * 60);
-//        return Jwts.builder()
-//                .setClaims(claims)
-//                .setIssuer(issuer)                 // iss
-//                .setIssuedAt(Date.from(now))       // iat
-//                .setExpiration(Date.from(exp))     // exp
-//                .claim("typ", "access")
-//                .signWith(hmacKey(), SignatureAlgorithm.HS256)
-//                .compact();
-//    }
-//
-//    public String generateRefreshToken(Map<String, Object> claims) {
-//        Instant now = Instant.now();
-//        Instant exp = now.plusSeconds(refreshHours * 3600);
-//        return Jwts.builder()
-//                .setClaims(claims)
-//                .setIssuer(issuer)
-//                .setIssuedAt(Date.from(now))
-//                .setExpiration(Date.from(exp))
-//                .claim("typ", "refresh")
-//                .signWith(hmacKey(), SignatureAlgorithm.HS256)
-//                .compact();
-//    }
-//
-//    public Jws<Claims> parseAuth(String token) {
-//        return Jwts.parserBuilder().setSigningKey(hmacKey()).build().parseClaimsJws(token);
-//    }
-//
-//    public boolean isValidAuthToken(String token) {
-//        try { parseAuth(token); return true; } catch (JwtException | IllegalArgumentException e) { return false; }
-//    }
-//
-//    public boolean isRefreshToken(String token) {
-//        try {
-//            return "refresh".equals(parseAuth(token).getBody().get("typ"));
-//        } catch (Exception e) { return false; }
-//    }
-//}
+
 @Component
 public class JwtUtils {
 
@@ -114,7 +56,8 @@ public class JwtUtils {
     }
 
     public String generateAccessToken(Map<String, Object> claims) {
-        long seconds = accessMinutes * 60;
+        //long seconds = accessMinutes * 60;
+        long seconds = 60;
         return buildAndSign(claims, seconds, "access");
     }
 
@@ -132,6 +75,25 @@ public class JwtUtils {
             return jwt.getJWTClaimsSet();
         } catch (Exception e) {
             throw new IllegalArgumentException("Invalid JWT", e);
+        }
+    }
+    public JWTClaimsSet parseRefresh(String token) throws ParseException {
+        try {
+            SignedJWT jwt = SignedJWT.parse(token);
+            boolean ok = jwt.verify(new RSASSAVerifier(rsaPublicJWK));
+            if (!ok) throw new JOSEException("Signature verification failed");
+
+            JWTClaimsSet claims = jwt.getJWTClaimsSet();
+
+            // Verify it's a refresh token
+            Object typ = claims.getClaim("typ");
+            if (typ == null || !"refresh".equals(String.valueOf(typ))) {
+                throw new IllegalArgumentException("Not a refresh token");
+            }
+
+            return claims;
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid refresh token", e);
         }
     }
 
@@ -153,7 +115,31 @@ public class JwtUtils {
             return false;
         }
     }
+    public boolean isValidRefreshToken(String token) {
+        try {
+            JWTClaimsSet claims = parseRefresh(token);
+            return !isExpired(claims);
+        } catch (Exception ignored) {
+            return false;
+        }
+    }
 
+    public boolean isExpired(String token) {
+        try {
+            JWTClaimsSet claims = parseAuth(token);
+            return isExpired(claims);
+        } catch (Exception e) {
+            return true; // If can't parse, consider expired
+        }
+    }
+    /**
+     * Check if claims set is expired
+     */
+    private boolean isExpired(JWTClaimsSet claims) {
+        Date expirationTime = claims.getExpirationTime();
+        if (expirationTime == null) return true;
+        return expirationTime.before(new Date());
+    }
     // -------------------- helpers --------------------
 
     private String buildAndSign(Map<String, Object> inputClaims, long lifetimeSeconds, String typ) {

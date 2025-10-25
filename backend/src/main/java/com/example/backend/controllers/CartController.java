@@ -13,7 +13,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin("*")
+//@CrossOrigin("*")
+@CrossOrigin(origins = "http://localhost:5173",allowCredentials = "true")
 @RestController
 @RequestMapping("/itb-mshop")
 public class CartController {

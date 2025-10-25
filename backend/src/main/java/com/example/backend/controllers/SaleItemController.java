@@ -30,7 +30,8 @@ import java.util.List;
 @RestController
 @Getter
 @Setter
-@CrossOrigin("*")
+//@CrossOrigin("*")
+@CrossOrigin(origins = "http://localhost:5173",allowCredentials = "true")
 @RequestMapping("/itb-mshop")
 public class SaleItemController {
     @Autowired
@@ -70,20 +71,6 @@ public class SaleItemController {
         return ResponseEntity.ok(modelMapper.map(saleItemService.updateSaleItem(saleItemId, saleItemDto), SaleItemDto.GetSaleItemDto.class));
     }
 
-//    @PostMapping("/v1/sale-items")
-//    public ResponseEntity<SaleItemDto.GetSaleItemDto> addSaleItem(
-//            @RequestBody SaleItemDto.GetCreateSaleItemDto saleItemDto) {
-//        SaleItem saleItem = modelMapper.map(saleItemDto, SaleItem.class);
-//        SaleItem savedItem = saleItemService.addSaleItem(saleItem);
-//        SaleItemDto.GetSaleItemDto dto = modelMapper.map(savedItem, SaleItemDto.GetSaleItemDto.class);
-//        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
-//    }
-
-//    @DeleteMapping("/v1/sale-items/{saleItemId}")
-//    public ResponseEntity<Void> deleteSaleItem(@PathVariable Integer saleItemId) {
-//        saleItemService.deleteSaleItem(saleItemId);
-//        return ResponseEntity.noContent().build();
-//    }
 
     // ========== V2 Endpoints ==========
     @PostMapping(value = "/v2/sellers/{id}/sale-items", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

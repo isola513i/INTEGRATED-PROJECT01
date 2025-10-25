@@ -103,7 +103,6 @@ export const useCartStore = defineStore("cart", {
       this.save();
     },
 
-    // 🆕 ลบเฉพาะที่ถูกเลือก
     clearSelected() {
       this.removeMany((i) => i.selected === true);
     },

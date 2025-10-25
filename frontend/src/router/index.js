@@ -159,24 +159,24 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-	const auth = useAuthStore();
-	const cart = useCartStore();
-	await auth.fetchCheckUser();
-	if (!auth.isAuthenticated && cart.items) cart.clear();
-	if (to.meta.requiresAuth) {
-		if (!auth.isAuthenticated) {
-			return next({ name: "signin" });
-		}
-
-		try {
-			if (to.meta.roles && !to.meta.roles.includes(auth.user.userType)) {
-				return next({ name: "SaleItemsV2" });
-			}
-		} catch (e) {
-			console.error("Token invalid or expired", e);
-			return next({ name: "Landing" });
-		}
-	}
+  const auth = useAuthStore();
+  const cart = useCartStore();
+  await auth.fetchCheckUser();
+  if (!auth.isAuthenticated && cart.items) cart.clear();
+  if (to.meta.requiresAuth) {
+     console.log(!auth.isAuthenticated)
+    if (!auth.userId) {
+      return next({ name: "signin" });
+    }
+    try {
+      if (to.meta.roles && !to.meta.roles.includes(auth.user.userType)) {
+        return next({ name: "SaleItemsV2" });
+      }
+    } catch (e) {
+      console.error("Token invalid or expired", e);
+      return next({ name: "Landing" });
+    }
+  }
 
 	next();
 });

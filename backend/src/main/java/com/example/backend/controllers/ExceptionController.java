@@ -147,8 +147,8 @@ public class ExceptionController {
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<MyErrorResponse> handleBadCred(BadCredentialsException ex,
                                                          HttpServletRequest req) {
-        var body = new MyErrorResponse(401, "UNAUTHORIZED",
-                "Username or Password is incorrect", req.getRequestURI());
+        var body = new MyErrorResponse(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED.name(),
+                ex.getMessage(), req.getRequestURI());
         return ResponseEntity.status(401).body(body);
     }
 

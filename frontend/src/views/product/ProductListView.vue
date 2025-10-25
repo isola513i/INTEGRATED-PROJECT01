@@ -21,6 +21,7 @@ const paginate = ref({ page: 0, totalPages: 0 });
 const userStore = useAuthStore();
 const loadItems = async (page = 0) => {
   loading.value = true;
+  
   try {
     const res = await fetchSaleItems({
       sellerId: userStore.user.id,
@@ -33,7 +34,7 @@ const loadItems = async (page = 0) => {
     saleItems.value = res?.content ?? [];
   } catch (e) {
     console.error(e);
-    router.push("/server-error");
+    //router.push("/server-error");
   } finally {
     loading.value = false;
   }
