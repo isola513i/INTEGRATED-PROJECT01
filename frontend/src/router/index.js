@@ -21,124 +21,136 @@ import YourOrdersView from "@/views/order/YourOrdersView.vue";
 import OrderDetailView from "@/views/order/OrderDetailView.vue";
 import SaleOrdersView from "@/views/order/SaleOrdersView.vue"; // Add import
 import SaleOrderDetailView from "@/views/order/SaleOrderDetailView.vue"; // Add import
+import ChangePassword from "@/views/password/ChangePassword.vue";
+import ForgotPassword from "@/views/password/ForgotPassword.vue";
 
 const routes = [
-	{
-		path: "/",
-		name: "Landing",
-		component: LandingPageView,
-	},
-	{
-		path: "/sale-items",
-		name: "SaleItemsV2",
-		component: ProductGalleryView,
-	},
-	{
-		path: "/sale-items/:id",
-		name: "SaleItems-Detail",
-		component: ProductDetailView,
-	},
-	{
-		path: "/sale-items/add",
-		name: "Add-SaleItem",
-		component: AddEditItemView,
-	},
-	{
-		path: "/sale-items/:id/edit",
-		name: "Edit-SaleItem",
-		component: AddEditItemView,
-	},
-	{
-		path: "/sale-items/list",
-		name: "ProductListView",
-		component: ProductListView,
-		meta: { requiresAuth: true, roles: ["SELLER"] },
-	},
-	{
-		path: "/brands",
-		name: "MangeBrandView",
-		component: ManageBrandView,
-	},
-	{
-		path: "/brands/add",
-		name: "AddBrandView",
-		component: AddEditBrandView,
-	},
-	{
-		path: "/brands/:brandId/edit",
-		name: "EditBrandView",
-		component: AddEditBrandView,
-	},
-	{
-		path: "/not-found",
-		name: "NotFound",
-		component: NotFoundView,
-	},
-	{
-		path: "/server-error",
-		name: "ServerError",
-		component: Error500View,
-	},
-	{
-		path: "/:pathMatch(.*)*",
-		redirect: "/not-found",
-	},
-	{
-		path: "/registers",
-		name: "register",
-		component: RegisterUser,
-	},
-	{
-		path: "/signin",
-		name: "signin",
-		component: SignInUser,
-	},
-	{
-		path: "/verify-email",
-		name: "VerifyEmail",
-		component: VerifyEmail,
-	},
-	{
-		path: "/profile",
-		name: "ProfileView",
-		component: ProfileView,
-		meta: { requiresAuth: true },
-	},
-	{
-		path: "/profile/edit",
-		name: "ProfileEditView",
-		component: ProfileEdit,
-		meta: { requiresAuth: true },
-	},
-	{
-		path: "/cart",
-		name: "Cart",
-		component: ShoppingCart,
-	},
-	{
-		path: "/your-orders",
-		name: "YourOrders",
-		component: YourOrdersView,
-		meta: { requiresAuth: true, roles: ["BUYER"] },
-	},
-	{
-		path: "/your-orders/:orderId",
-		name: "OrderDetail",
-		component: OrderDetailView,
-		meta: { requiresAuth: true, roles: ["BUYER"] },
-	},
-	{
-		path: "/sale-orders",
-		name: "SaleOrders",
-		component: SaleOrdersView,
-		meta: { requiresAuth: true, roles: ["SELLER"] },
-	},
-	{
-		path: "/sale-orders/:orderId",
-		name: "SaleOrderDetail",
-		component: SaleOrderDetailView,
-		meta: { requiresAuth: true, roles: ["SELLER"] },
-	},
+  {
+    path: "/",
+    name: "Landing",
+    component: LandingPageView,
+  },
+  {
+    path: "/sale-items",
+    name: "SaleItemsV2",
+    component: ProductGalleryView,
+  },
+  {
+    path: "/sale-items/:id",
+    name: "SaleItems-Detail",
+    component: ProductDetailView,
+  },
+  {
+    path: "/sale-items/add",
+    name: "Add-SaleItem",
+    component: AddEditItemView,
+  },
+  {
+    path: "/sale-items/:id/edit",
+    name: "Edit-SaleItem",
+    component: AddEditItemView,
+  },
+  {
+    path: "/sale-items/list",
+    name: "ProductListView",
+    component: ProductListView,
+    meta: { requiresAuth: true, roles: ["SELLER"] },
+  },
+  {
+    path: "/brands",
+    name: "MangeBrandView",
+    component: ManageBrandView,
+  },
+  {
+    path: "/brands/add",
+    name: "AddBrandView",
+    component: AddEditBrandView,
+  },
+  {
+    path: "/brands/:brandId/edit",
+    name: "EditBrandView",
+    component: AddEditBrandView,
+  },
+  {
+    path: "/not-found",
+    name: "NotFound",
+    component: NotFoundView,
+  },
+  {
+    path: "/server-error",
+    name: "ServerError",
+    component: Error500View,
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    redirect: "/not-found",
+  },
+  {
+    path: "/registers",
+    name: "register",
+    component: RegisterUser,
+  },
+  {
+    path: "/signin",
+    name: "signin",
+    component: SignInUser,
+  },
+  {
+    path: "/verify-email",
+    name: "VerifyEmail",
+    component: VerifyEmail,
+  },
+  {
+    path: "/profile",
+    name: "ProfileView",
+    component: ProfileView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/profile/edit",
+    name: "ProfileEditView",
+    component: ProfileEdit,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/cart",
+    name: "Cart",
+    component: ShoppingCart,
+  },
+  {
+    path: "/your-orders",
+    name: "YourOrders",
+    component: YourOrdersView,
+    meta: { requiresAuth: true, roles: ["BUYER"] },
+  },
+  {
+    path: "/your-orders/:orderId",
+    name: "OrderDetail",
+    component: OrderDetailView,
+    meta: { requiresAuth: true, roles: ["BUYER"] },
+  },
+  {
+    path: "/sale-orders",
+    name: "SaleOrders",
+    component: SaleOrdersView,
+    meta: { requiresAuth: true, roles: ["SELLER"] },
+  },
+  {
+    path: "/sale-orders/:orderId",
+    name: "SaleOrderDetail",
+    component: SaleOrderDetailView,
+    meta: { requiresAuth: true, roles: ["SELLER"] },
+  },
+  {
+    path: "/change-password",
+    name: "ChangePassword",
+    component: ChangePassword,
+  },
+  {
+    path: "/forgot-password",
+    name: "ForgotPassword",
+    component: ForgotPassword,
+  },
 ];
 
 const router = createRouter({
