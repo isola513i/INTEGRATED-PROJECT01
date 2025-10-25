@@ -107,7 +107,6 @@ watch(
             Welcome to ITB-MShop
           </h2>
 
-          <!-- Error message -->
           <div
             v-if="errorMessage"
             class="itbms-message rounded-md border border-red-300 bg-red-50 text-red-700 text-sm p-3 flex items-start gap-2"
@@ -169,8 +168,8 @@ watch(
             :class="[
               ' itbms-signin-button w-full py-3 rounded-lg font-semibold text-white shadow-md transition',
               loading || buttonDisabled
-                ? 'bg-blue-300 cursor-not-allowed'
-                : 'bg-blue-500 hover:bg-blue-600 hover:shadow-lg',
+                ? 'bg-gray-300 cursor-not-allowed'
+                : 'bg-black hover:bg-blue-600 hover:shadow-lg',
             ]"
           >
             {{ loading ? "Signing in…" : "Sign In" }}
@@ -178,9 +177,13 @@ watch(
 
           <!-- Extra Links -->
           <div class="text-center">
-            <a href="#" class="text-sm text-blue-500 hover:underline">
-              Forgot password?
-            </a>
+
+            <RouterLink
+                 :to="{ name: 'ForgotPassword' }"
+                  class="text-sm text-zinc-500 "
+                >
+                  Forgot password?
+                </RouterLink>
           </div>
         </form>
       </div>
