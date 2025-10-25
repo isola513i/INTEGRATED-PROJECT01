@@ -1,4 +1,5 @@
 import { useAuthStore } from '@/store/useAuthStore';
+import { ref } from 'vue';
 
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -16,13 +17,35 @@ function safeAuth() {
   }
 }
 
+async function ensureAuthValid() {
+  const auth = safeAuth();
+  
+  if (!auth) {
+    throw new Error('Auth store not available');
+  }
+
+  // If token is expired, try to refresh
+  if (!auth.isTokenValid) {
+    const refreshed = await auth.refreshAccessToken();
+    if (!refreshed) {
+      throw new Error('Token refresh failed - please login again');
+    }
+  }
+
+  return auth;
+}
+
 // request ที่รองรับทั้ง JSON และ FormData
 async function request(
   path,
   { method = 'GET', headers = {}, body, attachAuth = true } = {}
 ) {
-  const auth = safeAuth();
-
+  //const auth = safeAuth();
+  let auth = null;
+  if (attachAuth) {
+    auth = await ensureAuthValid();
+  }
+ 
   const finalHeaders = { Accept: 'application/hal+json', ...headers };
 
   // ใส่ token ถ้ามี
@@ -74,11 +97,39 @@ async function request(
     }
   }
 
+  // const res = await fetch(`${API_BASE_URL}${path}`, {
+  //   method,
+  //   headers: finalHeaders,
+  //   body: payload,
+    
+  // });
+  // return res;
   const res = await fetch(`${API_BASE_URL}${path}`, {
     method,
     headers: finalHeaders,
     body: payload,
+    credentials: 'include', // ✅ Include cookies (for refresh_token)
   });
+
+   if (res.status === 401 && attachAuth && auth) {
+    console.warn('Received 401, attempting token refresh...');
+    const refreshed = await auth.refreshAccessToken();
+    
+    if (refreshed) {
+      // Retry the request with new token
+      finalHeaders.Authorization = `Bearer ${auth.accessToken}`;
+      return fetch(`${API_BASE_URL}${path}`, {
+        method,
+        headers: finalHeaders,
+        body: payload,
+        credentials: 'include',
+      });
+    } else {
+      // Refresh failed - return original 401 response
+      return res;
+    }
+  }
+
   return res;
 }
 

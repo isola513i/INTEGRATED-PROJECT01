@@ -25,6 +25,7 @@ export const fetchSaleItems = async ({
     `/v2/sellers/${sellerId}/sale-items${searchParams}`
   );
   if (!response.ok) throw new Error("Failed to fetch sale items");
+  
   return await response.json();
 };
 

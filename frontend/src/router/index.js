@@ -123,10 +123,9 @@ router.beforeEach(async (to, from, next) => {
   await auth.fetchCheckUser();
   if (!auth.isAuthenticated && cart.items) cart.clear();
   if (to.meta.requiresAuth) {
-    if (!auth.isAuthenticated) {
+    if (!auth.user) {
       return next({ name: "signin" });
     }
-
     try {
       if (to.meta.roles && !to.meta.roles.includes(auth.user.userType)) {
         return next({ name: "SaleItemsV2" });
