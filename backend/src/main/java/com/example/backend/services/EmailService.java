@@ -26,10 +26,11 @@ public class EmailService {
         String subject = "[ITMB shop] Email verification";
         String path = "/ssi4/verify-email";
         String message = "Click the button below to verify your email address.";
-        sendEmail(email, verificationToken, subject, path, message);
+        String buttonContext = "Verify Email";
+        sendEmail(email, verificationToken, subject, path, message, buttonContext);
     }
 
-    private void sendEmail(String email, String token, String subject, String path, String message) {
+    private void sendEmail(String email, String token, String subject, String path, String message, String buttonContext) {
         try {
             String actionUrl = UriComponentsBuilder.newInstance()
                     .scheme("http")
@@ -50,7 +51,7 @@ public class EmailService {
                                                      style="background-color: #4CAF50; color: white; text-decoration: none;\s
                                                             padding: 12px 24px; border-radius: 6px; font-size: 16px;\s
                                                             font-weight: bold; display: inline-block;">
-                                                      Verify Email
+                                                        %s
                                                   </a>
                                               </div>
                                               <p style="font-size: 12px; color: #777; text-align: center;">
@@ -65,7 +66,7 @@ public class EmailService {
                                               </p>
                                           </div>
                           
-                    """.formatted(subject, message, actionUrl, actionUrl);
+                    """.formatted(subject, message, actionUrl,buttonContext, actionUrl);
 
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
@@ -79,6 +80,13 @@ public class EmailService {
         } catch (Exception e) {
             System.err.println("Failed to send email: " + e.getMessage());
         }
+    }
+    public void sendResetPasswordEmail(String email, String resetToken) {
+        String subject = "[ITMB shop] Password Reset Request";
+        String path = "/ssi4/reset-password";
+        String message = "Click the button below to reset your password.";
+        String buttonContext = "Reset Password";
+        sendEmail(email, resetToken, subject, path, message,buttonContext);
     }
 
 }

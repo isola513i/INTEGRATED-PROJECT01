@@ -1,6 +1,8 @@
 package com.example.backend.services;
 
+import com.example.backend.dtos.ChangePasswordRequestDto;
 import com.example.backend.dtos.JwtRequestUser;
+import com.example.backend.dtos.ResetPasswordRequestDto;
 import com.example.backend.dtos.UserCreateRequestDto;
 import com.example.backend.entities.User;
 import com.example.backend.exceptions.ActivationRequiredException;
@@ -9,6 +11,7 @@ import com.example.backend.repositories.UserRepository;
 import com.example.backend.utils.JwtTokenUtils;
 import com.example.backend.utils.JwtUtils;
 import com.nimbusds.jwt.JWTClaimsSet;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
@@ -117,7 +120,7 @@ public class UserService {
 
     public Map<String, String> refresh(String refreshToken) throws ParseException {
         // 1) Verify signature/expiry and that this is a refresh token
-        if (!jwtUtils.isValidAuthToken(refreshToken) || !jwtUtils.isRefreshToken(refreshToken)) {
+        if (!jwtUtils.isValidRefreshToken(refreshToken) || !jwtUtils.isRefreshToken(refreshToken)) {
             throw new BadCredentialsException("Invalid refresh token");
         }
 
@@ -154,6 +157,34 @@ public class UserService {
                 "access_token",  jwtUtils.generateAccessToken(newClaims),
                 "refresh_token", jwtUtils.generateRefreshToken(newClaims)
         );
+    }
+
+    public void changePassword(Integer userId, ChangePasswordRequestDto changePasswordRequestDto, HttpServletRequest request) {
+        if(!changePasswordRequestDto.getNewPassword().equals(changePasswordRequestDto.getConfirmNewPassword())){
+            throw new IllegalArgumentException("New password and confirm new password do not match.");
+        }
+        User user = getUserById(userId);
+        user.setPasswordHash(passwordEncoder.encode(changePasswordRequestDto.getNewPassword()));
+        userRepository.save(user);
+    }
+    public void resetPassword(String token, ResetPasswordRequestDto resetPasswordRequestDto){
+        if(!jwtTokenUtils.validateToken(token)){
+            throw new IllegalArgumentException("Invalid or expired reset token.");
+        }
+        String emailString = jwtTokenUtils.extractEmail(token);
+        if(emailString == null || emailString.isBlank()){
+            throw new IllegalArgumentException("Invalid reset token.");
+        }
+        User user = getUserByEmail(emailString);
+        // check user is exits
+        // implement reset password logic - check new password = confirm new password , encode new password and set new value use setter then save to db
+        if(user == null){
+            throw new IllegalArgumentException("User not found for the provided reset token.");
+        }
+        if(!resetPasswordRequestDto.getNewPassword().equals(resetPasswordRequestDto.getConfirmNewPassword())){
+            throw new IllegalArgumentException("New password and confirm new password do not match.");
+        }
+        user.setPasswordHash(passwordEncoder.encode(resetPasswordRequestDto.getNewPassword()));
     }
 
     public User getUserById(Integer id) {
