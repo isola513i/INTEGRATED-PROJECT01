@@ -1,5 +1,6 @@
 package com.example.backend.services;
 
+import com.example.backend.dtos.CartDetailResponse;
 import com.example.backend.dtos.CartItemDto;
 import com.example.backend.entities.Cart;
 import com.example.backend.entities.CartItem;
@@ -9,17 +10,13 @@ import com.example.backend.repositories.CartItemRepository;
 import com.example.backend.repositories.CartRepository;
 import com.example.backend.repositories.SaleItemRepository;
 import com.example.backend.repositories.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class CartService {
@@ -150,6 +147,25 @@ public class CartService {
         }
 
         return dtos;
+    }
+
+    public void updateCartDetail(Integer userId, String shippingAddress, String note) {
+        Cart cart = cartRepository.findByBuyerId(userId)
+                .orElseThrow(() -> new RuntimeException("Cart not found for userId: " + userId));
+
+        cart.setShippingAddress(shippingAddress);
+        cart.setNote(note);
+        cartRepository.save(cart);
+    }
+
+    public CartDetailResponse getCartDetail(Integer userId) {
+        Cart cart = cartRepository.findByBuyerId(userId)
+                .orElseThrow(() -> new RuntimeException("Cart not found for userId: " + userId));
+
+        CartDetailResponse dto = new CartDetailResponse();
+        dto.setShippingAddress(cart.getShippingAddress());
+        dto.setNote(cart.getNote());
+        return dto;
     }
 
 }
