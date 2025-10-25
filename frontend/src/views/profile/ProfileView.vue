@@ -48,10 +48,10 @@ onMounted(loadProfile)
 </script>
 
 <template>
-  <div class="min-h-[calc(100vh-80px)] bg-white text-gray-900 flex flex-col items-center py-10">
+  <div class="min-h-[calc(100vh-80px)] bg-zinc-700 text-gray-900 flex flex-col items-center py-10">
     <!-- Header -->
     <div class="text-center mb-6">
-      <h1 class="text-2xl font-semibold tracking-tight">Profile</h1>
+      <h1 class="text-2xl font-semibold tracking-tight text-white">Profile</h1>
       <p class="text-gray-500 text-sm">Your account information</p>
     </div>
 
@@ -131,12 +131,14 @@ onMounted(loadProfile)
         >
           Edit Profile
         </button>
+        <router-link :to="{ name: 'ChangePassword' }">
         <button
           @click="goChangePassword"
           class="bg-white border border-gray-800 text-gray-900 px-5 py-2 rounded-lg font-medium hover:bg-gray-100 active:bg-gray-200 transition"
         >
           Change Password
         </button>
+        </router-link>
       </div>
     </div>
   </div>
