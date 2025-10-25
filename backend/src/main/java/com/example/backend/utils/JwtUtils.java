@@ -56,7 +56,8 @@ public class JwtUtils {
     }
 
     public String generateAccessToken(Map<String, Object> claims) {
-        long seconds = accessMinutes * 60;
+        //long seconds = accessMinutes * 60;
+        long seconds = 60;
         return buildAndSign(claims, seconds, "access");
     }
 

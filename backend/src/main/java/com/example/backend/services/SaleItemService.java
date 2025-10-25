@@ -217,7 +217,6 @@ public class SaleItemService {
         var saleItem = saleItemRepo.findByIdWithBrand(saleItemId)
                 .orElseThrow(() -> new ItemNotFoundException("SaleItem not found"));
         User user = userService.getUserById(saleItem.getSeller().getId());
-        System.out.println("User: " + user.getNickName());
         var response = new SaleItemV2Dto.SaleItemV2Response();
         response.setId(saleItem.getId());
         response.setModel(saleItem.getModel());

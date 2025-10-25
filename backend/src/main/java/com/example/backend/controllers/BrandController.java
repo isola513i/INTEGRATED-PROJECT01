@@ -17,6 +17,8 @@ import java.util.List;
         origins = "http://localhost:5173",
         allowCredentials = "true"
 )
+//@CrossOrigin("*")
+
 @RestController
 @RequestMapping("/itb-mshop/v1")
 public class BrandController {

@@ -78,9 +78,9 @@ public class UserController {
         if ((provided == null || provided.isBlank()) && body != null) {
             provided = body.getOrDefault("refresh_token", body.get("refreshToken"));
         }
-        if (provided == null || provided.isBlank()) {
-            throw new IllegalArgumentException("refresh_token is required (cookie or body)");
-        }
+//        if (provided == null || provided.isBlank()) {
+//            throw new IllegalArgumentException("refresh_token is required (cookie or body)");
+//        }
         Map<String, String> newTokens = userService.refresh(provided); // rotates refresh + new access
         String newAccess  = newTokens.get("access_token");
         String newRefresh = newTokens.get("refresh_token");
@@ -125,14 +125,20 @@ public class UserController {
     private long refreshHours;
 
     // choose cookie attributes suitable for your environment
-    @Value("${app.cookies.secure:true}")   // true in HTTPS; set to false for plain HTTP in local dev
+//    @Value("${app.cookies.secure:true}")   // true in HTTPS; set to false for plain HTTP in local dev
+//    private boolean cookieSecure;
+
+    @Value("${app.cookies.secure:false}")   // true in HTTPS; set to false for plain HTTP in local dev
     private boolean cookieSecure;
 
-    @Value("${app.cookies.same-site:Strict}") // None|Lax|Strict (None required for cross-site)
-    private String cookieSameSite;
+
+    //    @Value("${app.cookies.same-site:Strict}") // None|Lax|Strict (None required for cross-site)
+//    private String cookieSameSite;
+@Value("${app.cookies.same-site:Lax}") // None|Lax|Strict (None required for cross-site)
+private String cookieSameSite;
 
     // Path that should send the cookie ("/" is simplest if multiple endpoints need it)
-    @Value("${app.cookies.refresh.path:/itb-mshop/v2/auth/login}")
+    @Value("${app.cookies.refresh.path:/itb-mshop/v2/auth")
     private String refreshCookiePath;
 
     private ResponseCookie buildRefreshCookie(String token) {
