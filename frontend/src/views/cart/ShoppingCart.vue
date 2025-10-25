@@ -87,12 +87,10 @@ function buildSellerGroups(items) {
   const map = new Map();
 
   for (const it of items) {
-    // ดึงค่าให้ชัดเจน + บังคับเป็นตัวเลข
+
     const sellerId = Number(it.sellerId ?? it.seller?.id);
     const saleItemId = Number(it.saleItemId ?? it.id);
     const quantity = Number(it.quantity ?? 0);
-
-    // ข้ามรายการที่ข้อมูลไม่ครบ/ไม่ถูก
     if (
       !sellerId ||
       !saleItemId ||
