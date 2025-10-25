@@ -37,11 +37,7 @@ export const useAuthStore = defineStore("auth", {
       const now = Date.now();
       return s.tokenExpMs > now; // true if still valid
     },
-    // isExpired: (s) => {
-    //   if (!s.accessToken) return true;
-    //   const now = Date.now();
-    //   return s.tokenExpMs <= now;
-    // },
+    
     isAuthenticated: (s) => !!s.accessToken && s.isTokenValid,
     isLoggedIn: (s) => !!s.accessToken && s.isTokenValid && !!s.user,
     userId: (s) => s.user?.id,
@@ -223,7 +219,7 @@ export const useAuthStore = defineStore("auth", {
       localStorage.setItem("user", JSON.stringify(this.user));
 
       const cart = useCartStore();
-      cart.clear();
+      cart.getItems();
     },
 
     async logout() {

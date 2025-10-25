@@ -48,6 +48,7 @@ public class SecurityConfig {
                         // Allow auth/public endpoints & preflight
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/itb-mshop/v2/auth/**").permitAll()
+                        .requestMatchers("/itb-mshop/v2/cart/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/itb-mshop/v2/sale-items").permitAll()
                         .requestMatchers(HttpMethod.GET, "/itb-mshop/v2/sale-items/*").permitAll()
                         .requestMatchers(HttpMethod.GET, "/itb-mshop/v1/brands").permitAll()
@@ -62,10 +63,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST,  "/itb-mshop/v2/sellers/*/sale-items").hasAuthority("SELLER")
                         .requestMatchers(HttpMethod.PUT,  "/itb-mshop/v2/sellers/*/sale-items/*").hasAuthority("SELLER")
                         .requestMatchers(HttpMethod.DELETE,  "/itb-mshop/v2/sellers/*/sale-items/*").hasAuthority("SELLER")
+                        .requestMatchers(HttpMethod.GET, "/itbms/v2/sellers/*/orders").hasAuthority("SELLER")
+                        .requestMatchers(HttpMethod.GET, "/itbms/v2/sellers/*/orders/*").hasAuthority("SELLER")
 
                         // BUYER-only (เติมใหม่)
                         .requestMatchers(HttpMethod.POST, "/itb-mshop/v2/orders").hasAuthority("BUYER")
                         .requestMatchers(HttpMethod.GET,  "/itb-mshop/v2/users/*/orders").hasAuthority("BUYER")
+                        .requestMatchers(HttpMethod.GET,  "/itbms/v2/orders/*").hasAuthority("BUYER")
 
                         // everything else needs authentication
                         .anyRequest().authenticated()

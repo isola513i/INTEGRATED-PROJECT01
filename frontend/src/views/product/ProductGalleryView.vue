@@ -8,6 +8,7 @@ import SortButtons from "@/components/sort/SortButtons.vue";
 import Pagination from "@/components/Pagination/Pagination.vue";
 import FilterBar from "@/components/filter/FilterBar.vue";
 import { useSearchStore } from "@/store/useSearchStore";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const saleItems = ref([]);
 const flash = useFlashStore();
@@ -21,6 +22,7 @@ const sortDirection = ref("asc");
 const sortType = ref("");
 const paginate = ref({});
 const searchStore = useSearchStore();
+const auth = useAuthStore();
 
 // sync ค่า sessionStorage
 const syncSessionToRefs = () => {
@@ -134,18 +136,30 @@ watch(
       </div>
     </div>
     <!-- Add Button -->
-    <div class="w-full max-w-7xl mx-auto px-4 mt-4 flex justify-end">
+    <div
+      v-if="auth.user?.userType === 'SELLER'"
+      class="w-full max-w-7xl mx-auto px-4 mt-4 flex justify-end"
+    >
       <router-link
         to="/sale-items/add"
-        class="px-6 py-2 bg-gradient-to-r from-black to-gray-800 text-white rounded-lg hover:from-gray-800 hover:to-black hover:scale-105 transition-all duration-300 text-sm font-semibold shadow-md"
+        class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-lg hover:bg-gray-50 transition-colors duration-200 text-sm font-medium shadow-sm"
       >
-        + Add New Sale Item
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-4 w-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M12 4v16m8-8H4"
+          />
+        </svg>
+        Add New Sale Item
       </router-link>
-    </div>
-
-    <!-- Flash message -->
-    <div v-if="flash.message" :class="flash.style" class="px-4">
-      {{ flash.message }}
     </div>
 
     <div class="px-8 py-2">
