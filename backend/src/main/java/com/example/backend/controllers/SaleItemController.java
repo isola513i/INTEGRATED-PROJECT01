@@ -30,8 +30,6 @@ import java.util.List;
 @RestController
 @Getter
 @Setter
-//@CrossOrigin("*")
-@CrossOrigin(origins = "http://localhost:5173",allowCredentials = "true")
 @RequestMapping("/itb-mshop")
 public class SaleItemController {
     @Autowired

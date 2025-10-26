@@ -56,7 +56,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/itb-mshop/v2/sale-items/*/images/*").permitAll()
                         .requestMatchers(HttpMethod.GET,"/itb-mshop/v2/sale-items/*/images").permitAll()
                         .requestMatchers(HttpMethod.POST, "/itb-mshop/v2/auth/logout").authenticated()
-                        .requestMatchers(HttpMethod.POST," /itb-mshop/v2/auth/*/change-password").authenticated()
+                        .requestMatchers(HttpMethod.POST,"/itb-mshop/v2/auth/*/change-password").authenticated()
 
                         // SELLER-only endpoints
                         .requestMatchers(HttpMethod.GET,  "/itb-mshop/v2/sellers/*/sale-items").hasAuthority("SELLER")
