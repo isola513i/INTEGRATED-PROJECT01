@@ -1,10 +1,11 @@
 <!-- ForgotPasswordView.vue (ธีมขาวดำ) -->
 <script setup>
 import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
-// import { requestPasswordReset } from '@/services/authService'
+import { useRouter} from 'vue-router'
+import { requestPasswordReset } from '@/services/userService'
 
 const router = useRouter()
+
 
 const email = ref('')
 const loading = ref(false)
@@ -18,7 +19,7 @@ async function onSubmit() {
   errorMsg.value = ''
   successMsg.value = ''
   try {
-    // await requestPasswordReset(email.value)
+     await requestPasswordReset(email.value)
     successMsg.value =
       'ถ้าอีเมลนี้อยู่ในระบบ เราจะส่งลิงก์รีเซ็ตรหัสผ่านไปให้'
   } catch (err) {

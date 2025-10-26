@@ -23,6 +23,7 @@ import SaleOrdersView from "@/views/order/SaleOrdersView.vue"; // Add import
 import SaleOrderDetailView from "@/views/order/SaleOrderDetailView.vue"; // Add import
 import ChangePassword from "@/views/password/ChangePassword.vue";
 import ForgotPassword from "@/views/password/ForgotPassword.vue";
+import ResetPassword from "@/views/password/ResetPassword.vue";
 
 const routes = [
   {
@@ -150,6 +151,11 @@ const routes = [
     path: "/forgot-password",
     name: "ForgotPassword",
     component: ForgotPassword,
+  },
+  {
+    path: "/reset-password",
+    name: "ResetPassword",
+    component:ResetPassword,
   },
 ];
 
