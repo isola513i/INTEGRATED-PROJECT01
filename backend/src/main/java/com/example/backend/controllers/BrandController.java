@@ -12,13 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-
-@CrossOrigin(
-        origins = "http://localhost:5173",
-        allowCredentials = "true"
-)
-//@CrossOrigin("*")
-
 @RestController
 @RequestMapping("/itb-mshop/v1")
 public class BrandController {
