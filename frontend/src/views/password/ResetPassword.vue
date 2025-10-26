@@ -30,7 +30,7 @@ async function onSubmit() {
   try {
     await resetPassword(token, newPassword.value,confirmNewPassword.value)
     successMsg.value = 'เปลี่ยนรหัสผ่านสำเร็จ! กำลังพาไปหน้าเข้าสู่ระบบ...'
-    setTimeout(() => router.push({ name: 'SignIn' }), 2500)
+    setTimeout(() => router.push('/signin'), 2500)
   } catch (err) {
     errorMsg.value = err?.message || 'ไม่สามารถเปลี่ยนรหัสผ่านได้ กรุณาลองใหม่อีกครั้ง'
   } finally {
