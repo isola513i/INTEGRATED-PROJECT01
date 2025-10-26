@@ -160,10 +160,13 @@ public class UserService {
     }
 
     public void changePassword(Integer userId, ChangePasswordRequestDto changePasswordRequestDto, HttpServletRequest request) {
+        User user = getUserById(userId);
+        if(user.getPasswordHash() == null || !passwordEncoder.matches(changePasswordRequestDto.getOldPassword(), user.getPasswordHash())){
+            throw new IllegalArgumentException("Current password is incorrect.");
+        }
         if(!changePasswordRequestDto.getNewPassword().equals(changePasswordRequestDto.getConfirmNewPassword())){
             throw new IllegalArgumentException("New password and confirm new password do not match.");
         }
-        User user = getUserById(userId);
         user.setPasswordHash(passwordEncoder.encode(changePasswordRequestDto.getNewPassword()));
         userRepository.save(user);
     }
