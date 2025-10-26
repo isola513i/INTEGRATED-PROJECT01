@@ -24,12 +24,18 @@ import SaleOrderDetailView from "@/views/order/SaleOrderDetailView.vue"; // Add 
 import ChangePassword from "@/views/password/ChangePassword.vue";
 import ForgotPassword from "@/views/password/ForgotPassword.vue";
 import ResetPassword from "@/views/password/ResetPassword.vue";
+import AboutUs from "@/components/layout/AboutUs.vue";
 
 const routes = [
   {
     path: "/",
     name: "Landing",
     component: LandingPageView,
+  },
+  {
+    path: "/aboutUs",
+    name: "AboutUs",
+    component: AboutUs,
   },
   {
     path: "/sale-items",
@@ -155,7 +161,7 @@ const routes = [
   {
     path: "/reset-password",
     name: "ResetPassword",
-    component:ResetPassword,
+    component: ResetPassword,
   },
 ];
 

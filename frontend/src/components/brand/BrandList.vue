@@ -54,88 +54,157 @@ async function deleteItem(id) {
 </script>
 
 <template>
-  <div class="flex justify-center m-5">
-    <div class="w-[75em]">
+  <div class="flex flex-col items-center  bg-white min-h-screen">
+    <div
+      class="w-full max-w-4xl bg-white rounded-xl shadow-md ring-1 ring-gray-200 overflow-hidden"
+    >
+      <!-- ─── Card header (ชื่อหน้า + ปุ่ม Add) ───────────────────── -->
       <div
-        class="w-full bg-[#171717] grid grid-cols-3 text-white text-sm font-semibold"
+        class="flex flex-col gap-3 px-4 py-4 border-b border-gray-200 md:flex-row md:items-center md:justify-between"
       >
-        <div
-          v-for="(field, index) in fields"
-          :key="index"
-          class="text-center border-1 border-gray-200 py-2"
+        <div class="text-lg font-semibold text-gray-900">
+          Brand List
+        </div>
+        <router-link
+          :to="{ name: 'AddBrandView' }"
+          class="inline-flex items-center justify-center rounded-lg bg-zinc-900 text-white text-sm font-medium px-3 py-2 hover:bg-zinc-800 hover:shadow transition"
         >
-          {{ field }}
+          + Add Brand
+        </router-link>
+      </div>
+
+      <!-- ─── Desktop / Tablet view: table ─────────────────────────── -->
+      <div class="hidden md:block">
+        <!-- Table header -->
+        <div
+          class="bg-zinc-900 text-white text-sm font-semibold grid grid-cols-3"
+        >
+          <div
+            v-for="(field, index) in fields"
+            :key="index"
+            class="py-3 text-center"
+          >
+            {{ field }}
+          </div>
+        </div>
+
+        <!-- Table body -->
+        <div class="divide-y divide-gray-200">
+          <div
+            v-for="(item, index) in items"
+            :key="item.brandId"
+            class="grid grid-cols-3 text-sm"
+            :class="index % 2 === 0 ? 'bg-gray-50' : 'bg-white'"
+          >
+            <!-- Id -->
+            <div class="py-3 text-center text-gray-800 font-medium">
+              {{ item.brandId }}
+            </div>
+
+            <!-- Name -->
+            <div class="py-3 text-center text-gray-700">
+              {{ item.name }}
+            </div>
+
+            <!-- Action -->
+            <div
+              class="py-3 flex items-center justify-center gap-2 text-xs"
+            >
+              <router-link
+                :to="`/brands/${item.brandId}/edit`"
+                class="inline-flex items-center rounded-md border border-blue-500 text-blue-600 px-3 py-1 font-medium hover:bg-blue-50 hover:shadow-sm transition"
+              >
+                Edit
+              </router-link>
+
+              <button
+                class="inline-flex items-center rounded-md border border-red-500 text-red-600 px-3 py-1 font-medium hover:bg-red-50 hover:shadow-sm transition"
+                @click="handleModal(item.brandId, item.name)"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="w-full grid grid-rows text-gray-600">
+
+      <!-- ─── Mobile view: stacked cards ───────────────────────────── -->
+      <div class="md:hidden divide-y divide-gray-200">
         <div
-          v-for="(item, key, index) in items"
-          class="itbms-row grid grid-cols-3"
+          v-for="(item, index) in items"
+          :key="item.brandId"
+          class="p-4 text-sm"
+          :class="index % 2 === 0 ? 'bg-gray-50' : 'bg-white'"
         >
-          <div
-            class="itbms-id text-center border-1 border-gray-500 py-2"
-            :key="index"
-            :class="key % 2 === 0 ? `bg-gray-200` : 'bg-white'"
-          >
-            {{ item.brandId }}
+          <!-- row 1 -->
+          <div class="flex justify-between mb-2">
+            <span class="text-gray-500">Brand ID</span>
+            <span class="text-gray-900 font-medium">
+              {{ item.brandId }}
+            </span>
           </div>
-          <div
-            class="itbms-name text-center border-1 border-gray-500 py-2"
-            :key="index"
-            :class="key % 2 === 0 ? `bg-gray-200` : 'bg-white'"
-          >
-            {{ item.name }}
+
+          <!-- row 2 -->
+          <div class="flex justify-between mb-4">
+            <span class="text-gray-500">Name</span>
+            <span class="text-gray-800">
+              {{ item.name }}
+            </span>
           </div>
-          <div
-            class="flex justify-center gap-3 items-center border-1 border-gray-500"
-            :key="index"
-            :class="key % 2 === 0 ? 'bg-gray-200' : 'bg-white'"
-          >
+
+          <!-- row 3: actions -->
+          <div class="flex justify-end gap-2 text-xs">
             <router-link
               :to="`/brands/${item.brandId}/edit`"
-              class="no-underline"
+              class="inline-flex items-center rounded-md border border-blue-500 text-blue-600 px-3 py-1 font-medium hover:bg-blue-50 hover:shadow-sm transition"
             >
-              <p
-                class="itbms-edit-button p-1 px-3 border-1 rounded-md border-blue-500 text-sm text-blue-500"
-              >
-                E
-              </p>
+              Edit
             </router-link>
+
             <button
-              class="itbms-delete-button p-1 px-3 border-1 rounded-md border-red-500 text-sm text-red-500"
+              class="inline-flex items-center rounded-md border border-red-500 text-red-600 px-3 py-1 font-medium hover:bg-red-50 hover:shadow-sm transition"
               @click="handleModal(item.brandId, item.name)"
             >
-              D
+              Delete
             </button>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- ─── Modal ─────────────────────────────────────────────────── -->
     <div
       v-if="showModal"
-      class="fixed inset-0 bg-[#ffffff8f] bg-opacity-50 flex items-center justify-center z-50"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      role="dialog"
+      aria-modal="true"
     >
       <div
-        class="itbms-message bg-white rounded-lg p-6 shadow-lg max-w-sm w-full"
+        class="bg-white rounded-xl p-6 shadow-xl ring-1 ring-gray-200 w-full max-w-sm"
       >
-        <h2 class="text-xl font-semibold mb-4 text-gray-800">
+        <!-- Title -->
+        <h2 class="text-lg font-semibold text-gray-900 mb-2">
           Delete Confirmation
         </h2>
-        <p class="mb-6 text-gray-800">
+
+        <!-- Message -->
+        <p class="text-sm text-gray-600 mb-6">
           {{ messageDelete }}
         </p>
-        <div class="flex justify-end space-x-4">
+
+        <!-- Buttons -->
+        <div class="flex flex-col-reverse gap-3 text-sm font-medium sm:flex-row sm:justify-end">
           <button
             @click="handleModal"
-            class="itbms-cancel-button bg-[#cc3535] px-4 py-2 rounded hover:bg-[#6d3e3e]"
+            class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 hover:shadow-sm transition"
           >
             Cancel
           </button>
+
           <button
-            @click="deleteItem(brandId)"
             v-if="canDelete"
-            class="itbms-confirm-button bg-[#5eb238] text-white px-4 py-2 rounded hover:bg-[#58914c]"
+            @click="deleteItem(brandId)"
+            class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 shadow-sm hover:shadow transition"
           >
             Confirm
           </button>
@@ -144,5 +213,3 @@ async function deleteItem(id) {
     </div>
   </div>
 </template>
-
-<style scoped></style>

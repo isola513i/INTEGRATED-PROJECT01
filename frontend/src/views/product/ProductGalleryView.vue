@@ -135,32 +135,6 @@ watch(
         <SortButtons :selected="sortType" @update:sort="handleSortChange" />
       </div>
     </div>
-    <!-- Add Button -->
-    <div
-      v-if="auth.user?.userType === 'SELLER'"
-      class="w-full max-w-7xl mx-auto px-4 mt-4 flex justify-end"
-    >
-      <router-link
-        to="/sale-items/add"
-        class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-lg hover:bg-gray-50 transition-colors duration-200 text-sm font-medium shadow-sm"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M12 4v16m8-8H4"
-          />
-        </svg>
-        Add New Sale Item
-      </router-link>
-    </div>
 
     <div class="px-8 py-2">
       <div

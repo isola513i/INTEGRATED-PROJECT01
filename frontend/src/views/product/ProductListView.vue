@@ -21,7 +21,7 @@ const paginate = ref({ page: 0, totalPages: 0 });
 const userStore = useAuthStore();
 const loadItems = async (page = 0) => {
   loading.value = true;
-  
+
   try {
     const res = await fetchSaleItems({
       sellerId: userStore.user.id,
@@ -58,46 +58,69 @@ async function handleGoToLast() {
 </script>
 
 <template>
-  <div>
-    <div class="flex justify-between pt-10 py-2 mx-4">
-      <div class="itbms-sale-item-add">
-        <router-link
-          to="/sale-items/add"
-          class="px-6 py-2 bg-[#171717] text-white rounded-2xl hover:bg-white hover:text-black hover:border hover:border-black transition-all duration-300 text-sm font-semibold"
-        >
-          Add New Sale Item
-        </router-link>
+  <div class="min-h-screen bg-zinc-950 text-zinc-100">
+    <div class="max-w-6xl mx-auto px-4 pt-12 pb-20">
+      <!-- Header + Actions -->
+      <div
+        class="flex flex-col sm:flex-row justify-between items-center bg-white border border-gray-200 rounded-3xl shadow-md p-6"
+      >
+        <div>
+          <h1 class="text-2xl font-semibold text-gray-900 tracking-tight">
+            My Sale Items
+          </h1>
+          <p class="text-sm text-gray-500 mt-1">
+            Manage your listed products and update their details
+          </p>
+        </div>
+
+        <div class="flex flex-wrap gap-3 mt-5 sm:mt-0">
+          <!-- ปุ่ม Add -->
+          <router-link
+            to="/sale-items/add"
+            class="px-6 py-2 rounded-2xl bg-gray-900 text-white font-semibold hover:bg-gray-800 hover:scale-[1.02] shadow-sm transition-all duration-200"
+          >
+            + Add New Item
+          </router-link>
+
+          <!-- ปุ่ม Manage Brand -->
+          <router-link
+            to="/brands"
+            class="px-6 py-2 rounded-2xl border border-gray-300 text-gray-700 font-semibold hover:bg-gray-100 transition-all duration-200"
+          >
+            Manage Brand
+          </router-link>
+        </div>
       </div>
-      <div class="itbms-manage-brand">
-        <router-link
-          to="/brands"
-          class="px-6 py-2 bg-[#171717] text-white rounded-2xl hover:bg-white hover:text-black hover:border hover:border-black transition-all duration-300 text-sm font-semibold"
-        >
-          Manage Brand
-        </router-link>
+
+      <!-- Flash Message -->
+      <div v-if="flash.message" :class="flash.style" class="mt-6">
+        {{ flash.message }}
       </div>
-    </div>
 
-    <div v-if="flash.message" :class="flash.style">{{ flash.message }}</div>
+      <!-- Sale Item List -->
+      <div class="mt-5">
+        <div
+          v-if="!loading && saleItems.length === 0"
+          class="p-16 text-center text-zinc-500 text-lg bg-zinc-900/50 border border-zinc-800 rounded-2xl"
+        >
+          No sale items found.
+          <div class="mt-3 text-sm text-zinc-400">
+            Click “Add New Item” to start listing your first product.
+          </div>
+        </div>
 
-    <div
-      v-if="!loading && saleItems.length === 0"
-      class="p-10 text-center text-gray-400 text-xl"
-    >
-      No sale item
-    </div>
+        <SaleItemList v-if="saleItems.length > 0" :items="saleItems" />
+      </div>
 
-    <SaleItemList v-if="saleItems.length > 0" :items="saleItems" />
-
-    <div class="flex justify-center py-4">
-      <Pagination
-        :current-page="paginate.page"
-        :total-pages="paginate.totalPages"
-        @update:page="(page) => loadItems(page)"
-        @go-to-last="handleGoToLast"
-      />
+      <!-- Pagination -->
+      <div class="flex justify-center mt-10">
+        <Pagination
+          :current-page="paginate.page"
+          :total-pages="paginate.totalPages"
+          @update:page="(page) => loadItems(page)"
+          @go-to-last="handleGoToLast"
+        />
+      </div>
     </div>
   </div>
 </template>
-
-<style scoped></style>

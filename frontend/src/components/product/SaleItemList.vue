@@ -49,89 +49,124 @@ async function deleteItem(saleItemId) {
   }
 }
 </script>
-
 <template>
-  <div class="flex flex-col items-center p-6">
+  <div class="min-h-screen text-gray-900 flex flex-col items-center">
     <div
-      class="w-full max-w-6xl bg-white rounded-xl shadow-md ring-1 ring-gray-200 overflow-hidden"
+      class="w-full max-w-6xl bg-white rounded-2xl shadow-md ring-1 ring-gray-200 overflow-hidden"
     >
-      <!-- header bar -->
-      <div
-        class="bg-zinc-900 text-white text-sm font-semibold grid grid-cols-8"
-      >
+    
+      <!-- Table (Desktop) -->
+      <div class="hidden md:block">
+        <!-- Header -->
         <div
-          v-for="(field, i) in fields"
-          :key="i"
-          class="py-3 text-center"
+          class="grid grid-cols-8 text-xs font-semibold bg-gray-100 text-gray-600 uppercase tracking-wide border-b border-gray-200"
         >
-          {{ field }}
+          <div
+            v-for="(field, i) in fields"
+            :key="i"
+            class="py-3 text-center px-2"
+          >
+            {{ field }}
+          </div>
+        </div>
+
+        <!-- Rows -->
+        <div class="divide-y divide-gray-100">
+          <div
+            v-for="(item, index) in items"
+            :key="item.id"
+            class="grid grid-cols-8 text-sm hover:bg-gray-50 transition"
+          >
+            <div class="py-3 px-2 text-center text-gray-700 font-medium">
+              {{ item.id }}
+            </div>
+            <div class="py-3 px-2 text-center text-gray-700">
+              {{ item.brandName }}
+            </div>
+            <div class="py-3 px-2 text-center text-gray-700">
+              {{ item.model }}
+            </div>
+            <div class="py-3 px-2 text-center text-gray-500">
+              {{ item.ramGb ?? "-" }}
+            </div>
+            <div class="py-3 px-2 text-center text-gray-500">
+              {{ item.storageGb ?? "-" }}
+            </div>
+            <div class="py-3 px-2 text-center text-gray-500">
+              {{ item.color ?? "-" }}
+            </div>
+            <div class="py-3 px-2 text-center text-gray-900 font-semibold">
+              ฿{{ Number(item.price).toLocaleString("en-US") }}
+            </div>
+
+            <div class="py-3 px-2 flex items-center justify-center gap-2 text-xs">
+              <router-link
+                :to="`/sale-items/${item.id}/edit`"
+                class="px-3 py-1.5 rounded-lg border border-blue-500 text-blue-600 hover:bg-blue-50 hover:shadow-sm transition"
+              >
+                Edit
+              </router-link>
+              <button
+                class="px-3 py-1.5 rounded-lg border border-red-500 text-red-600 hover:bg-red-50 hover:shadow-sm transition"
+                @click="handleModal(item.id)"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- rows -->
-      <div class="divide-y divide-gray-200">
+      <!-- Mobile View -->
+      <div class="md:hidden divide-y divide-gray-200">
         <div
           v-for="(item, index) in items"
           :key="item.id"
-          class="grid grid-cols-8 text-sm"
-          :class="index % 2 === 0 ? 'bg-gray-50' : 'bg-white'"
+          class="p-4 text-sm hover:bg-gray-50 transition"
         >
-          <!-- ID -->
-          <div class="py-3 px-2 text-center text-gray-700 font-medium">
-            {{ item.id }}
+          <div class="flex justify-between mb-2">
+            <div>
+              <span class="text-[11px] text-gray-500 uppercase">Brand / Model</span>
+              <div class="text-gray-800 font-medium leading-tight">
+                {{ item.brandName }} – {{ item.model }}
+              </div>
+            </div>
+            <span class="text-[11px] text-gray-400">#{{ item.id }}</span>
           </div>
 
-          <!-- Brand -->
-          <div class="py-3 px-2 text-center text-gray-700">
-            {{ item.brandName }}
+          <div class="grid grid-cols-3 gap-2 mb-3 text-center">
+            <div class="bg-white rounded-xl ring-1 ring-gray-200 p-2">
+              <div class="text-[10px] text-gray-500">RAM</div>
+              <div class="text-gray-800 font-medium">{{ item.ramGb ?? "-" }} GB</div>
+            </div>
+            <div class="bg-white rounded-xl ring-1 ring-gray-200 p-2">
+              <div class="text-[10px] text-gray-500">Storage</div>
+              <div class="text-gray-800 font-medium">{{ item.storageGb ?? "-" }} GB</div>
+            </div>
+            <div class="bg-white rounded-xl ring-1 ring-gray-200 p-2">
+              <div class="text-[10px] text-gray-500">Color</div>
+              <div class="text-gray-800 font-medium">{{ item.color ?? "-" }}</div>
+            </div>
           </div>
 
-          <!-- Model -->
-          <div class="py-3 px-2 text-center text-gray-700">
-            {{ item.model }}
+          <div class="flex justify-between items-end mb-4">
+            <div>
+              <span class="text-[11px] text-gray-500 uppercase">Price</span>
+              <div class="text-gray-900 font-semibold text-base">
+                ฿{{ Number(item.price).toLocaleString("en-US") }}
+              </div>
+            </div>
           </div>
 
-          <!-- RAM -->
-          <div class="py-3 px-2 text-center text-gray-700">
-            {{ item.ramGb ? item.ramGb : "-" }}
-          </div>
-
-          <!-- Storage -->
-          <div class="py-3 px-2 text-center text-gray-700">
-            {{ item.storageGb ? item.storageGb : "-" }}
-          </div>
-
-          <!-- Color -->
-          <div class="py-3 px-2 text-center text-gray-700">
-            {{ item.color ? item.color : "-" }}
-          </div>
-
-          <!-- Price -->
-          <div class="py-3 px-2 text-center text-gray-900 font-semibold">
-            ฿
-            <span>
-              {{
-                Number(item.price).toLocaleString("en-US", {
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 2,
-                })
-              }}
-            </span>
-          </div>
-
-          <!-- Action -->
-          <div
-            class="py-3 px-2 flex items-center justify-center gap-2 text-xs"
-          >
+          <div class="flex justify-end gap-2 text-xs">
             <router-link
               :to="`/sale-items/${item.id}/edit`"
-              class="inline-flex items-center rounded-md border border-blue-500 text-blue-600 px-2 py-1 font-medium hover:bg-blue-50"
+              class="px-3 py-1.5 rounded-lg border border-blue-500 text-blue-600 hover:bg-blue-50 transition"
             >
               Edit
             </router-link>
-
             <button
-              class="inline-flex items-center rounded-md border border-red-500 text-red-600 px-2 py-1 font-medium hover:bg-red-50"
+              class="px-3 py-1.5 rounded-lg border border-red-500 text-red-600 hover:bg-red-50 transition"
               @click="handleModal(item.id)"
             >
               Delete
@@ -141,35 +176,29 @@ async function deleteItem(saleItemId) {
       </div>
     </div>
 
-    <!-- Modal -->
+    <!-- Delete Modal -->
     <div
       v-if="showModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-      role="dialog"
-      aria-modal="true"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4"
     >
       <div
-        class="w-full max-w-sm rounded-xl bg-white shadow-xl ring-1 ring-gray-200 p-6"
+        class="w-full max-w-sm rounded-2xl bg-white text-gray-900 shadow-xl ring-1 ring-gray-200 p-6"
       >
-        <h2 class="text-lg font-semibold text-gray-900 mb-2">
-          Delete item?
-        </h2>
-
+        <h2 class="text-lg font-semibold mb-2">Delete Item?</h2>
         <p class="text-sm text-gray-600 mb-6">
-          Do you want to delete this sale item?
+          Are you sure you want to delete this sale item?
         </p>
 
-        <div class="flex justify-end gap-3 text-sm font-medium">
+        <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
           <button
             @click="handleModal"
-            class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
+            class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 transition"
           >
             Cancel
           </button>
-
           <button
             @click="deleteItem(saleItemId)"
-            class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700"
+            class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition"
           >
             Confirm
           </button>
@@ -178,3 +207,4 @@ async function deleteItem(saleItemId) {
     </div>
   </div>
 </template>
+
