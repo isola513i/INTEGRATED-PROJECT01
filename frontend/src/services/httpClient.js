@@ -1,30 +1,33 @@
-import { useAuthStore } from '@/store/useAuthStore';
+import { useAuthStore } from "@/store/useAuthStore";
 
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 if (!API_BASE_URL) {
-  console.error('VITE_API_BASE_URL is missing! Check .env.* and start command.');
+	console.error(
+		"VITE_API_BASE_URL is missing! Check .env.* and start command."
+	);
 }
 
 function safeAuth() {
-  try {
-    return useAuthStore();
-  } catch {
-    return null;
-  }
+	try {
+		return useAuthStore();
+	} catch {
+		return null;
+	}
 }
 
 async function ensureAuthValid() {
-  const auth = safeAuth();
-  if (!auth) throw new Error('Auth store not available');
+	const auth = safeAuth();
+	if (!auth) throw new Error("Auth store not available");
 
-  // Refresh token only if expired and user logged in
-  if (!auth.isTokenValid && auth.isLoggedIn) {
-    const refreshed = await auth.refreshAccessToken();
-    if (!refreshed) throw new Error('Token refresh failed - please login again');
-  }
+	// Refresh token only if expired and user logged in
+	if (!auth.isTokenValid && auth.isLoggedIn) {
+		const refreshed = await auth.refreshAccessToken();
+		if (!refreshed)
+			throw new Error("Token refresh failed - please login again");
+	}
 
-  return auth;
+	return auth;
 }
 
 /**
@@ -32,129 +35,139 @@ async function ensureAuthValid() {
  * Automatically attaches Authorization header and handles 401 refresh flow.
  */
 async function request(
-  path,
-  { method = 'GET', headers = {}, body, attachAuth = true, includeCookies = true } = {}
+	path,
+	{
+		method = "GET",
+		headers = {},
+		body,
+		attachAuth = true,
+		includeCookies = true,
+	} = {}
 ) {
-  let auth = null;
-  if (attachAuth) {
-    auth = await ensureAuthValid();
-  }
+	let auth = null;
+	if (attachAuth) {
+		auth = await ensureAuthValid();
+	}
 
-  const finalHeaders = { Accept: 'application/hal+json', ...headers };
+	const finalHeaders = { Accept: "application/hal+json", ...headers };
 
-  // Attach Bearer token if available
-  if (attachAuth && auth?.accessToken) {
-    finalHeaders.Authorization = `Bearer ${auth.accessToken}`;
-  }
+	// Attach Bearer token if available
+	if (attachAuth && auth?.accessToken) {
+		finalHeaders.Authorization = `Bearer ${auth.accessToken}`;
+	}
 
-  // Optionally include user ID header
-  if (auth?.user?.id != null) {
-    finalHeaders['X-USER-ID'] = String(auth.user.id);
-  }
+	// Optionally include user ID header
+	if (auth?.user?.id != null) {
+		finalHeaders["X-USER-ID"] = String(auth.user.id);
+	}
 
-  // ---- Prepare Request Body ----
-  let payload = body;
-  const hasBody = payload !== undefined && payload !== null;
-  const callerSetCT = Object.keys(finalHeaders).some(
-    (k) => k.toLowerCase() === 'content-type'
-  );
+	// ---- Prepare Request Body ----
+	let payload = body;
+	const hasBody = payload !== undefined && payload !== null;
+	const callerSetCT = Object.keys(finalHeaders).some(
+		(k) => k.toLowerCase() === "content-type"
+	);
 
-  if (hasBody) {
-    if (!callerSetCT) {
-      if (payload instanceof FormData) {
-        // No manual content-type for FormData
-      } else if (typeof payload === 'string') {
-        finalHeaders['Content-Type'] = 'text/plain;charset=UTF-8';
-      } else if (
-        payload instanceof Blob ||
-        payload instanceof ArrayBuffer ||
-        payload instanceof URLSearchParams ||
-        (typeof ReadableStream !== 'undefined' && payload instanceof ReadableStream)
-      ) {
-        // Leave as-is for binary/stream
-      } else {
-        finalHeaders['Content-Type'] = 'application/json';
-        payload = JSON.stringify(payload);
-      }
-    } else if (
-      finalHeaders['Content-Type']?.includes('application/json') &&
-      typeof payload === 'object' &&
-      !(payload instanceof FormData)
-    ) {
-      payload = JSON.stringify(payload);
-    }
-  }
+	if (hasBody) {
+		if (!callerSetCT) {
+			if (payload instanceof FormData) {
+				// No manual content-type for FormData
+			} else if (typeof payload === "string") {
+				finalHeaders["Content-Type"] = "text/plain;charset=UTF-8";
+			} else if (
+				payload instanceof Blob ||
+				payload instanceof ArrayBuffer ||
+				payload instanceof URLSearchParams ||
+				(typeof ReadableStream !== "undefined" &&
+					payload instanceof ReadableStream)
+			) {
+				// Leave as-is for binary/stream
+			} else {
+				finalHeaders["Content-Type"] = "application/json";
+				payload = JSON.stringify(payload);
+			}
+		} else if (
+			finalHeaders["Content-Type"]?.includes("application/json") &&
+			typeof payload === "object" &&
+			!(payload instanceof FormData)
+		) {
+			payload = JSON.stringify(payload);
+		}
+	}
 
-  // ---- Control Cookie Sending ----
-  const isLoginRequest = path.includes('/auth/login'); // login = no cookie
-  const isRefreshRequest = path.includes('/auth/refresh'); // refresh = need cookie
-  const isForgetPasswordRequest = path.includes('/auth/forget-password'); // forget password = no cookie
-  const isResetPasswordRequest = path.includes('/auth/reset-password'); // reset password = no cookie
+	// ---- Control Cookie Sending ----
+	const isLoginRequest = path.includes("/auth/login"); // login = no cookie
+	const isRefreshRequest = path.includes("/auth/refresh"); // refresh = need cookie
+	const isForgetPasswordRequest = path.includes("/auth/forget-password"); // forget password = no cookie
+	const isResetPasswordRequest = path.includes("/auth/reset-password"); // reset password = no cookie
 
-  const shouldIncludeCookies =
-    includeCookies && !isLoginRequest && !isForgetPasswordRequest && !isResetPasswordRequest? 'include' : 'same-origin';
-  
-    console.log('Cookie inclusion for request to', path, ':', shouldIncludeCookies);
+	const shouldIncludeCookies =
+		includeCookies &&
+		!isLoginRequest &&
+		!isForgetPasswordRequest &&
+		!isResetPasswordRequest
+			? "include"
+			: "same-origin";
 
-  // ---- Main Fetch Request ----
-  const res = await fetch(`${API_BASE_URL}${path}`, {
-    method,
-    headers: finalHeaders,
-    body: payload,
-    credentials: shouldIncludeCookies,
-  });
+	// ---- Main Fetch Request ----
+	const res = await fetch(`${API_BASE_URL}${path}`, {
+		method,
+		headers: finalHeaders,
+		body: payload,
+		credentials: shouldIncludeCookies,
+	});
 
-  // ---- Handle 401 Unauthorized ----
-  if (res.status === 401 && attachAuth && auth) {
-    console.warn('Received 401, attempting token refresh...');
-    const refreshed = await auth.refreshAccessToken();
+	// ---- Handle 401 Unauthorized ----
+	if (res.status === 401 && attachAuth && auth) {
+		console.warn("Received 401, attempting token refresh...");
+		const refreshed = await auth.refreshAccessToken();
 
-    if (refreshed) {
-      finalHeaders.Authorization = `Bearer ${auth.accessToken}`;
-      return fetch(`${API_BASE_URL}${path}`, {
-        method,
-        headers: finalHeaders,
-        body: payload,
-        credentials: 'include', // ✅ refresh requires cookie
-      });
-    } else {
-      // Refresh failed -> logout and redirect
-      await auth.logout();
-      window.location.replace('/ssi4/signin');
-      return res;
-    }
-  }
+		if (refreshed) {
+			finalHeaders.Authorization = `Bearer ${auth.accessToken}`;
+			return fetch(`${API_BASE_URL}${path}`, {
+				method,
+				headers: finalHeaders,
+				body: payload,
+				credentials: "include", // ✅ refresh requires cookie
+			});
+		} else {
+			// Refresh failed -> logout and redirect
+			await auth.logout();
+			window.location.replace("/ssi4/signin");
+			return res;
+		}
+	}
 
-  return res;
+	return res;
 }
 
 // ---- Exported API Client ----
 export const apiClient = {
-  get: (path, opts) => request(path, { ...opts, method: 'GET' }),
+	get: (path, opts) => request(path, { ...opts, method: "GET" }),
 
-  postJson: (path, data, opts) =>
-    request(path, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...(opts?.headers || {}) },
-      body: JSON.stringify(data ?? {}),
-      ...opts,
-    }),
+	postJson: (path, data, opts) =>
+		request(path, {
+			method: "POST",
+			headers: { "Content-Type": "application/json", ...(opts?.headers || {}) },
+			body: JSON.stringify(data ?? {}),
+			...opts,
+		}),
 
-  postForm: (path, formData, opts) =>
-    request(path, { method: 'POST', body: formData, ...opts }),
+	postForm: (path, formData, opts) =>
+		request(path, { method: "POST", body: formData, ...opts }),
 
-  putJson: (path, data, opts) =>
-    request(path, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', ...(opts?.headers || {}) },
-      body: JSON.stringify(data ?? {}),
-      ...opts,
-    }),
+	putJson: (path, data, opts) =>
+		request(path, {
+			method: "PUT",
+			headers: { "Content-Type": "application/json", ...(opts?.headers || {}) },
+			body: JSON.stringify(data ?? {}),
+			...opts,
+		}),
 
-  putFormData: (path, formData, opts) =>
-    request(path, { method: 'PUT', body: formData, ...opts }),
+	putFormData: (path, formData, opts) =>
+		request(path, { method: "PUT", body: formData, ...opts }),
 
-  delete: (path, opts) => request(path, { ...opts, method: 'DELETE' }),
+	delete: (path, opts) => request(path, { ...opts, method: "DELETE" }),
 };
 
 // import { useAuthStore } from '@/store/useAuthStore';
@@ -178,7 +191,7 @@ export const apiClient = {
 
 // async function ensureAuthValid() {
 //   const auth = safeAuth();
-  
+
 //   if (!auth) {
 //     throw new Error('Auth store not available');
 //   }
@@ -204,7 +217,7 @@ export const apiClient = {
 //   if (attachAuth) {
 //     auth = await ensureAuthValid();
 //   }
- 
+
 //   const finalHeaders = { Accept: 'application/hal+json', ...headers };
 
 //   // ใส่ token ถ้ามี
@@ -256,7 +269,6 @@ export const apiClient = {
 //     }
 //   }
 
-  
 //   const res = await fetch(`${API_BASE_URL}${path}`, {
 //     method,
 //     headers: finalHeaders,
@@ -267,7 +279,7 @@ export const apiClient = {
 //    if (res.status === 401 && attachAuth && auth) {
 //     console.warn('Received 401, attempting token refresh...');
 //     const refreshed = await auth.refreshAccessToken();
-    
+
 //     if (refreshed) {
 //       // Retry the request with new token
 //       finalHeaders.Authorization = `Bearer ${auth.accessToken}`;
