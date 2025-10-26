@@ -28,26 +28,8 @@ const fields = [
   "Price",
   "Action",
 ];
-// async function deleteItem(id) {
-//   try {
-//     await deleteItemById(id);
-//     const index = props.items.findIndex((item) => item.id === id);
-//     props.items.splice(index, 1);
-//     flash.setMessage(
-//       "✅ The sale item has been deleted.",
-//       "m-4 p-4 bg-green-100 text-green-800 shadow itbms-message"
-//     );
-//     handleModal();
-//   } catch (error) {
-//     flash.setMessage(
-//       "❌ The requested sale item does not exist.",
-//       "m-4 p-4 bg-red-100 text-red-800 shadow itbms-message"
-//     );
-//   }
-// }
 async function deleteItem(saleItemId) {
   try {
-    // ✅ ดึง sellerId จาก user ที่ล็อกอิน
     const sellerId = auth.user?.id; 
     if (!sellerId) throw new Error("Seller not found");
     await deleteItemById(sellerId, saleItemId);
@@ -66,76 +48,68 @@ async function deleteItem(saleItemId) {
     );
   }
 }
-
 </script>
 
 <template>
-  <div class="flex flex-col items-center m-5">
-    <div class="w-[75em]">
+  <div class="flex flex-col items-center p-6">
+    <div
+      class="w-full max-w-6xl bg-white rounded-xl shadow-md ring-1 ring-gray-200 overflow-hidden"
+    >
+      <!-- header bar -->
       <div
-        class="w-full bg-[#171717] grid grid-cols-8 text-white text-sm font-semibold"
+        class="bg-zinc-900 text-white text-sm font-semibold grid grid-cols-8"
       >
         <div
-          v-for="(field, index) in fields"
-          :key="index"
-          class="text-center border-1 border-gray-200 py-2"
+          v-for="(field, i) in fields"
+          :key="i"
+          class="py-3 text-center"
         >
           {{ field }}
         </div>
       </div>
-      <div class="w-full grid grid-rows">
+
+      <!-- rows -->
+      <div class="divide-y divide-gray-200">
         <div
-          v-for="(item, key, index) in items"
-          class="itbms-row grid grid-cols-8 text-gray-600"
+          v-for="(item, index) in items"
+          :key="item.id"
+          class="grid grid-cols-8 text-sm"
+          :class="index % 2 === 0 ? 'bg-gray-50' : 'bg-white'"
         >
-          <div
-            class="itbms-id text-center border-1 border-gray-500 py-2"
-            :key="index"
-            :class="key % 2 === 0 ? `bg-gray-200` : 'bg-white'"
-          >
+          <!-- ID -->
+          <div class="py-3 px-2 text-center text-gray-700 font-medium">
             {{ item.id }}
           </div>
-          <div
-            class="itbms-brand text-center border-1 border-gray-500 py-2"
-            :key="index"
-            :class="key % 2 === 0 ? `bg-gray-200` : 'bg-white'"
-          >
+
+          <!-- Brand -->
+          <div class="py-3 px-2 text-center text-gray-700">
             {{ item.brandName }}
           </div>
-          <div
-            class="itbms-model text-center border-1 border-gray-500 py-2"
-            :key="index"
-            :class="key % 2 === 0 ? `bg-gray-200` : 'bg-white'"
-          >
+
+          <!-- Model -->
+          <div class="py-3 px-2 text-center text-gray-700">
             {{ item.model }}
           </div>
-          <div
-            class="itbms-ramGb text-center border-1 border-gray-500 py-2"
-            :key="index"
-            :class="key % 2 === 0 ? `bg-gray-200` : 'bg-white'"
-          >
+
+          <!-- RAM -->
+          <div class="py-3 px-2 text-center text-gray-700">
             {{ item.ramGb ? item.ramGb : "-" }}
           </div>
-          <div
-            class="itbms-storageGb text-center border-1 border-gray-500 py-2"
-            :key="index"
-            :class="key % 2 === 0 ? `bg-gray-200` : 'bg-white'"
-          >
+
+          <!-- Storage -->
+          <div class="py-3 px-2 text-center text-gray-700">
             {{ item.storageGb ? item.storageGb : "-" }}
           </div>
-          <div
-            class="itbms-color text-center border-1 border-gray-500 py-2"
-            :key="index"
-            :class="key % 2 === 0 ? `bg-gray-200` : 'bg-white'"
-          >
+
+          <!-- Color -->
+          <div class="py-3 px-2 text-center text-gray-700">
             {{ item.color ? item.color : "-" }}
           </div>
-          <div
-            class="itbms-price text-center border-1 border-gray-500 py-2"
-            :key="index"
-            :class="key % 2 === 0 ? `bg-gray-200` : 'bg-white'"
-          >
-            ฿<span class="itbms-price-unit">
+
+          <!-- Price -->
+          <div class="py-3 px-2 text-center text-gray-900 font-semibold">
+            ฿
+            <span>
               {{
                 Number(item.price).toLocaleString("en-US", {
                   minimumFractionDigits: 0,
@@ -144,53 +118,58 @@ async function deleteItem(saleItemId) {
               }}
             </span>
           </div>
+
+          <!-- Action -->
           <div
-            class="flex justify-center gap-3 items-center border-1 border-gray-500"
-            :key="index"
-            :class="key % 2 === 0 ? 'bg-gray-200' : 'bg-white'"
+            class="py-3 px-2 flex items-center justify-center gap-2 text-xs"
           >
             <router-link
               :to="`/sale-items/${item.id}/edit`"
-              class="no-underline"
+              class="inline-flex items-center rounded-md border border-blue-500 text-blue-600 px-2 py-1 font-medium hover:bg-blue-50"
             >
-              <p
-                class="itbms-edit-button p-1 px-3 border-1 rounded-md border-blue-500 text-sm text-blue-500"
-              >
-                E
-              </p>
+              Edit
             </router-link>
+
             <button
-              class="itbms-delete-button p-1 px-3 border-1 rounded-md border-red-500 text-sm text-red-500"
+              class="inline-flex items-center rounded-md border border-red-500 text-red-600 px-2 py-1 font-medium hover:bg-red-50"
               @click="handleModal(item.id)"
             >
-              D
+              Delete
             </button>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- Modal -->
     <div
       v-if="showModal"
-      class="fixed inset-0 bg-[#ffffff8f] bg-opacity-50 flex items-center justify-center z-50"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      role="dialog"
+      aria-modal="true"
     >
-      <div class="bg-white rounded-lg p-6 shadow-lg max-w-sm w-full">
-        <h2 class="text-xl font-semibold mb-4 text-gray-800">
-          Delete Confirmation
+      <div
+        class="w-full max-w-sm rounded-xl bg-white shadow-xl ring-1 ring-gray-200 p-6"
+      >
+        <h2 class="text-lg font-semibold text-gray-900 mb-2">
+          Delete item?
         </h2>
-        <p class="itbms-message mb-6 text-gray-800">
+
+        <p class="text-sm text-gray-600 mb-6">
           Do you want to delete this sale item?
         </p>
-        <div class="flex justify-end space-x-4">
+
+        <div class="flex justify-end gap-3 text-sm font-medium">
           <button
             @click="handleModal"
-            class="itbms-cancel-button bg-[#cc3535] px-4 py-2 rounded hover:bg-[#6d3e3e]"
+            class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 bg-white hover:bg-gray-50"
           >
             Cancel
           </button>
+
           <button
             @click="deleteItem(saleItemId)"
-            class="itbms-confirm-button bg-[#5eb238] text-white px-4 py-2 rounded hover:bg-[#58914c]"
+            class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700"
           >
             Confirm
           </button>
@@ -199,5 +178,3 @@ async function deleteItem(saleItemId) {
     </div>
   </div>
 </template>
-
-<style scoped></style>

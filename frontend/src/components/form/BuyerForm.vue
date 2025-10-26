@@ -6,15 +6,13 @@ const props = defineProps({
   isStillSubmit: Boolean,
 });
 
-const isDisabled = computed(() => {
-  return (
-    !buyerForm.value.nickName.trim() ||
-    !buyerForm.value.fullName.trim() ||
-    !buyerForm.value.email.trim() ||
-    buyerForm.value.password.length < 8 ||
-    props.isStillSubmit
-  );
-});
+// รูปตาโชว์/ซ่อน
+import eyeIcon from "@/assets/images/eye.png";
+import eyeOffIcon from "@/assets/images/view.png";
+
+const emit = defineEmits(["submitForm"]);
+const router = useRouter();
+
 const buyerForm = ref({
   nickName: "",
   fullName: "",
@@ -23,153 +21,223 @@ const buyerForm = ref({
   userType: "BUYER",
 });
 
-const focusNext = (nextIndex) => {
-  const nextInputField = document.getElementById(nextIndex);
-  if (nextInputField) nextInputField.focus();
-};
-
-const emit = defineEmits(["submitForm"]);
-const router = useRouter();
-
-function submitData() {
-  emit("submitForm", buyerForm.value);
-}
-const handleCancel = () => {
-  router.push({ path: "/" });
-};
-// 👇 state สำหรับเปิด/ปิด password
 const showPassword = ref(false);
 const togglePassword = () => {
   showPassword.value = !showPassword.value;
 };
+
+// password validation states
+const passHasMinLen = computed(() => buyerForm.value.password.length >= 8);
+const passHasNumber = computed(() => /\d/.test(buyerForm.value.password));
+const passHasUpperLower = computed(
+  () =>
+    /[A-Z]/.test(buyerForm.value.password) &&
+    /[a-z]/.test(buyerForm.value.password)
+);
+
+const isDisabled = computed(() => {
+  return (
+    !buyerForm.value.nickName.trim() ||
+    !buyerForm.value.fullName.trim() ||
+    !buyerForm.value.email.trim() ||
+    !passHasMinLen.value ||
+    !passHasNumber.value ||
+    !passHasUpperLower.value ||
+    props.isStillSubmit
+  );
+});
+
+const focusNext = (nextId) => {
+  const el = document.getElementById(nextId);
+  el && el.focus();
+};
+
+function submitData() {
+  const payload = {
+    ...buyerForm.value,
+    nickName: buyerForm.value.nickName.trim(),
+    fullName: buyerForm.value.fullName.trim(),
+    email: buyerForm.value.email.trim(),
+    password: buyerForm.value.password,
+  };
+  emit("submitForm", payload);
+}
+
+const handleCancel = () => {
+  router.push({ path: "/" });
+};
 </script>
 
 <template>
-  <div class="flex justify-center min-h-screen text-black">
-    <form
-      @submit.prevent="submitData"
-      class="bg-white p-8 rounded-2xl h-fit shadow-lg w-full max-w-lg border border-gray-100"
-    >
-      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">
-        Buyer Registration
-      </h2>
+  <div class="mx-2 text-gray-800">
+    <!-- Title -->
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">Buyer Information</h3>
 
-      <div class="grid grid-cols-12 gap-5">
-        <!-- Nickname -->
-        <label
-          for="nickname"
-          class="col-span-4 flex items-center font-medium text-gray-700"
-        >
+    <form @submit.prevent="submitData" class="space-y-6">
+      <!-- Nickname -->
+      <div class="flex flex-col">
+        <label for="nickname" class="text-sm font-medium text-gray-700 mb-1">
           Nickname
         </label>
-        <div class="col-span-8">
-          <input
-            id="nickname"
-            type="text"
-            v-model.trim="buyerForm.nickName"
-            class="itbms-nickname w-full border border-gray-300 px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-            @keydown.enter="focusNext('fullname')"
-          />
-        </div>
-        <!-- Fullname -->
-        <label
-          for="fullname"
-          class="col-span-4 flex items-center font-medium text-gray-700"
-        >
-          Fullname
-        </label>
-        <div class="col-span-8">
-          <input
-            id="fullname"
-            type="text"
-            v-model.trim="buyerForm.fullName"
-            class="itbms-fullname w-full border border-gray-300 px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-            @keydown.enter="focusNext('email')"
-          />
-        </div>
-        <!-- Email -->
-        <label
-          for="email"
-          class="col-span-4 flex items-center font-medium text-gray-700"
-        >
-          Email
-        </label>
-        <div class="col-span-8">
-          <input
-            id="email"
-            type="email"
-            v-model.trim="buyerForm.email"
-            class="itbms-email w-full border border-gray-300 px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-            @keydown.enter="focusNext('password')"
-          />
-        </div>
 
-        <!-- Password -->
-        <label
-          for="password"
-          class="col-span-4 flex items-center font-medium text-gray-700"
-        >
-          Password
-        </label>
-        <div class="col-span-8">
-          <!-- กล่องเฉพาะ input -->
-          <div class="relative h-12">
-            <input
-              id="password"
-              :type="showPassword ? 'text' : 'password'"
-              v-model.trim="buyerForm.password"
-              minlength="8"
-              maxlength="14"
-              required
-              dir="ltr"
-              class="itbms-password h-full w-full border border-gray-300 rounded-lg px-4 pr-12 text-left focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition shadow-sm hover:shadow-md"
-              @keydown.enter.prevent
-              autocomplete="new-password"
-            />
-            <button
-              type="button"
-              @click="togglePassword"
-              class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
-              aria-label="Toggle password visibility"
-            >
-              {{ showPassword ? "🙈" : "👁️" }}
-            </button>
-          </div>
-
-          <!-- error เป็น sibling ไม่ให้ดันตำแหน่งปุ่ม -->
-          <p
-            v-if="buyerForm.password && buyerForm.password.length < 8"
-            class="text-red-500 text-sm mt-1"
-          >
-            Password must be at least 8 characters
-          </p>
-        </div>
+        <input
+          id="nickname"
+          type="text"
+          v-model.trim="buyerForm.nickName"
+          class="w-full py-3 px-5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition text-base"
+          @keydown.enter="focusNext('fullname')"
+        />
       </div>
 
-      <!-- Buttons -->
-      <div class="flex justify-end gap-4 mt-8">
+      <!-- Fullname -->
+      <div class="flex flex-col">
+        <label for="fullname" class="text-sm font-medium text-gray-700 mb-1">
+          Fullname
+        </label>
+
+        <input
+          id="fullname"
+          type="text"
+          v-model.trim="buyerForm.fullName"
+          class="w-full py-3 px-5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition text-base"
+          @keydown.enter="focusNext('email')"
+        />
+      </div>
+
+      <!-- Email -->
+      <div class="flex flex-col">
+        <label for="email" class="text-sm font-medium text-gray-700 mb-1">
+          Email
+        </label>
+
+        <input
+          id="email"
+          type="email"
+          v-model.trim="buyerForm.email"
+          class="w-full py-3 px-5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition text-base"
+          @keydown.enter="focusNext('password')"
+        />
+      </div>
+
+      <!-- Password -->
+      <div class="flex flex-col">
+        <label for="password" class="text-sm font-medium text-gray-700 mb-1">
+          Password
+        </label>
+
+        <div class="relative">
+          <input
+            id="password"
+            :type="showPassword ? 'text' : 'password'"
+            v-model="buyerForm.password"
+            minlength="8"
+            maxlength="14"
+            required
+            dir="ltr"
+            autocomplete="new-password"
+            class="w-full py-3 px-5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition text-base"
+            @keydown.enter.prevent
+          />
+
+          <button
+            type="button"
+            @click="togglePassword"
+            class="absolute inset-y-0 right-3 flex items-center focus:outline-none"
+            aria-label="Toggle password visibility"
+          >
+            <img
+              :src="showPassword ? eyeOffIcon : eyeIcon"
+              alt="Toggle password visibility"
+              class="w-5 h-5 opacity-80 hover:opacity-100 transition"
+            />
+          </button>
+        </div>
+
+        <!-- error แดง -->
+        <p
+          v-if="buyerForm.password && buyerForm.password.length < 8"
+          class="text-red-500 text-sm mt-1"
+        >
+          Password must be at least 8 characters
+        </p>
+
+        <!-- password rules with checkmark -->
+        <ul class="mt-3 space-y-2 text-sm text-gray-700">
+          <!-- Rule 1 -->
+          <li class="flex items-start gap-2">
+            <span
+              class="flex items-center justify-center h-4 w-4 rounded border text-[10px] font-semibold leading-none"
+              :class="
+                passHasMinLen
+                  ? 'bg-green-500 border-green-500 text-white'
+                  : 'border-gray-400 text-transparent'
+              "
+            >
+              ✓
+            </span>
+            <span>At least 8 characters</span>
+          </li>
+
+          <!-- Rule 2 -->
+          <li class="flex items-start gap-2">
+            <span
+              class="flex items-center justify-center h-4 w-4 rounded border text-[10px] font-semibold leading-none"
+              :class="
+                passHasNumber
+                  ? 'bg-green-500 border-green-500 text-white'
+                  : 'border-gray-400 text-transparent'
+              "
+            >
+              ✓
+            </span>
+            <span>Contains at least one number</span>
+          </li>
+
+          <!-- Rule 3 -->
+          <li class="flex items-start gap-2">
+            <span
+              class="flex items-center justify-center h-4 w-4 rounded border text-[10px] font-semibold leading-none"
+              :class="
+                passHasUpperLower
+                  ? 'bg-green-500 border-green-500 text-white'
+                  : 'border-gray-400 text-transparent'
+              "
+            >
+              ✓
+            </span>
+            <span
+              >Contains both uppercase and lowercase letters (A–Z, a–z)</span
+            >
+          </li>
+        </ul>
+      </div>
+
+      <div
+        class="flex flex-col md:flex-row justify-end gap-3 pt-4 border-t border-gray-200"
+      >
+        <!-- Cancel -->
         <button
           type="button"
           @click="handleCancel"
-          class="itbms-cancel-button bg-gray-200 px-6 py-2.5 rounded-lg text-gray-700 font-medium hover:bg-gray-300 transition"
+          class="h-11 min-w-[96px] px-4 rounded-lg border border-gray-300 bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 active:bg-gray-300 transition-colors"
         >
           Cancel
         </button>
+
+        <!-- Submit -->
         <button
           type="submit"
           :disabled="isDisabled"
           :class="[
-            'itbms-submit-button px-6 py-2.5 text-white rounded-lg font-medium shadow-md transition',
+            'h-11 min-w-[96px] px-4 rounded-lg font-medium text-white shadow-sm transition-colors',
             isDisabled
-              ? 'bg-blue-300 cursor-not-allowed'
-              : 'bg-blue-500 hover:bg-blue-600',
+              ? 'bg-gray-400 cursor-not-allowed'
+              : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800',
           ]"
         >
-          Submit
+          Save
         </button>
       </div>
     </form>
   </div>
 </template>
-
-<style scoped></style>

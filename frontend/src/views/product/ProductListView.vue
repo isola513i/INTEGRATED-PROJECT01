@@ -68,24 +68,6 @@ async function handleGoToLast() {
           Add New Sale Item
         </router-link>
       </div>
-
-      <div class="flex items-center gap-2 h-[42px]">
-        <label for="pageSize" class="text-gray-700 text-sm cursor-pointer"
-          >Show :</label
-        >
-        <select
-          id="pageSize"
-          v-model.number="pageSize"
-          @change="handlePageSizeChange(pageSize)"
-          class="border border-gray-300 px-3 h-full rounded-lg text-gray-700 text-sm focus:ring-2 focus:ring-blue-400 focus:outline-none cursor-pointer"
-        >
-          <option :value="5">5</option>
-          <option :value="10">10</option>
-          <option :value="15">15</option>
-          <option :value="20">20</option>
-        </select>
-      </div>
-
       <div class="itbms-manage-brand">
         <router-link
           to="/brands"
