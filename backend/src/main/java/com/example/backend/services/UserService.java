@@ -185,6 +185,7 @@ public class UserService {
             throw new IllegalArgumentException("New password and confirm new password do not match.");
         }
         user.setPasswordHash(passwordEncoder.encode(resetPasswordRequestDto.getNewPassword()));
+        userRepository.save(user);
     }
 
     public User getUserById(Integer id) {
