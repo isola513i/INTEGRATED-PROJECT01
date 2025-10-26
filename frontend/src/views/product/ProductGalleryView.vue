@@ -113,80 +113,117 @@ watch(
 </script>
 
 <template>
-  <div class="min-h-screen bg-white">
-    <PromoBar />
+  <div class="min-h-screen bg-gray-50">
+    <!-- Container -->
+    <div class="max-w-7xl mx-auto px-4 pt-8 pb-16 flex flex-col gap-6">
 
-    <!-- Responsive Controls Section -->
-    <div
-      class="flex flex-col md:flex-row gap-4 items-center w-full max-w-7xl mx-auto px-4"
-    >
-      <!-- Filter -->
-      <div class="flex-grow">
-        <FilterBar
-          @update:brands="handleBrandFilterChange"
-          @update:price="handlePriceFilterChange"
-          @update:storage="handleStorageFilterChange"
-          @update:pageSize="handlePageSizeChange"
-        />
-      </div>
+      <!-- Breadcrumb -->
+      <nav aria-label="Breadcrumb" class="text-sm text-gray-500">
+        <ol class="flex items-center flex-wrap gap-1">
+          <li class="flex items-center">
+            <router-link
+              to="/"
+              class="text-gray-500 hover:text-gray-900 font-medium transition-colors"
+            >
+              Home
+            </router-link>
+          </li>
 
-      <!-- Sort -->
-      <div class="flex-shrink-0">
-        <SortButtons :selected="sortType" @update:sort="handleSortChange" />
-      </div>
-    </div>
-    <!-- Add Button -->
-    <div
-      v-if="auth.user?.userType === 'SELLER'"
-      class="w-full max-w-7xl mx-auto px-4 mt-4 flex justify-end"
-    >
-      <router-link
-        to="/sale-items/add"
-        class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 bg-white rounded-lg hover:bg-gray-50 transition-colors duration-200 text-sm font-medium shadow-sm"
+          <li class="text-gray-400 px-1 select-none">/</li>
+
+          <li class="flex items-center">
+            <router-link
+              to="/sale-items"
+              class="text-gray-700 hover:text-gray-900 font-medium transition-colors"
+            >
+              Sale Items
+            </router-link>
+          </li>
+        </ol>
+      </nav>
+
+      <!-- Top Controls: Filters + Sort -->
+      <section
+        class="bg-white border border-gray-200 rounded-2xl shadow-sm p-4 md:p-5 flex flex-col md:flex-row md:items-start md:justify-between gap-4"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M12 4v16m8-8H4"
+        <!-- Filters block -->
+        <div class="flex-1">
+          <FilterBar
+            @update:brands="handleBrandFilterChange"
+            @update:price="handlePriceFilterChange"
+            @update:storage="handleStorageFilterChange"
+            @update:pageSize="handlePageSizeChange"
           />
-        </svg>
-        Add New Sale Item
-      </router-link>
-    </div>
+        </div>
 
-    <div class="px-8 py-2">
-      <div
-        v-if="saleItems.length > 0"
-        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 justify-center justify-items-center"
+        <!-- Sort block -->
+        <div
+          class="flex-shrink-0 md:w-48 lg:w-56 bg-white border border-gray-200 rounded-xl shadow-sm p-3"
+        >
+          <div class="text-[11px] uppercase tracking-wide text-gray-500 font-medium mb-2 text-center md:text-left">
+            Sort by
+          </div>
+          <SortButtons
+            :selected="sortType"
+            @update:sort="handleSortChange"
+          />
+        </div>
+      </section>
+
+      <!-- Items grid section -->
+      <section
+        class="bg-white border border-gray-200 rounded-2xl shadow-sm p-4 md:p-6"
       >
-        <SaleItemCard
-          v-for="item in saleItems"
-          :key="item.saleItemId"
-          :item="item"
-          @add-to-cart="addToCart"
-        />
-      </div>
-      <div v-else class="p-10 text-center text-gray-400 text-xl">
-        No sale item
-      </div>
-    </div>
+        <!-- (optional) header row for result info -->
+        <div class="flex items-center justify-between mb-4">
+          <div class="text-sm text-gray-600">
+            <span class="font-medium text-gray-900">{{ saleItems.length }}</span>
+            <span class="ml-1">items shown</span>
+          </div>
 
-    <!-- Pagination -->
-    <div class="flex justify-center py-4">
-      <Pagination
-        :current-page="paginate.page"
-        :total-pages="paginate.totalPages"
-        @update:page="(page) => loadItems(page)"
-        @go-to-last="handleGoToLast"
-      />
+          <div
+            v-if="flash.message"
+            :class="flash.style"
+            class="text-xs text-center"
+          >
+            {{ flash.message }}
+          </div>
+        </div>
+
+        <!-- product grid -->
+        <div
+          v-if="saleItems.length > 0"
+          class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6"
+        >
+          <SaleItemCard
+            v-for="item in saleItems"
+            :key="item.saleItemId"
+            :item="item"
+            @add-to-cart="addToCart"
+          />
+        </div>
+
+        <!-- empty state -->
+        <div
+          v-else
+          class="text-center text-gray-500 text-base py-16 border border-dashed border-gray-300 rounded-xl bg-gray-50/50"
+        >
+          No sale items found.
+          <div class="text-gray-400 text-sm mt-1">
+            Try adjusting filters or clearing all filters.
+          </div>
+        </div>
+      </section>
+
+      <!-- Pagination -->
+      <section class="flex justify-center">
+        <Pagination
+          :current-page="paginate.page"
+          :total-pages="paginate.totalPages"
+          @update:page="(page) => loadItems(page)"
+          @go-to-last="handleGoToLast"
+        />
+      </section>
     </div>
   </div>
 </template>

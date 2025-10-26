@@ -1,11 +1,9 @@
-<!-- ForgotPasswordView.vue (ธีมขาวดำ) -->
 <script setup>
 import { ref, computed } from 'vue'
-import { useRouter} from 'vue-router'
+import { useRouter } from 'vue-router'
 import { requestPasswordReset } from '@/services/userService'
 
 const router = useRouter()
-
 
 const email = ref('')
 const loading = ref(false)
@@ -19,11 +17,11 @@ async function onSubmit() {
   errorMsg.value = ''
   successMsg.value = ''
   try {
-     await requestPasswordReset(email.value)
+    await requestPasswordReset(email.value)
     successMsg.value =
-      'ถ้าอีเมลนี้อยู่ในระบบ เราจะส่งลิงก์รีเซ็ตรหัสผ่านไปให้'
+      'If this email is registered in our system, a reset link has been sent to your inbox.'
   } catch (err) {
-    errorMsg.value = err?.message || 'ไม่สามารถส่งคำขอได้ กรุณาลองใหม่อีกครั้ง'
+    errorMsg.value = err?.message || 'Unable to send request. Please try again.'
   } finally {
     loading.value = false
   }
@@ -35,36 +33,28 @@ function goLogin() {
 </script>
 
 <template>
-  <!-- background: ขาวเทาอ่อน -->
-  <div class="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-100 to-gray-300 px-4 py-10 text-gray-900">
+  <div
+    class="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-100 to-gray-300 px-4 py-10 text-gray-900"
+  >
     <!-- card -->
     <div
       class="w-full max-w-md bg-white rounded-md shadow-xl border border-gray-200 p-8 text-center"
     >
-      <!-- โลโก้ -->
-      <div class="mb-6 flex flex-col items-center">
-        <img
-          src="/image/ITBM_SHOP.png"
-          alt="Logo"
-          class="h-8 mb-4"
-        />
-      </div>
-
-      <!-- หัวข้อ -->
+      <!-- Title -->
       <h1 class="text-[20px] font-semibold text-gray-800 leading-tight">
-        ลืมรหัสผ่าน
+        Forgot Password
       </h1>
       <p class="text-[14px] text-gray-500 mt-1">
-        รีเซ็ตรหัสผ่านด้วยอีเมลที่ใช้งาน
+        Reset your password using your registered email.
       </p>
 
-      <!-- ฟอร์ม -->
+      <!-- Form -->
       <form class="mt-6 text-left" @submit.prevent="onSubmit">
         <label
           for="email"
           class="block text-[14px] text-gray-800 font-medium mb-2"
         >
-          อีเมล
+          Email
         </label>
 
         <input
@@ -72,7 +62,7 @@ function goLogin() {
           v-model.trim="email"
           type="email"
           placeholder="name@example.com"
-          class="w-full rounded-sm border border-gray-400 bg-gray-50 px-3 py-2 text-[14px] text-gray-800 placeholder-gray-400 shadow-inner outline-none focus:border-black focus:ring-1 focus:ring-black"
+          class="w-full py-3 px-5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition text-base"
           required
           autocomplete="email"
         />
@@ -85,7 +75,7 @@ function goLogin() {
           {{ successMsg }}
         </p>
 
-        <!-- ปุ่ม -->
+        <!-- button -->
         <button
           type="submit"
           :disabled="disabled"
@@ -106,19 +96,19 @@ function goLogin() {
               stroke-linejoin="round"
             />
           </svg>
-          รีเซ็ตรหัสผ่าน
+          Reset Password
         </button>
       </form>
 
-      <!-- ลิงก์ -->
+      <!-- Link -->
       <div class="mt-6 text-[13px] text-gray-600 text-center">
-        มีบัญชีผู้ใช้งานแล้ว?
+        Already have an account?
         <button
           type="button"
           @click="goLogin"
           class="text-black font-medium hover:underline"
         >
-          ล็อกอินเข้าสู่ระบบ
+          Log In
         </button>
       </div>
     </div>

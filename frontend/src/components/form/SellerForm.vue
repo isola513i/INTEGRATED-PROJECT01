@@ -7,6 +7,9 @@ const props = defineProps({
   isStillSubmit: Boolean,
 });
 
+const emit = defineEmits(["submitForm"]);
+const router = useRouter();
+
 const sellerForm = ref({
   nickName: "",
   userType: "SELLER",
@@ -21,58 +24,49 @@ const sellerForm = ref({
   idCardImageBack: null,
 });
 
+// password validations
+const passHasMinLen = computed(() => sellerForm.value.password.length >= 8);
+const passHasNumber = computed(() => /\d/.test(sellerForm.value.password));
+const passHasUpperLower = computed(
+  () =>
+    /[A-Z]/.test(sellerForm.value.password) &&
+    /[a-z]/.test(sellerForm.value.password)
+);
+
+// toggle password visibility
+import eyeIcon from "@/assets/images/eye.png";
+import eyeOffIcon from "@/assets/images/view.png";
+const showPassword = ref(false);
+const togglePassword = () => (showPassword.value = !showPassword.value);
+
+// preview ID card images
 const previewFront = ref(null);
 const previewBack = ref(null);
-
-const emit = defineEmits(["submitForm"]);
-const router = useRouter();
-
-// refs สำหรับ input file
 const inputRefsFront = ref(null);
 const inputRefsBack = ref(null);
+
+watch(
+  () => sellerForm.value.idCardImageFront,
+  (file) => (previewFront.value = file ? previewBinaryFile(file) : null)
+);
+watch(
+  () => sellerForm.value.idCardImageBack,
+  (file) => (previewBack.value = file ? previewBinaryFile(file) : null)
+);
 
 function removeFile(side) {
   if (side === "front") {
     sellerForm.value.idCardImageFront = null;
     previewFront.value = null;
     if (inputRefsFront.value) inputRefsFront.value.value = null;
-  } else if (side === "back") {
+  } else {
     sellerForm.value.idCardImageBack = null;
     previewBack.value = null;
     if (inputRefsBack.value) inputRefsBack.value.value = null;
   }
 }
 
-function submitData() {
-  emit("submitForm", sellerForm.value);
-}
-
-const handleCancel = () => {
-  router.push({ path: "/" });
-};
-
-// Watch image เพื่อสร้าง preview
-watch(
-  () => sellerForm.value.idCardImageFront,
-  (file) => {
-    if (file) {
-      previewFront.value = previewBinaryFile(file);
-    } else {
-      previewFront.value = null;
-    }
-  }
-);
-watch(
-  () => sellerForm.value.idCardImageBack,
-  (file) => {
-    if (file) {
-      previewBack.value = previewBinaryFile(file);
-    } else {
-      previewBack.value = null;
-    }
-  }
-);
-
+// disable submit logic
 const isDisabled = computed(() => {
   return (
     !sellerForm.value.nickName?.trim() ||
@@ -89,240 +83,293 @@ const isDisabled = computed(() => {
     props.isStillSubmit
   );
 });
-const focusNext = (nextIndex) => {
-  const nextInputField = document.getElementById(nextIndex);
-  if (nextInputField) nextInputField.focus();
-};
-// 👇 state สำหรับเปิด/ปิด password
-const showPassword = ref(false);
-const togglePassword = () => {
-  showPassword.value = !showPassword.value;
-};
+
+function submitData() {
+  emit("submitForm", sellerForm.value);
+}
+
+function handleCancel() {
+  router.push({ path: "/" });
+}
 </script>
 
 <template>
-  <div class="flex justify-center items-center min-h-screen text-black">
-    <form
-      @submit.prevent="submitData"
-      class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-lg border border-gray-100"
-    >
-      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">
-        Seller Registration
-      </h2>
+  <div class="mx-2 text-gray-800">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">Seller Information</h3>
 
-      <div class="grid grid-cols-12 gap-5">
-        <!-- Nickname -->
-        <label class="col-span-4 flex items-center font-medium text-gray-700"
-          >Nickname</label
+    <form @submit.prevent="submitData" class="space-y-6">
+      <!-- Nickname -->
+      <div>
+        <label
+          for="nickname"
+          class="text-sm font-medium text-gray-700 mb-1 block"
         >
-        <div class="col-span-8">
-          <input
-            id="nickname"
-            v-model.trim="sellerForm.nickName"
-            type="text"
-            class="w-full border px-4 py-2.5 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-            @keydown.enter="focusNext('fullname')"
-          />
-        </div>
+          Nickname
+        </label>
+        <input
+          id="nickname"
+          v-model.trim="sellerForm.nickName"
+          type="text"
+          class="w-full py-3 px-5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition text-base"
+        />
+      </div>
 
-        <!-- Fullname -->
-        <label class="col-span-4 flex items-center font-medium text-gray-700"
-          >Fullname</label
+      <!-- Fullname -->
+      <div>
+        <label
+          for="fullname"
+          class="text-sm font-medium text-gray-700 mb-1 block"
         >
-        <div class="col-span-8">
-          <input
-            id="fullname"
-            v-model.trim="sellerForm.fullName"
-            type="text"
-            class="w-full border px-4 py-2.5 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-            @keydown.enter="focusNext('email')"
-          />
-        </div>
+          Fullname
+        </label>
+        <input
+          id="fullname"
+          v-model.trim="sellerForm.fullName"
+          type="text"
+          class="w-full py-3 px-5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition text-base"
+        />
+      </div>
 
-        <!-- Email -->
-        <label class="col-span-4 flex items-center font-medium text-gray-700"
-          >Email</label
-        >
-        <div class="col-span-8">
-          <input
-            id="email"
-            v-model.trim="sellerForm.email"
-            type="email"
-            class="itbms-email w-full border border-gray-300 px-4 py-2.5 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition pr-12"
-            @keydown.enter="focusNext('password')"
-          />
-        </div>
+      <!-- Email -->
+      <div>
+        <label for="email" class="text-sm font-medium text-gray-700 mb-1 block">
+          Email
+        </label>
+        <input
+          id="email"
+          v-model.trim="sellerForm.email"
+          type="email"
+          class="w-full py-3 px-5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition text-base"
+        />
+      </div>
 
-        <!-- Password -->
+      <!-- Password -->
+      <div>
         <label
           for="password"
-          class="col-span-4 flex items-center font-medium text-gray-700"
+          class="text-sm font-medium text-gray-700 mb-1 block"
         >
           Password
         </label>
-        <div class="col-span-8">
-          <!-- กล่องเฉพาะ input: มีความสูงคงที่ และเป็น relative -->
-          <div class="relative h-12">
-            <input
-              id="password"
-              :type="showPassword ? 'text' : 'password'"
-              v-model.trim="sellerForm.password"
-              minlength="8"
-              autocomplete="new-password"
-              class="itbms-password h-full w-full border border-gray-300 rounded-lg px-4 pr-12 text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition shadow-sm hover:shadow-md"
-              @keydown.enter="focusNext('phoneNumber')"
-            />
-
-            <!-- toggle button: จัดกึ่งกลางตามความสูงช่อง input เสมอ -->
-            <button
-              type="button"
-              @click="togglePassword"
-              class="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
-              aria-label="Toggle password visibility"
-            >
-              {{ showPassword ? "🙈" : "👁️" }}
-            </button>
-          </div>
-
-          <!-- error แยกออกมา ไม่ให้ดันความสูงของกล่อง input -->
-          <p
-            v-if="sellerForm.password && sellerForm.password.length < 8"
-            class="text-red-500 text-sm mt-1"
+        <div class="relative">
+          <input
+            id="password"
+            :type="showPassword ? 'text' : 'password'"
+            v-model.trim="sellerForm.password"
+            minlength="8"
+            maxlength="14"
+            autocomplete="new-password"
+            class="w-full py-3 px-5 pr-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition text-base"
+          />
+          <button
+            type="button"
+            @click="togglePassword"
+            class="absolute inset-y-0 right-3 flex items-center focus:outline-none"
+            aria-label="Toggle password visibility"
           >
-            Password must be at least 8 characters
-          </p>
-        </div>
-
-        <!-- Mobile -->
-        <label class="col-span-4 flex items-center font-medium text-gray-700"
-          >Phone Number</label
-        >
-        <div class="col-span-8">
-          <input
-            id="phoneNumber"
-            v-model.trim="sellerForm.phoneNumber"
-            type="text"
-            class="w-full border px-4 py-2.5 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-            @keydown.enter="focusNext('BankAccountNo')"
-          />
-        </div>
-
-        <!-- Bank Account No -->
-        <label class="col-span-4 flex items-center font-medium text-gray-700"
-          >Bank Account No</label
-        >
-        <div class="col-span-8">
-          <input
-            id="BankAccountNo"
-            v-model.trim="sellerForm.bankAccount"
-            type="text"
-            class="w-full border px-4 py-2.5 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-            @keydown.enter="focusNext('bankName')"
-          />
-        </div>
-
-        <!-- Bank Name -->
-        <label class="col-span-4 flex items-center font-medium text-gray-700"
-          >Bank Name</label
-        >
-        <div class="col-span-8">
-          <input
-            id="bankName"
-            v-model.trim="sellerForm.bankName"
-            type="text"
-            class="w-full border px-4 py-2.5 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-            @keydown.enter="focusNext('NationalCardNo')"
-          />
-        </div>
-
-        <!-- National Card No -->
-        <label class="col-span-4 flex items-center font-medium text-gray-700"
-          >National Card No</label
-        >
-        <div class="col-span-8">
-          <input
-            id="NationalCardNo"
-            v-model.trim="sellerForm.idCardNumber"
-            type="text"
-            class="w-full border px-4 py-2.5 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-          />
-        </div>
-
-        <!-- Card Front -->
-        <label class="col-span-4 flex items-center font-medium text-gray-700"
-          >Card Front</label
-        >
-        <div class="col-span-8 flex flex-col gap-2">
-          <input
-            type="file"
-            ref="inputRefsFront"
-            accept="image/*"
-            @change="(e) => (sellerForm.idCardImageFront = e.target.files[0])"
-            class="w-full border px-4 py-2.5 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-          />
-          <div v-if="previewFront" class="relative w-40 h-24 mt-2">
             <img
-              :src="previewFront"
-              class="object-cover w-full h-full rounded border"
+              :src="showPassword ? eyeOffIcon : eyeIcon"
+              alt="Toggle visibility"
+              class="w-5 h-5 opacity-80 hover:opacity-100 transition"
             />
-            <button
-              type="button"
-              @click="removeFile('front')"
-              class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
-            >
-              ✕
-            </button>
-          </div>
+          </button>
         </div>
 
-        <!-- Card Back -->
-        <label class="col-span-4 flex items-center font-medium text-gray-700"
-          >Card Back</label
+        <p
+          v-if="sellerForm.password && sellerForm.password.length < 8"
+          class="text-red-500 text-sm mt-1"
         >
-        <div class="col-span-8 flex flex-col gap-2">
-          <input
-            type="file"
-            ref="inputRefsBack"
-            accept="image/*"
-            @change="(e) => (sellerForm.idCardImageBack = e.target.files[0])"
-            class="w-full border px-4 py-2.5 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
-          />
-          <div v-if="previewBack" class="relative w-40 h-24 mt-2">
-            <img
-              :src="previewBack"
-              class="object-cover w-full h-full rounded border"
-            />
-            <button
-              type="button"
-              @click="removeFile('back')"
-              class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+          Password must be at least 8 characters
+        </p>
+
+        <!-- password checklist ✅ -->
+        <ul class="mt-3 space-y-2 text-sm text-gray-700">
+          <li class="flex items-start gap-2">
+            <span
+              class="flex items-center justify-center h-4 w-4 rounded border text-[10px] font-semibold leading-none"
+              :class="
+                passHasMinLen
+                  ? 'bg-green-500 border-green-500 text-white'
+                  : 'border-gray-400 text-transparent'
+              "
             >
-              ✕
-            </button>
-          </div>
+              ✓
+            </span>
+            <span>At least 8 characters</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span
+              class="flex items-center justify-center h-4 w-4 rounded border text-[10px] font-semibold leading-none"
+              :class="
+                passHasNumber
+                  ? 'bg-green-500 border-green-500 text-white'
+                  : 'border-gray-400 text-transparent'
+              "
+            >
+              ✓
+            </span>
+            <span>Contains at least one number</span>
+          </li>
+          <li class="flex items-start gap-2">
+            <span
+              class="flex items-center justify-center h-4 w-4 rounded border text-[10px] font-semibold leading-none"
+              :class="
+                passHasUpperLower
+                  ? 'bg-green-500 border-green-500 text-white'
+                  : 'border-gray-400 text-transparent'
+              "
+            >
+              ✓
+            </span>
+            <span
+              >Contains both uppercase and lowercase letters (A–Z, a–z)</span
+            >
+          </li>
+        </ul>
+      </div>
+
+      <!-- Phone Number -->
+      <div>
+        <label
+          for="phoneNumber"
+          class="text-sm font-medium text-gray-700 mb-1 block"
+        >
+          Phone Number
+        </label>
+        <input
+          id="phoneNumber"
+          v-model.trim="sellerForm.phoneNumber"
+          type="text"
+          class="w-full py-3 px-5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition text-base"
+        />
+      </div>
+
+      <!-- Bank Account -->
+      <div>
+        <label
+          for="bankAccount"
+          class="text-sm font-medium text-gray-700 mb-1 block"
+        >
+          Bank Account No
+        </label>
+        <input
+          id="bankAccount"
+          v-model.trim="sellerForm.bankAccount"
+          type="text"
+          class="w-full py-3 px-5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition text-base"
+        />
+      </div>
+
+      <!-- Bank Name -->
+      <div>
+        <label
+          for="bankName"
+          class="text-sm font-medium text-gray-700 mb-1 block"
+        >
+          Bank Name
+        </label>
+        <input
+          id="bankName"
+          v-model.trim="sellerForm.bankName"
+          type="text"
+          class="w-full py-3 px-5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition text-base"
+        />
+      </div>
+
+      <!-- ID Card Number -->
+      <div>
+        <label
+          for="idCardNumber"
+          class="text-sm font-medium text-gray-700 mb-1 block"
+        >
+          National Card No
+        </label>
+        <input
+          id="idCardNumber"
+          v-model.trim="sellerForm.idCardNumber"
+          type="text"
+          class="w-full py-3 px-5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition text-base"
+        />
+      </div>
+
+      <!-- Card Front -->
+      <div>
+        <label class="text-sm font-medium text-gray-700 mb-1 block">
+          Card Front
+        </label>
+        <input
+          type="file"
+          ref="inputRefsFront"
+          accept="image/*"
+          @change="(e) => (sellerForm.idCardImageFront = e.target.files[0])"
+          class="w-full py-3 px-5 border border-gray-300 rounded-xl file:mr-4 file:py-2 file:px-3 file:rounded-md file:border file:border-gray-300 file:bg-gray-100 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition"
+        />
+        <div v-if="previewFront" class="relative w-40 h-24 mt-3">
+          <img
+            :src="previewFront"
+            class="object-cover w-full h-full rounded border border-gray-300"
+          />
+          <button
+            type="button"
+            @click="removeFile('front')"
+            class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+          >
+            ✕
+          </button>
         </div>
       </div>
 
-      <!-- Buttons -->
-      <div class="flex justify-end gap-4 mt-8">
+      <!-- Card Back -->
+      <div>
+        <label class="text-sm font-medium text-gray-700 mb-1 block">
+          Card Back
+        </label>
+        <input
+          type="file"
+          ref="inputRefsBack"
+          accept="image/*"
+          @change="(e) => (sellerForm.idCardImageBack = e.target.files[0])"
+          class="w-full py-3 px-5 border border-gray-300 rounded-xl file:mr-4 file:py-2 file:px-3 file:rounded-md file:border file:border-gray-300 file:bg-gray-100 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition"
+        />
+        <div v-if="previewBack" class="relative w-40 h-24 mt-3">
+          <img
+            :src="previewBack"
+            class="object-cover w-full h-full rounded border border-gray-300"
+          />
+          <button
+            type="button"
+            @click="removeFile('back')"
+            class="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <div
+        class="flex flex-col md:flex-row justify-end gap-3 pt-4 border-t border-gray-200"
+      >
+        <!-- Cancel -->
         <button
           type="button"
           @click="handleCancel"
-          class="bg-gray-200 px-6 py-2.5 rounded-lg text-gray-700 font-medium hover:bg-gray-300 transition"
+          class="h-11 min-w-[96px] px-4 rounded-lg border border-gray-300 bg-gray-100 text-gray-700 font-medium hover:bg-gray-200 active:bg-gray-300 transition-colors"
         >
           Cancel
         </button>
+
+        <!-- Submit -->
         <button
           type="submit"
           :disabled="isDisabled"
           :class="[
-            'px-6 py-2.5 text-white rounded-lg font-medium shadow-md transition',
+            'h-11 min-w-[96px] px-4 rounded-lg font-medium text-white shadow-sm transition-colors',
             isDisabled
-              ? 'bg-blue-300 cursor-not-allowed'
-              : 'bg-blue-500 hover:bg-blue-600',
+              ? 'bg-gray-400 cursor-not-allowed'
+              : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800',
           ]"
         >
-          Submit
+          Save
         </button>
       </div>
     </form>

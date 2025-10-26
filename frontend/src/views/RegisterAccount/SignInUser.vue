@@ -52,7 +52,8 @@ async function handleFormSubmit() {
     loading.value = false;
   }
 }
-
+import eyeIcon from "@/assets/images/eye.png";
+import eyeOffIcon from "@/assets/images/view.png";
 const showPassword = ref(false);
 const togglePassword = () => (showPassword.value = !showPassword.value);
 const focusNext = (nextId) => document.getElementById(nextId)?.focus();
@@ -115,8 +116,6 @@ watch(
             <span>{{ errorMessage }}</span>
           </div>
 
-          <!-- Email -->
-          <!-- Email -->
           <div class="space-y-2">
             <label for="email" class="text-black font-medium">Email</label>
             <div class="relative">
@@ -151,13 +150,17 @@ watch(
                 class="itbms-password h-12 w-full px-4 pr-12 border border-gray-300 rounded-lg text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition shadow-sm hover:shadow-md"
               />
               <button
-                type="button"
-                @click="togglePassword"
-                class="absolute inset-y-0 right-3 flex items-center text-black hover:text-gray-700 focus:outline-none"
-                aria-label="Toggle password visibility"
-              >
-                {{ showPassword ? "🙈" : "👁️" }}
-              </button>
+            type="button"
+            @click="togglePassword"
+            class="absolute inset-y-0 right-3 flex items-center focus:outline-none"
+            aria-label="Toggle password visibility"
+          >
+            <img
+              :src="showPassword ? eyeOffIcon : eyeIcon"
+              alt="Toggle password visibility"
+              class="w-5 h-5 opacity-80 hover:opacity-100 transition"
+            />
+          </button>
             </div>
           </div>
 
@@ -169,7 +172,7 @@ watch(
               ' itbms-signin-button w-full py-3 rounded-lg font-semibold text-white shadow-md transition',
               loading || buttonDisabled
                 ? 'bg-gray-300 cursor-not-allowed'
-                : 'bg-black hover:bg-blue-600 hover:shadow-lg',
+                : 'bg-black hover:bg-gray-800 hover:shadow-lg',
             ]"
           >
             {{ loading ? "Signing in…" : "Sign In" }}

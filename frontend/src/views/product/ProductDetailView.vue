@@ -21,9 +21,8 @@ const successMessage = ref("");
 const successMessageStyle = ref("");
 const flash = useFlashStore();
 const cart = useCartStore();
-const route = useRoute(); // ใช้อ่าน params/query
-const router = useRouter(); // ใช้นำทาง
-
+const route = useRoute();
+const router = useRouter(); 
 const onAdd = () => {
   if (!auth.isLoggedIn) {
     router.push("/signin");
@@ -33,7 +32,7 @@ const onAdd = () => {
   const want = Number(quantity.value || 1);
   const qty = Math.min(Math.max(1, want), stock);
 
-  cart.add(product.value, qty); // ✅ ส่งจำนวนที่เลือกจริง
+  cart.add(product.value, qty);
   flash.setMessage(
     "Added to cart",
     "fixed top-6 left-1/2 -translate-x-1/2 z-50 px-5 py-2 rounded-lg bg-green-500 text-white text-sm shadow-lg"
@@ -75,11 +74,7 @@ onMounted(async () => {
 
       return res.url;
     });
-
-    // Wait for all images
     const results = await Promise.all(imagePromises);
-
-    // Filter out nulls and assign to images
     images.value = results.filter(Boolean);
   } catch (err) {
     console.log("error :", err);
@@ -92,13 +87,13 @@ const handleSelectedIndex = (index) => {
 };
 
 const prev = () => {
-  const len = images.value.length; // ✅ ใช้ .value
+  const len = images.value.length;
   if (len <= 1) return;
   selectedIndex.value =
     selectedIndex.value === 0 ? len - 1 : selectedIndex.value - 1;
 };
 const next = () => {
-  const len = images.value.length; // ✅ ใช้ .value
+  const len = images.value.length;
   if (len <= 1) return;
   selectedIndex.value =
     selectedIndex.value === len - 1 ? 0 : selectedIndex.value + 1;
@@ -146,12 +141,36 @@ const deleteItem = async () => {
       {{ flash.message }}
     </div>
 
-    <div class="px-20 mb-4 flex items-center gap-2">
-      <router-link
-        to="/sale-items"
-        class="itbms-home-button text-gray-600 hover:text-black text-xl font-light"
-        >Home
-      </router-link>
+    <div aria-label="Breadcrumb" class="px-20 mb-6 text-sm text-gray-500">
+      <ol class="flex items-center flex-wrap gap-1">
+        <!-- Home link -->
+        <li class="flex items-center">
+          <router-link
+            to="/"
+            class="text-gray-500 hover:text-black font-medium transition-colors"
+          >
+            Home
+          </router-link>
+        </li>
+
+        <!-- separator -->
+        <li class="text-gray-400 px-1">/</li>
+        <li class="flex items-center">
+          <router-link
+            to="/sale-items"
+            class="text-gray-500 hover:text-black font-medium transition-colors"
+          >
+            Sale Item
+          </router-link>
+        </li>
+        <li class="text-gray-400 px-1">/</li>
+        <!-- Current product -->
+        <li
+          class="flex items-center text-gray-900 font-semibold truncate max-w-[60vw] md:max-w-[30vw]"
+        >
+          {{ product.model || "Loading..." }}
+        </li>
+      </ol>
     </div>
 
     <div
@@ -299,7 +318,6 @@ const deleteItem = async () => {
             Add to Cart
           </button>
         </div>
-
 
         <div class="mt-5">
           <h2 class="text-md font-semibold mb-2 text-black">Description</h2>

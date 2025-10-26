@@ -73,7 +73,6 @@ const orderStore = useOrderStore();
 const sellerOrderCount = computed(() => orderStore.pendingCount || 0);
 
 onMounted(() => {
-
   if (auth.user?.userType === "SELLER") {
     orderStore.refreshPendingCount();
   }
@@ -86,27 +85,38 @@ onMounted(() => {
   >
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="flex h-14 items-center justify-between">
-        <div class="flex items-center gap-2 pl-0">
-          <router-link to="/" class="inline-flex items-center">
+        <div class="flex items-center gap-8 min-w-0">
+          <router-link to="/" class="inline-flex items-center shrink-0">
             <img
               class="h-9 w-auto"
               src="/image/ITBM_SHOP.png"
               alt="ITBM Shop logo"
             />
           </router-link>
+
+          <!-- main links (md+) -->
+          <div class="hidden md:flex items-center gap-6">
+            <router-link to="/sale-items" :class="linkClasses('/sale-items')">
+              Store
+            </router-link>
+            <router-link to="/aboutUs" :class="linkClasses('/')">
+              About Us
+            </router-link>
+
+            <!-- แสดงเฉพาะ SELLER -->
+            <router-link
+              v-if="auth.user?.userType === 'SELLER'"
+              to="/sale-items/list"
+              :class="linkClasses('/sale-items/list')"
+            >
+              Sale Item list
+            </router-link>
+          </div>
         </div>
 
-        <div class="hidden md:flex items-center gap-8">
-          <router-link to="/sale-items" :class="linkClasses('/sale-items')"
-            >Store</router-link
-          >
-          <router-link to="/" :class="linkClasses('/')">Support</router-link>
-          <router-link to="/" :class="linkClasses('/')">Categories</router-link>
-          <router-link to="/" :class="linkClasses('/')">Promotions</router-link>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <div class="relative hidden lg:block">
+        <!-- CENTER: search (lg+) -->
+        <div class="hidden lg:flex flex-1 justify-center px-4">
+          <div class="relative w-full max-w-md">
             <input
               ref="searchInputRef"
               v-model="searchQuery"
@@ -114,7 +124,7 @@ onMounted(() => {
               @keyup.enter="handleSearch"
               type="text"
               placeholder="Press / to search"
-              class="peer pl-10 pr-10 py-2 w-72 xl:w-80 rounded-full bg-white/95 text-black text-sm outline-none ring-0 focus:ring-2 focus:ring-blue-500 placeholder:text-gray-500"
+              class="peer w-full rounded-full bg-white/95 text-black text-sm pl-10 pr-10 py-2 outline-none ring-0 focus:ring-2 focus:ring-blue-500 placeholder:text-gray-500"
               aria-label="Search products"
             />
             <svg
@@ -131,6 +141,7 @@ onMounted(() => {
                 d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"
               />
             </svg>
+
             <button
               v-if="searchQuery"
               @click="clearSearch"
@@ -140,10 +151,35 @@ onMounted(() => {
               ✖
             </button>
           </div>
+        </div>
 
+        <!-- RIGHT: user actions -->
+        <div class="flex items-center gap-2">
+          <!-- search icon (mobile / tablet only, hidden on lg because we already show search bar in center) -->
+          <button
+            class="lg:hidden inline-flex items-center justify-center rounded-md p-2 text-gray-300 hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            @click="$refs.searchInputRef?.focus()"
+            aria-label="Focus search"
+          >
+            <svg
+              class="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"
+              />
+            </svg>
+          </button>
+
+          <!-- Cart -->
           <router-link to="/cart" custom v-slot="{ navigate }">
             <button
-              class="itbms-cart-quantity relative hidden md:inline-flex items-center justify-center rounded-full p-2 text-gray-300 hover:text-white focus:outline-none  disabled:opacity-40 disabled:cursor-not-allowed"
+              class="relative hidden md:inline-flex items-center justify-center rounded-md p-2 text-gray-300 hover:text-white focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed"
               :disabled="isCartDisabled"
               :aria-disabled="isCartDisabled"
               :title="isCartDisabled ? 'Your cart is empty' : 'Cart'"
@@ -166,103 +202,121 @@ onMounted(() => {
 
               <span
                 v-if="cart.count > 0"
-                class="absolute -top-1 -right-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-600 px-1 text-xs font-bold text-white"
+                class="absolute -top-1 -right-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold leading-none text-white"
               >
                 {{ cart.count }}
               </span>
             </button>
           </router-link>
 
-          <div
-            class="itbms-cart-quantity relative hidden md:inline-flex items-center justify-center rounded-full p-2 text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            <template v-if="isSignedIn">
-              <router-link
-                v-if="auth.user?.userType === 'BUYER'"
-                to="/your-orders"
-                class="rounded-md px-2 py-1 hover:text-white focus:outline-none "
+          <!-- Orders (buyer) / Sale Orders (seller) -->
+          <template v-if="isSignedIn">
+            <router-link
+              v-if="auth.user?.userType === 'BUYER'"
+              to="/your-orders"
+              class="hidden md:inline-flex items-center justify-center rounded-md p-2 text-gray-300 hover:text-white focus:outline-none"
+              title="Your orders"
+            >
+              <svg
+                class="h-6 w-6"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                stroke="currentColor"
+                stroke-width="0.5"
+                xmlns="http://www.w3.org/2000/svg"
               >
-                <svg
-                  class="h-7 w-6"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="0.5"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M11.0784 2.89423C8.57288 2.89423 6.54176 4.92534 6.54176 7.43086V7.50253H3.70513C2.72667 7.50253 1.93347 8.29572 1.93347 9.27418V16.6475C1.93347 19.662 4.37723 22.1058 7.39177 22.1058H16.6084C19.6229 22.1058 22.0667 19.662 22.0667 16.6475V9.27418C22.0667 8.29572 21.2735 7.50253 20.295 7.50253H17.4583V7.43086C17.4583 4.92535 15.4272 2.89423 12.9217 2.89423H11.0784ZM15.7583 9.20253V10.1958C15.7583 10.6653 16.1389 11.0458 16.6083 11.0458C17.0778 11.0458 17.4583 10.6653 17.4583 10.1958V9.20253H20.295C20.3346 9.20253 20.3667 9.23461 20.3667 9.27418V16.6475C20.3667 18.7231 18.684 20.4058 16.6084 20.4058H7.39177C5.31612 20.4058 3.63347 18.7231 3.63347 16.6475V9.27418C3.63347 9.23461 3.66555 9.20253 3.70513 9.20253H6.54176V10.1958C6.54176 10.6653 6.92231 11.0458 7.39176 11.0458C7.8612 11.0458 8.24176 10.6653 8.24176 10.1958V9.20253H15.7583ZM15.7583 7.50253V7.43086C15.7583 5.86423 14.4883 4.59423 12.9217 4.59423H11.0784C9.51176 4.59423 8.24176 5.86423 8.24176 7.43086V7.50253H15.7583Z"
+                />
+              </svg>
+            </router-link>
+
+            <router-link
+              v-else-if="auth.user?.userType === 'SELLER'"
+              to="/sale-orders"
+              class="relative hidden md:inline-flex items-center justify-center rounded-md p-2 text-gray-300 hover:text-white focus:outline-none"
+              title="Sale orders"
+            >
+              <svg
+                class="h-6 w-6"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                stroke="currentColor"
+                stroke-width="0.5"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M11.0784 2.89423C8.57288 2.89423 6.54176 4.92534 6.54176 7.43086V7.50253H3.70513C2.72667 7.50253 1.93347 8.29572 1.93347 9.27418V16.6475C1.93347 19.662 4.37723 22.1058 7.39177 22.1058H16.6084C19.6229 22.1058 22.0667 19.662 22.0667 16.6475V9.27418C22.0667 8.29572 21.2735 7.50253 20.295 7.50253H17.4583V7.43086C17.4583 4.92535 15.4272 2.89423 12.9217 2.89423H11.0784ZM15.7583 9.20253V10.1958C15.7583 10.6653 16.1389 11.0458 16.6083 11.0458C17.0778 11.0458 17.4583 10.6653 17.4583 10.1958V9.20253H20.295C20.3346 9.20253 20.3667 9.23461 20.3667 9.27418V16.6475C20.3667 18.7231 18.684 20.4058 16.6084 20.4058H7.39177C5.31612 20.4058 3.63347 18.7231 3.63347 16.6475V9.27418C3.63347 9.23461 3.66555 9.20253 3.70513 9.20253H6.54176V10.1958C6.54176 10.6653 6.92231 11.0458 7.39176 11.0458C7.8612 11.0458 8.24176 10.6653 8.24176 10.1958V9.20253H15.7583ZM15.7583 7.50253V7.43086C15.7583 5.86423 14.4883 4.59423 12.9217 4.59423H11.0784C9.51176 4.59423 8.24176 5.86423 8.24176 7.43086V7.50253H15.7583Z"
+                />
+              </svg>
+
+              <span
+                v-if="sellerOrderCount > 0"
+                class="absolute -top-1 -right-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold leading-none text-white"
+              >
+                {{ sellerOrderCount }}
+              </span>
+            </router-link>
+          </template>
+
+          <template v-if="isSignedIn">
+            <router-link
+              :to="{ name: 'ProfileView' }"
+              class="flex items-center gap-2 rounded-md p-2 text-gray-300 hover:text-white focus:outline-none"
+              title="Profile"
+            >
+              <span
+                class="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white ring-1 ring-white/20"
+              >
+                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                   <path
-                    fill-rule="evenodd"
-                    clip-rule="evenodd"
-                    d="M11.0784 2.89423C8.57288 2.89423 6.54176 4.92534 6.54176 7.43086V7.50253H3.70513C2.72667 7.50253 1.93347 8.29572 1.93347 9.27418V16.6475C1.93347 19.662 4.37723 22.1058 7.39177 22.1058H16.6084C19.6229 22.1058 22.0667 19.662 22.0667 16.6475V9.27418C22.0667 8.29572 21.2735 7.50253 20.295 7.50253H17.4583V7.43086C17.4583 4.92535 15.4272 2.89423 12.9217 2.89423H11.0784ZM15.7583 9.20253V10.1958C15.7583 10.6653 16.1389 11.0458 16.6083 11.0458C17.0778 11.0458 17.4583 10.6653 17.4583 10.1958V9.20253H20.295C20.3346 9.20253 20.3667 9.23461 20.3667 9.27418V16.6475C20.3667 18.7231 18.684 20.4058 16.6084 20.4058H7.39177C5.31612 20.4058 3.63347 18.7231 3.63347 16.6475V9.27418C3.63347 9.23461 3.66555 9.20253 3.70513 9.20253H6.54176V10.1958C6.54176 10.6653 6.92231 11.0458 7.39176 11.0458C7.8612 11.0458 8.24176 10.6653 8.24176 10.1958V9.20253H15.7583ZM15.7583 7.50253V7.43086C15.7583 5.86423 14.4883 4.59423 12.9217 4.59423H11.0784C9.51176 4.59423 8.24176 5.86423 8.24176 7.43086V7.50253H15.7583Z"
-                    fill="currentColor"
+                    d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm0 2c-3.33 0-10 1.67-10 5v1h20v-1c0-3.33-6.67-5-10-5Z"
                   />
                 </svg>
-              </router-link>
-              <router-link
-                v-else-if="auth.user?.userType === 'SELLER'"
-                to="/sale-orders"
-                class="relative inline-flex items-center gap-1 rounded-md px-2 py-1 hover:text-white focus:outline-none "
-              >
-                <div class="relative">
-                  <svg
-                    class="h-7 w-6"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="0.5"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fill-rule="evenodd"
-                      clip-rule="evenodd"
-                      d="M11.0784 2.89423C8.57288 2.89423 6.54176 4.92534 6.54176 7.43086V7.50253H3.70513C2.72667 7.50253 1.93347 8.29572 1.93347 9.27418V16.6475C1.93347 19.662 4.37723 22.1058 7.39177 22.1058H16.6084C19.6229 22.1058 22.0667 19.662 22.0667 16.6475V9.27418C22.0667 8.29572 21.2735 7.50253 20.295 7.50253H17.4583V7.43086C17.4583 4.92535 15.4272 2.89423 12.9217 2.89423H11.0784ZM15.7583 9.20253V10.1958C15.7583 10.6653 16.1389 11.0458 16.6083 11.0458C17.0778 11.0458 17.4583 10.6653 17.4583 10.1958V9.20253H20.295C20.3346 9.20253 20.3667 9.23461 20.3667 9.27418V16.6475C20.3667 18.7231 18.684 20.4058 16.6084 20.4058H7.39177C5.31612 20.4058 3.63347 18.7231 3.63347 16.6475V9.27418C3.63347 9.23461 3.66555 9.20253 3.70513 9.20253H6.54176V10.1958C6.54176 10.6653 6.92231 11.0458 7.39176 11.0458C7.8612 11.0458 8.24176 10.6653 8.24176 10.1958V9.20253H15.7583ZM15.7583 7.50253V7.43086C15.7583 5.86423 14.4883 4.59423 12.9217 4.59423H11.0784C9.51176 4.59423 8.24176 5.86423 8.24176 7.43086V7.50253H15.7583Z"
-                      fill="currentColor"
-                    />
-                  </svg>
+              </span>
 
-                  <span
-                    v-if="sellerOrderCount > 0"
-                    class="absolute -top-1 -right-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold leading-none text-white"
-                  >
-                    {{ sellerOrderCount }}
-                  </span>
-                </div>
+              <span class="hidden lg:block text-sm leading-tight text-left">
+                <span
+                  class="block font-semibold text-white truncate max-w-[120px]"
+                >
+                  {{ auth.nickname ?? auth.user?.nickName }}
+                </span>
+                <span class="block text-[11px] text-gray-400 leading-none">
+                  Profile
+                </span>
+              </span>
+            </router-link>
 
-                
-              </router-link>
+            <!-- Logout -->
+            <button
+              @click="handleLogOut"
+              class="hidden md:inline-flex items-center justify-center rounded-md p-2 text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            >
+              Log out
+            </button>
+          </template>
 
-              <router-link
-                :to="{ name: 'ProfileView' }"
-                class="rounded-md px-2 py-1 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                Profile
-              </router-link>
-              <div class="hidden lg:block text-sm">
-                Hi, {{ auth.nickname ?? auth.user?.nickName }}
-              </div>
-              <button
-                @click="handleLogOut"
-                class="rounded-md px-2 py-1 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                Log out
-              </button>
-            </template>
-            <template v-else>
-              <button
-                @click="goToSignIn"
-                class="rounded-md px-3 py-1.5 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                Sign in
-              </button>
-              <button
-                @click="goToRegister"
-                class="rounded-full px-3 py-1.5 bg-white text-black hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                Register
-              </button>
-            </template>
-          </div>
+          <template v-else>
+            <!-- Sign in / Register -->
+            <button
+              @click="goToSignIn"
+              class="rounded-md px-3 py-1.5 text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-semibold"
+            >
+              Sign in
+            </button>
+            <button
+              @click="goToRegister"
+              class="rounded-full px-3 py-1.5 bg-white text-black hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-semibold"
+            >
+              Register
+            </button>
+          </template>
 
+          <!-- Mobile menu toggle -->
           <button
             class="md:hidden inline-flex items-center justify-center rounded-md p-2 text-gray-300 hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             @click="isOpen = !isOpen"
@@ -294,10 +348,12 @@ onMounted(() => {
       </div>
     </div>
 
+    <!-- MOBILE DROPDOWN PANEL -->
     <div
       v-if="isOpen"
       class="md:hidden border-t border-white/10 bg-[#111112] px-4 sm:px-6 lg:px-8 pb-4"
     >
+      <!-- mobile search -->
       <div class="relative mt-3">
         <input
           v-model="searchQuery"
@@ -331,34 +387,35 @@ onMounted(() => {
         </button>
       </div>
 
+      <!-- mobile nav links -->
       <div class="mt-3 space-y-1 text-white">
         <router-link
           to="/sale-items"
           class="block rounded-md px-3 py-2 text-base font-medium hover:bg-white/10"
           @click="isOpen = false"
-          >Store</router-link
         >
+          Store
+        </router-link>
+
         <router-link
           to="/"
           class="block rounded-md px-3 py-2 text-base font-medium hover:bg-white/10"
           @click="isOpen = false"
-          >Support</router-link
         >
+          Support
+        </router-link>
+
         <router-link
           to="/"
           class="block rounded-md px-3 py-2 text-base font-medium hover:bg-white/10"
           @click="isOpen = false"
-          >Categories</router-link
         >
-        <router-link
-          to="/"
-          class="block rounded-md px-3 py-2 text-base font-medium hover:bg-white/10"
-          @click="isOpen = false"
-          >Promotions</router-link
-        >
+          Categories
+        </router-link>
       </div>
 
-      <div class="mt-2">
+      <!-- account / auth block -->
+      <div class="mt-4 border-t border-white/10 pt-3">
         <template v-if="isSignedIn">
           <router-link
             v-if="auth.user?.userType === 'BUYER'"
@@ -368,6 +425,7 @@ onMounted(() => {
           >
             Your Orders
           </router-link>
+
           <router-link
             v-else-if="auth.user?.userType === 'SELLER'"
             to="/sale-orders"
@@ -375,14 +433,21 @@ onMounted(() => {
             @click="isOpen = false"
           >
             Sale Orders
+            <span
+              v-if="sellerOrderCount > 0"
+              class="ml-2 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-600 px-1 text-xs font-bold leading-none text-white align-middle"
+            >
+              {{ sellerOrderCount }}
+            </span>
           </router-link>
 
           <button
             @click="goToProfile"
             class="block w-full rounded-md px-3 py-2 text-left text-base font-medium text-white hover:bg-white/10"
           >
-            Profile
+            Profile & Account
           </button>
+
           <button
             @click="handleLogOut"
             class="block w-full rounded-md px-3 py-2 text-left text-base font-medium text-white hover:bg-white/10"
@@ -390,6 +455,7 @@ onMounted(() => {
             Log out
           </button>
         </template>
+
         <template v-else>
           <button
             @click="goToSignIn"
@@ -397,9 +463,10 @@ onMounted(() => {
           >
             Sign in
           </button>
+
           <button
             @click="goToRegister"
-            class="mt-1 block w-full rounded-md bg-white px-3 py-2 text-left text-base font-medium text-black hover:bg-gray-100"
+            class="mt-2 block w-full rounded-md bg-white px-3 py-2 text-left text-base font-medium text-black hover:bg-gray-100"
           >
             Register
           </button>

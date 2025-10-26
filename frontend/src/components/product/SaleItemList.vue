@@ -28,26 +28,8 @@ const fields = [
   "Price",
   "Action",
 ];
-// async function deleteItem(id) {
-//   try {
-//     await deleteItemById(id);
-//     const index = props.items.findIndex((item) => item.id === id);
-//     props.items.splice(index, 1);
-//     flash.setMessage(
-//       "✅ The sale item has been deleted.",
-//       "m-4 p-4 bg-green-100 text-green-800 shadow itbms-message"
-//     );
-//     handleModal();
-//   } catch (error) {
-//     flash.setMessage(
-//       "❌ The requested sale item does not exist.",
-//       "m-4 p-4 bg-red-100 text-red-800 shadow itbms-message"
-//     );
-//   }
-// }
 async function deleteItem(saleItemId) {
   try {
-    // ✅ ดึง sellerId จาก user ที่ล็อกอิน
     const sellerId = auth.user?.id; 
     if (!sellerId) throw new Error("Seller not found");
     await deleteItemById(sellerId, saleItemId);
@@ -66,131 +48,154 @@ async function deleteItem(saleItemId) {
     );
   }
 }
-
 </script>
-
 <template>
-  <div class="flex flex-col items-center m-5">
-    <div class="w-[75em]">
-      <div
-        class="w-full bg-[#171717] grid grid-cols-8 text-white text-sm font-semibold"
-      >
+  <div class=" text-gray-900 flex flex-col items-center">
+    <div
+      class="w-full max-w-6xl bg-white rounded-2xl shadow-md ring-1 ring-gray-200 overflow-hidden"
+    >
+      <div class="hidden md:block">
         <div
-          v-for="(field, index) in fields"
-          :key="index"
-          class="text-center border-1 border-gray-200 py-2"
+          class="grid grid-cols-8 text-xs font-semibold bg-gray-100 text-gray-600 uppercase tracking-wide border-b border-gray-200"
         >
-          {{ field }}
+          <div
+            v-for="(field, i) in fields"
+            :key="i"
+            class="py-3 text-center px-2"
+          >
+            {{ field }}
+          </div>
+        </div>
+
+        <!-- Rows -->
+        <div class="divide-y divide-gray-100">
+          <div
+            v-for="(item, index) in items"
+            :key="item.id"
+            class="grid grid-cols-8 text-sm hover:bg-gray-50 transition"
+          >
+            <div class="py-3 px-2 text-center text-gray-700 font-medium">
+              {{ item.id }}
+            </div>
+            <div class="py-3 px-2 text-center text-gray-700">
+              {{ item.brandName }}
+            </div>
+            <div class="py-3 px-2 text-center text-gray-700">
+              {{ item.model }}
+            </div>
+            <div class="py-3 px-2 text-center text-gray-500">
+              {{ item.ramGb ?? "-" }}
+            </div>
+            <div class="py-3 px-2 text-center text-gray-500">
+              {{ item.storageGb ?? "-" }}
+            </div>
+            <div class="py-3 px-2 text-center text-gray-500">
+              {{ item.color ?? "-" }}
+            </div>
+            <div class="py-3 px-2 text-center text-gray-900 font-semibold">
+              ฿{{ Number(item.price).toLocaleString("en-US") }}
+            </div>
+
+            <div class="py-3 px-2 flex items-center justify-center gap-2 text-xs">
+              <router-link
+                :to="`/sale-items/${item.id}/edit`"
+                class="px-3 py-1.5 rounded-lg border border-blue-500 text-blue-600 hover:bg-blue-50 hover:shadow-sm transition"
+              >
+                Edit
+              </router-link>
+              <button
+                class="px-3 py-1.5 rounded-lg border border-red-500 text-red-600 hover:bg-red-50 hover:shadow-sm transition"
+                @click="handleModal(item.id)"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="w-full grid grid-rows">
+
+      <!-- Mobile View -->
+      <div class="md:hidden divide-y divide-gray-200">
         <div
-          v-for="(item, key, index) in items"
-          class="itbms-row grid grid-cols-8 text-gray-600"
+          v-for="(item, index) in items"
+          :key="item.id"
+          class="p-4 text-sm hover:bg-gray-50 transition"
         >
-          <div
-            class="itbms-id text-center border-1 border-gray-500 py-2"
-            :key="index"
-            :class="key % 2 === 0 ? `bg-gray-200` : 'bg-white'"
-          >
-            {{ item.id }}
+          <div class="flex justify-between mb-2">
+            <div>
+              <span class="text-[11px] text-gray-500 uppercase">Brand / Model</span>
+              <div class="text-gray-800 font-medium leading-tight">
+                {{ item.brandName }} – {{ item.model }}
+              </div>
+            </div>
+            <span class="text-[11px] text-gray-400">#{{ item.id }}</span>
           </div>
-          <div
-            class="itbms-brand text-center border-1 border-gray-500 py-2"
-            :key="index"
-            :class="key % 2 === 0 ? `bg-gray-200` : 'bg-white'"
-          >
-            {{ item.brandName }}
+
+          <div class="grid grid-cols-3 gap-2 mb-3 text-center">
+            <div class="bg-white rounded-xl ring-1 ring-gray-200 p-2">
+              <div class="text-[10px] text-gray-500">RAM</div>
+              <div class="text-gray-800 font-medium">{{ item.ramGb ?? "-" }} GB</div>
+            </div>
+            <div class="bg-white rounded-xl ring-1 ring-gray-200 p-2">
+              <div class="text-[10px] text-gray-500">Storage</div>
+              <div class="text-gray-800 font-medium">{{ item.storageGb ?? "-" }} GB</div>
+            </div>
+            <div class="bg-white rounded-xl ring-1 ring-gray-200 p-2">
+              <div class="text-[10px] text-gray-500">Color</div>
+              <div class="text-gray-800 font-medium">{{ item.color ?? "-" }}</div>
+            </div>
           </div>
-          <div
-            class="itbms-model text-center border-1 border-gray-500 py-2"
-            :key="index"
-            :class="key % 2 === 0 ? `bg-gray-200` : 'bg-white'"
-          >
-            {{ item.model }}
+
+          <div class="flex justify-between items-end mb-4">
+            <div>
+              <span class="text-[11px] text-gray-500 uppercase">Price</span>
+              <div class="text-gray-900 font-semibold text-base">
+                ฿{{ Number(item.price).toLocaleString("en-US") }}
+              </div>
+            </div>
           </div>
-          <div
-            class="itbms-ramGb text-center border-1 border-gray-500 py-2"
-            :key="index"
-            :class="key % 2 === 0 ? `bg-gray-200` : 'bg-white'"
-          >
-            {{ item.ramGb ? item.ramGb : "-" }}
-          </div>
-          <div
-            class="itbms-storageGb text-center border-1 border-gray-500 py-2"
-            :key="index"
-            :class="key % 2 === 0 ? `bg-gray-200` : 'bg-white'"
-          >
-            {{ item.storageGb ? item.storageGb : "-" }}
-          </div>
-          <div
-            class="itbms-color text-center border-1 border-gray-500 py-2"
-            :key="index"
-            :class="key % 2 === 0 ? `bg-gray-200` : 'bg-white'"
-          >
-            {{ item.color ? item.color : "-" }}
-          </div>
-          <div
-            class="itbms-price text-center border-1 border-gray-500 py-2"
-            :key="index"
-            :class="key % 2 === 0 ? `bg-gray-200` : 'bg-white'"
-          >
-            ฿<span class="itbms-price-unit">
-              {{
-                Number(item.price).toLocaleString("en-US", {
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 2,
-                })
-              }}
-            </span>
-          </div>
-          <div
-            class="flex justify-center gap-3 items-center border-1 border-gray-500"
-            :key="index"
-            :class="key % 2 === 0 ? 'bg-gray-200' : 'bg-white'"
-          >
+
+          <div class="flex justify-end gap-2 text-xs">
             <router-link
               :to="`/sale-items/${item.id}/edit`"
-              class="no-underline"
+              class="px-3 py-1.5 rounded-lg border border-blue-500 text-blue-600 hover:bg-blue-50 transition"
             >
-              <p
-                class="itbms-edit-button p-1 px-3 border-1 rounded-md border-blue-500 text-sm text-blue-500"
-              >
-                E
-              </p>
+              Edit
             </router-link>
             <button
-              class="itbms-delete-button p-1 px-3 border-1 rounded-md border-red-500 text-sm text-red-500"
+              class="px-3 py-1.5 rounded-lg border border-red-500 text-red-600 hover:bg-red-50 transition"
               @click="handleModal(item.id)"
             >
-              D
+              Delete
             </button>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- Delete Modal -->
     <div
       v-if="showModal"
-      class="fixed inset-0 bg-[#ffffff8f] bg-opacity-50 flex items-center justify-center z-50"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4"
     >
-      <div class="bg-white rounded-lg p-6 shadow-lg max-w-sm w-full">
-        <h2 class="text-xl font-semibold mb-4 text-gray-800">
-          Delete Confirmation
-        </h2>
-        <p class="itbms-message mb-6 text-gray-800">
-          Do you want to delete this sale item?
+      <div
+        class="w-full max-w-sm rounded-2xl bg-white text-gray-900 shadow-xl ring-1 ring-gray-200 p-6"
+      >
+        <h2 class="text-lg font-semibold mb-2">Delete Item?</h2>
+        <p class="text-sm text-gray-600 mb-6">
+          Are you sure you want to delete this sale item?
         </p>
-        <div class="flex justify-end space-x-4">
+
+        <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
           <button
             @click="handleModal"
-            class="itbms-cancel-button bg-[#cc3535] px-4 py-2 rounded hover:bg-[#6d3e3e]"
+            class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 transition"
           >
             Cancel
           </button>
           <button
             @click="deleteItem(saleItemId)"
-            class="itbms-confirm-button bg-[#5eb238] text-white px-4 py-2 rounded hover:bg-[#58914c]"
+            class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition"
           >
             Confirm
           </button>
@@ -200,4 +205,3 @@ async function deleteItem(saleItemId) {
   </div>
 </template>
 
-<style scoped></style>
