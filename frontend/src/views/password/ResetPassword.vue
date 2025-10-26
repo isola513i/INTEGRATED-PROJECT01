@@ -28,11 +28,11 @@ async function onSubmit() {
   errorMsg.value = ''
   successMsg.value = ''
   try {
-    await resetPassword(token, newPassword.value,confirmNewPassword.value)
-    successMsg.value = 'เปลี่ยนรหัสผ่านสำเร็จ! กำลังพาไปหน้าเข้าสู่ระบบ...'
+    await resetPassword(token, newPassword.value, confirmNewPassword.value)
+    successMsg.value = 'Password changed successfully! Redirecting to sign-in page...'
     setTimeout(() => router.push('/signin'), 2500)
   } catch (err) {
-    errorMsg.value = err?.message || 'ไม่สามารถเปลี่ยนรหัสผ่านได้ กรุณาลองใหม่อีกครั้ง'
+    errorMsg.value = err?.message || 'Unable to change password. Please try again.'
   } finally {
     loading.value = false
   }
@@ -51,10 +51,10 @@ async function onSubmit() {
       </div>
 
       <h1 class="text-[20px] font-semibold text-gray-800 leading-tight">
-        ตั้งรหัสผ่านใหม่
+        Set a New Password
       </h1>
       <p class="text-[14px] text-gray-500 mt-1">
-        กรุณากรอกรหัสผ่านใหม่เพื่อรีเซ็ตบัญชีของคุณ
+        Please enter your new password to reset your account.
       </p>
 
       <form class="mt-6 text-left" @submit.prevent="onSubmit">
@@ -62,7 +62,7 @@ async function onSubmit() {
           for="newPassword"
           class="block text-[14px] text-gray-800 font-medium mb-2"
         >
-          รหัสผ่านใหม่
+          New Password
         </label>
         <input
           id="newPassword"
@@ -77,7 +77,7 @@ async function onSubmit() {
           for="confirmNewPassword"
           class="block text-[14px] text-gray-800 font-medium mb-2 mt-4"
         >
-          ยืนยันรหัสผ่านใหม่
+          Confirm New Password
         </label>
         <input
           id="confirmNewPassword"
@@ -92,7 +92,7 @@ async function onSubmit() {
           v-if="newPassword && confirmNewPassword && newPassword !== confirmNewPassword"
           class="mt-2 text-[13px] text-red-500 text-center"
         >
-          รหัสผ่านไม่ตรงกัน
+          Passwords do not match
         </p>
 
         <p v-if="errorMsg" class="mt-3 text-[13px] text-red-500 text-center">
@@ -122,7 +122,7 @@ async function onSubmit() {
               stroke-linejoin="round"
             />
           </svg>
-          บันทึกรหัสผ่านใหม่
+          Save New Password
         </button>
       </form>
 
@@ -132,7 +132,7 @@ async function onSubmit() {
           @click="router.push({ name: 'SignIn' })"
           class="text-black font-medium hover:underline"
         >
-          กลับไปหน้าเข้าสู่ระบบ
+          Back to Sign In
         </button>
       </div>
     </div>

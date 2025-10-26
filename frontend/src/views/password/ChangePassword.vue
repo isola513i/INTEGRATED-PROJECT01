@@ -131,8 +131,6 @@ async function onSubmit() {
             </button>
           </div>
 
-          <!-- Password checklist -->
-          <!-- password rules with checkmark -->
           <ul class="mt-3 space-y-2 text-sm text-gray-700">
             <!-- Rule 1 -->
             <li class="flex items-start gap-2">
@@ -234,7 +232,7 @@ async function onSubmit() {
         <button
           type="submit"
           :disabled="disabled"
-          class="w-full flex items-center justify-center rounded-md bg-black text-white text-[15px] font-medium py-2.5 shadow disabled:opacity-60 disabled:cursor-not-allowed hover:bg-gray-800 transition"
+          class="w-full flex items-center justify-center rounded-md bg-gray-300 text-white text-[15px] font-medium py-2.5 shadow disabled:opacity-60 disabled:cursor-not-allowed  transition"
         >
           <svg
             v-if="loading"
