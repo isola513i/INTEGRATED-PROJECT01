@@ -20,13 +20,23 @@ const coverSrc = computed(() => {
 
 const onAdd = () => {
 	if (!auth.isLoggedIn) {
-		route.push("/signin");
+		route.push("/signin"); // ใช้ route ที่ import มา
 		return;
 	}
+
+	const availableQuantity = Number(props.item?.quantity ?? 0);
+	if (availableQuantity <= 0) {
+		flash.setMessage(
+			"❌ This item is out of stock.",
+			"fixed top-6 left-1/2 -translate-x-1/2 z-50 px-5 py-2 rounded-lg bg-red-500 text-white text-sm shadow-lg itbms-message" // เพิ่ม itbms-message ถ้าต้องการ
+		);
+		return;
+	}
+
 	cart.add(props.item);
 	flash.setMessage(
-		"Added to cart",
-		"fixed top-6 left-1/2 -translate-x-1/2 z-50 px-5 py-2 rounded-lg bg-green-500 text-white text-sm shadow-lg"
+		"✅ Added to cart", // อาจจะเปลี่ยน Icon เป็น ✅
+		"fixed top-6 left-1/2 -translate-x-1/2 z-50 px-5 py-2 rounded-lg bg-green-500 text-white text-sm shadow-lg itbms-message" // เพิ่ม itbms-message ถ้าต้องการ
 	);
 };
 </script>

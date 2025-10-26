@@ -83,7 +83,6 @@ public class OrderDto {
         private String orderStatus;
 
         private SellerBrief seller;
-
         private String shippingAddress;
         private String orderNote;
 
