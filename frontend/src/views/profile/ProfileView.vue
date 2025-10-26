@@ -48,7 +48,7 @@ onMounted(loadProfile)
 </script>
 
 <template>
-  <div class="min-h-[calc(100vh-80px)] bg-zinc-700 text-gray-900 flex flex-col items-center py-10">
+  <div class="min-h-[calc(100vh-80px)] bg-zinc-800 text-gray-900 flex flex-col items-center py-10">
     <!-- Header -->
     <div class="text-center mb-6">
       <h1 class="text-2xl font-semibold tracking-tight text-white">Profile</h1>

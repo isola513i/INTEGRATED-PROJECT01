@@ -58,7 +58,7 @@ async function handleGoToLast() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-zinc-950 text-zinc-100">
+  <div class="min-h-screen bg-zinc-800 text-zinc-100">
     <div class="max-w-6xl mx-auto px-4 pt-12 pb-20">
       <!-- Header + Actions -->
       <div
@@ -113,7 +113,7 @@ async function handleGoToLast() {
       </div>
 
       <!-- Pagination -->
-      <div class="flex justify-center mt-10">
+      <div class="flex justify-center ">
         <Pagination
           :current-page="paginate.page"
           :total-pages="paginate.totalPages"

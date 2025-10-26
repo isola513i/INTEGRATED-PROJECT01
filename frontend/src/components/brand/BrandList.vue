@@ -54,30 +54,16 @@ async function deleteItem(id) {
 </script>
 
 <template>
-  <div class="flex flex-col items-center  bg-white min-h-screen">
+  <div class="text-gray-900 flex flex-col items-center">
     <div
-      class="w-full max-w-4xl bg-white rounded-xl shadow-md ring-1 ring-gray-200 overflow-hidden"
+      class="w-full max-w-6xl bg-white rounded-2xl shadow-md ring-1 ring-gray-200 overflow-hidden"
     >
-      <!-- ─── Card header (ชื่อหน้า + ปุ่ม Add) ───────────────────── -->
-      <div
-        class="flex flex-col gap-3 px-4 py-4 border-b border-gray-200 md:flex-row md:items-center md:justify-between"
-      >
-        <div class="text-lg font-semibold text-gray-900">
-          Brand List
-        </div>
-        <router-link
-          :to="{ name: 'AddBrandView' }"
-          class="inline-flex items-center justify-center rounded-lg bg-zinc-900 text-white text-sm font-medium px-3 py-2 hover:bg-zinc-800 hover:shadow transition"
-        >
-          + Add Brand
-        </router-link>
-      </div>
-
+  
       <!-- ─── Desktop / Tablet view: table ─────────────────────────── -->
       <div class="hidden md:block">
         <!-- Table header -->
         <div
-          class="bg-zinc-900 text-white text-sm font-semibold grid grid-cols-3"
+          class="bg-gray-100 text-gray-600 text-sm font-semibold grid grid-cols-3 border border-gray-200"
         >
           <div
             v-for="(field, index) in fields"

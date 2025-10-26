@@ -50,14 +50,11 @@ async function deleteItem(saleItemId) {
 }
 </script>
 <template>
-  <div class="min-h-screen text-gray-900 flex flex-col items-center">
+  <div class=" text-gray-900 flex flex-col items-center">
     <div
       class="w-full max-w-6xl bg-white rounded-2xl shadow-md ring-1 ring-gray-200 overflow-hidden"
     >
-    
-      <!-- Table (Desktop) -->
       <div class="hidden md:block">
-        <!-- Header -->
         <div
           class="grid grid-cols-8 text-xs font-semibold bg-gray-100 text-gray-600 uppercase tracking-wide border-b border-gray-200"
         >

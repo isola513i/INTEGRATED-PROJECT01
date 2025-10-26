@@ -15,7 +15,6 @@ watch(
   }
 );
 
-// sync จาก local -> parent + sessionStorage
 watch(pageSize, (v) => {
   const n = Number(v);
   emit("update:modelValue", n);
@@ -35,10 +34,7 @@ watch(pageSize, (v) => {
       <select
         id="pageSize"
         v-model="pageSize"
-        class="appearance-none w-auto h-10 px-4 pr-9 rounded-lg border border-gray-300
-               bg-white text-gray-800 text-base leading-none cursor-pointer
-               shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none
-               transition-all"
+        class="appearance-none w-auto h-10 px-4 pr-9 rounded-lg border border-gray-300 bg-white text-gray-800 text-base leading-none cursor-pointer shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all"
       >
         <option :value="5">5</option>
         <option :value="10">10</option>
@@ -56,7 +52,11 @@ watch(pageSize, (v) => {
           stroke="currentColor"
           stroke-width="2"
         >
-          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M19 9l-7 7-7-7"
+          />
         </svg>
       </div>
     </div>

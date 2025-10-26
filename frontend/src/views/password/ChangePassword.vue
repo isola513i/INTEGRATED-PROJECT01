@@ -47,14 +47,9 @@ async function onSubmit() {
     if (!auth.userId) {
       throw new Error("User not authenticated. Please log in again.");
     }
-    await changePassword(
-      auth.userId,
-      oldPassword.value,
-      newPassword.value,
-      confirmNewPassword.value
-    );
-    successMsg.value = "Password changed successfully!";
-    setTimeout(() => router.push({ name: "Profile" }), 2000);
+    await changePassword(auth.userId,oldPassword.value, newPassword.value,confirmNewPassword.value)
+    successMsg.value = 'Password changed successfully!'
+    setTimeout(() => router.push('/profile'), 2000)
   } catch (err) {
     errorMsg.value =
       err?.message || "Unable to change password. Please try again.";

@@ -22,32 +22,65 @@ if (flash.message === `Please add correct brand's name`) flash.message = "";
 </script>
 
 <template>
-  <div class="max-w-5xl mx-auto px-6 py-6">
-    <div
-      class="flex items-center justify-center space-x-6 text-xl font-medium text-neutral-700"
-    >
-      <button
-        @click="router.back()"
-        class="itbms-items-list transition-colors hover:text-blue-600 hover:underline underline-offset-4 cursor-pointer"
+  <div class="min-h-screen bg-zinc-800 text-gray-900">
+    <div class="max-w-5xl mx-auto px-6 py-10 space-y-8">
+      <div
+        class="bg-white border border-gray-200 rounded-2xl shadow-md px-6 py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
       >
-        Sale Item List
-      </button>
+        <div>
+          <h1 class="text-xl font-semibold text-gray-900">Manage Brands</h1>
+          <p class="text-sm text-gray-500 mt-1">
+            View and maintain all available phone brands in the system
+          </p>
 
-      <span class="text-neutral-400">/</span>
+          <!-- breadcrumb -->
+          <div class="flex flex-wrap items-center text-sm text-gray-500 mt-3">
+            <button
+              @click="router.back()"
+              class="hover:text-gray-800 hover:underline underline-offset-4 transition"
+            >
+              Sale Item List
+            </button>
+          </div>
+        </div>
 
-      <button
-        @click="router.push({ path: 'brands/add' })"
-        class="itbms-add-button transition-colors hover:text-blue-600 hover:underline underline-offset-4 cursor-pointer"
+        <div class="flex flex-col sm:flex-row gap-3">
+          <button
+            @click="router.push({ path: 'brands/add' })"
+            class="px-4 py-2 rounded-xl bg-gray-900 text-white text-sm font-semibold hover:bg-gray-800 hover:shadow transition"
+          >
+            + Add Brand
+          </button>
+        </div>
+      </div>
+
+      <!-- flash message -->
+      <div v-if="flash.message" :class="flash.style" class="text-center mb-6">
+        {{ flash.message }}
+      </div>
+
+      <!-- error -->
+      <div
+        v-if="errorMessage"
+        class="text-center mb-6 text-red-600 text-sm font-medium bg-red-50 border border-red-200 rounded-lg px-4 py-3"
       >
-        Add Brand
-      </button>
-    </div>
+        {{ errorMessage }}
+      </div>
 
-    <div v-if="flash.message" :class="flash.style" class="text-center mt-6">
-      {{ flash.message }}
+      <!-- list -->
+      <div v-if="brands.length !== 0">
+        <BrandList :items="brands" />
+      </div>
+
+      <div
+        v-else
+        class="text-center text-gray-500 text-sm py-16 border border-dashed border-gray-300 rounded-xl bg-gray-50/50"
+      >
+        No brands found.
+        <div class="text-gray-400 mt-1">
+          Click “Add Brand” to create a new brand entry.
+        </div>
+      </div>
     </div>
-    <BrandList v-if="brands.length !== 0" :items="brands" class="mt-8" />
   </div>
 </template>
-
-<style scoped></style>
