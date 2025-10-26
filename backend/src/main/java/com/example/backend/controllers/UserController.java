@@ -7,8 +7,10 @@ import com.example.backend.exceptions.ItemNotFoundException;
 import com.example.backend.exceptions.SellerNotMatchInTokenException;
 import com.example.backend.services.EmailService;
 import com.example.backend.services.UserService;
+import com.example.backend.utils.JwtTokenUtils;
 import com.example.backend.utils.JwtUtils;
 import com.nimbusds.jwt.JWTClaimsSet;
+import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
@@ -43,21 +45,21 @@ public class UserController {
     public ResponseEntity<UserCreateResponseDto> registerUsers(@Valid @ModelAttribute UserCreateRequestDto request)
             throws Exception {
         User savedUser = userService.registerUsers(request);
-        if(savedUser != null){
+        if (savedUser != null) {
             emailService.sendVerificationEmail(savedUser.getEmail(), savedUser.getLatestVerifyToken());
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(modelMapper.map(savedUser, UserCreateResponseDto.class));
     }
 
     @PostMapping("/v2/auth/verify-email")
-    public ResponseEntity<UserCreateResponseDto> verifyByEmail(@RequestParam("token") String token){
-        return ResponseEntity.ok(modelMapper.map(userService.verifyUserByEmail(token),UserCreateResponseDto.class));
+    public ResponseEntity<UserCreateResponseDto> verifyByEmail(@RequestParam("token") String token) {
+        return ResponseEntity.ok(modelMapper.map(userService.verifyUserByEmail(token), UserCreateResponseDto.class));
     }
 
     @PostMapping("/v2/auth/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody JwtRequestUser body){
+    public ResponseEntity<Map<String, String>> login(@RequestBody JwtRequestUser body) {
         Map<String, String> tokens = userService.authenticate(body);           // returns access & refresh
-        String accessToken  = tokens.get("access_token");
+        String accessToken = tokens.get("access_token");
         String refreshToken = tokens.get("refresh_token");
 
         ResponseCookie cookie = buildRefreshCookie(refreshToken);
@@ -82,7 +84,7 @@ public class UserController {
 //            throw new IllegalArgumentException("refresh_token is required (cookie or body)");
 //        }
         Map<String, String> newTokens = userService.refresh(provided); // rotates refresh + new access
-        String newAccess  = newTokens.get("access_token");
+        String newAccess = newTokens.get("access_token");
         String newRefresh = newTokens.get("refresh_token");
 
         ResponseCookie cookie = buildRefreshCookie(newRefresh);
@@ -96,7 +98,7 @@ public class UserController {
     public ResponseEntity<Boolean> changePassword(@PathVariable Integer userId,
                                                   @RequestBody @Valid ChangePasswordRequestDto changePasswordRequestDto,
                                                   HttpServletRequest request) {
-        Integer userIdInToken =  jwtUtils.extractUserId(request);
+        Integer userIdInToken = jwtUtils.extractUserId(request);
         User user = userService.getUserById(userId);
         if (userIdInToken == null || !userIdInToken.equals(userId) || !user.getIsActive()) {
             throw new SellerNotMatchInTokenException("User does not match the user in token or user is not active.");
@@ -104,14 +106,17 @@ public class UserController {
         userService.changePassword(userId, changePasswordRequestDto, request);
         return ResponseEntity.ok(true);
     }
+
     @PostMapping("/v2/auth/forget-password")
     public ResponseEntity<Boolean> forgetPassword(@RequestParam("email") String email) {
         User user = userService.getUserByEmail(email);
-        if(user != null && user.getIsActive()) {
-            emailService.sendResetPasswordEmail(user.getEmail(), email);
+        if (user != null && user.getIsActive()) {
+            String token = JwtTokenUtils.generateToken(user.getEmail());
+            emailService.sendResetPasswordEmail(user.getEmail(),token);
         } else throw new ItemNotFoundException("User with the provided email does not exist or is not active.");
         return ResponseEntity.ok(true);
     }
+
     @PostMapping("/v2/auth/reset-password")
     public ResponseEntity<Boolean> resetPassword(@RequestParam("token") String token,
                                                  @RequestBody @Valid ResetPasswordRequestDto resetPasswordRequestDto) {
@@ -124,18 +129,12 @@ public class UserController {
     @Value("${jwt.refresh.hours}")
     private long refreshHours;
 
-    // choose cookie attributes suitable for your environment
-//    @Value("${app.cookies.secure:true}")   // true in HTTPS; set to false for plain HTTP in local dev
-//    private boolean cookieSecure;
-
     @Value("${app.cookies.secure:false}")   // true in HTTPS; set to false for plain HTTP in local dev
     private boolean cookieSecure;
 
 
-    //    @Value("${app.cookies.same-site:Strict}") // None|Lax|Strict (None required for cross-site)
-//    private String cookieSameSite;
-@Value("${app.cookies.same-site:Lax}") // None|Lax|Strict (None required for cross-site)
-private String cookieSameSite;
+    @Value("${app.cookies.same-site:Lax}") // None|Lax|Strict (None required for cross-site)
+    private String cookieSameSite;
 
     // Path that should send the cookie ("/" is simplest if multiple endpoints need it)
     @Value("${app.cookies.refresh.path:/itb-mshop/v2/auth")
@@ -150,6 +149,7 @@ private String cookieSameSite;
                 .maxAge(Duration.ofHours(refreshHours))  // align with JWT refresh lifetime
                 .build();
     }
+
     @PostMapping("/v2/auth/logout")
     public ResponseEntity<Void> logout(
             @RequestHeader(value = "Authorization", required = false) String authHeader) throws ParseException {
@@ -204,6 +204,7 @@ private String cookieSameSite;
                 .header(HttpHeaders.SET_COOKIE, clearRefreshCookie().toString())
                 .build();
     }
+
     private ResponseCookie clearRefreshCookie() {
         return ResponseCookie.from("refresh_token", "")
                 .httpOnly(true)

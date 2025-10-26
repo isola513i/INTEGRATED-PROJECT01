@@ -15,7 +15,7 @@ public class UserCreateRequestDto {
     @NotBlank
     private String fullName;
     @NotBlank
-    @Size(max = 14, message = "Password length must not exceed 14 characters")
+    @Size(max = 14,min =8 , message = "Password length must not less than 8 and over 14 characters")
     private String password;
     @NotBlank
     private String userType;

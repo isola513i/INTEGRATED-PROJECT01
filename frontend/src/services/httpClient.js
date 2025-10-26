@@ -86,11 +86,15 @@ async function request(
   }
 
   // ---- Control Cookie Sending ----
-  const isLoginRequest = path.includes('/auth/signin'); // login = no cookie
+  const isLoginRequest = path.includes('/auth/login'); // login = no cookie
   const isRefreshRequest = path.includes('/auth/refresh'); // refresh = need cookie
+  const isForgetPasswordRequest = path.includes('/auth/forget-password'); // forget password = no cookie
+  const isResetPasswordRequest = path.includes('/auth/reset-password'); // reset password = no cookie
 
   const shouldIncludeCookies =
-    includeCookies && !isLoginRequest ? 'include' : 'same-origin';
+    includeCookies && !isLoginRequest && !isForgetPasswordRequest && !isResetPasswordRequest? 'include' : 'same-origin';
+  
+    console.log('Cookie inclusion for request to', path, ':', shouldIncludeCookies);
 
   // ---- Main Fetch Request ----
   const res = await fetch(`${API_BASE_URL}${path}`, {

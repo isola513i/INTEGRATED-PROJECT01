@@ -90,3 +90,20 @@ export const logOut = async () => {
   if (!res.ok) throw new Error((await res.text()) || "Failed to load profile");
   return await res.json();
 };
+export const requestPasswordReset = async (email) => {
+  const res = await apiClient.postJson(`/v2/auth/forget-password?email=${email}`)
+  }
+
+export const resetPassword = async (token, newPassword,confirmNewPassword) => {
+    const res = await apiClient.postJson(`/v2/auth/reset-password?token=${token}`, { newPassword:newPassword ,confirmNewPassword:confirmNewPassword});
+    if (res.status === 400) throw new Error("Invalid token or password");
+    if (!res.ok) throw new Error((await res.text()) || "Password reset failed");
+    return await res.json();
+  }
+
+  export async function changePassword(userId,oldPassword, newPassword,confirmNewPassword) {
+  const res = await apiClient.postJson(`/v2/auth/${userId}/change-password`, { oldPassword:oldPassword, newPassword:newPassword, confirmNewPassword:confirmNewPassword });
+  if (res.status === 400) throw new Error("Invalid old password or new password");
+  if (!res.ok) throw new Error('Change password failed')
+  return await res.json()
+}
