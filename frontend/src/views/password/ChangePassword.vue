@@ -258,8 +258,8 @@ async function onSubmit() {
       <div class="mt-8 text-[13px] text-gray-600 text-center">
         <button
           type="button"
-          @click="router.push({ name: 'Profile' })"
-          class="text-black font-medium hover:underline"
+          @click="router.push({ name: 'ProfileView' })"
+          class="text-black font-medium hover:underline cursor-pointer"
         >
           Back to Profile
         </button>
